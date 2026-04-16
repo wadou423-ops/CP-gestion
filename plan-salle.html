@@ -483,31 +483,60 @@ function addTable(type){
 function buildChairs(t){
   const chairsContainer=document.createElement('div');
   chairsContainer.className='chairs-container';
-  chairsContainer.style.cssText='position:absolute;inset:0;pointer-events:none;';
+  chairsContainer.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;';
   const n=Math.min(t.capacity,20);
   const cs=chairSize, cg=chairGap;
+
+  function makeChair(left,top,isRound){
+    const ch=document.createElement('div');
+    ch.className='chair-2d';
+    ch.style.cssText=`width:${cs}px;height:${isRound?cs:Math.round(cs*0.85)}px;background:${colors.chair};position:absolute;left:${left}px;top:${top}px;border-radius:${isRound?'50%':'3px'};cursor:move;pointer-events:all;transition:box-shadow 0.15s;`;
+    ch.title='Déplacer cette chaise';
+
+    // Drag individuel
+    let dr=false,sx,sy,ox=left,oy=top;
+    ch.addEventListener('mousedown',e=>{
+      e.stopPropagation();
+      dr=true;sx=e.clientX;sy=e.clientY;ox=parseFloat(ch.style.left);oy=parseFloat(ch.style.top);
+      ch.style.boxShadow=`0 0 0 2px ${colors.table},0 0 8px rgba(0,0,0,0.3)`;
+      ch.style.zIndex='999';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove',e=>{
+      if(!dr)return;
+      ch.style.left=(ox+(e.clientX-sx)/zoomLevel)+'px';
+      ch.style.top=(oy+(e.clientY-sy)/zoomLevel)+'px';
+    });
+    document.addEventListener('mouseup',()=>{
+      if(!dr)return;
+      dr=false;
+      ch.style.boxShadow='none';
+      ch.style.zIndex='';
+    });
+    // Double clic pour supprimer une chaise
+    ch.addEventListener('dblclick',e=>{e.stopPropagation();ch.remove();});
+    return ch;
+  }
+
   if(t.type==='round'){
     const r=t.w/2;
     for(let i=0;i<n;i++){
       const angle=(i/n)*2*Math.PI-Math.PI/2;
-      const ch=document.createElement('div');
-      ch.className='chair-2d';
-      ch.style.cssText=`width:${cs}px;height:${cs}px;background:${colors.chair};position:absolute;left:${r+Math.cos(angle)*(r+cg)-cs/2}px;top:${r+Math.sin(angle)*(r+cg)-cs/2}px;border-radius:50%;`;
-      chairsContainer.appendChild(ch);
+      const left=r+Math.cos(angle)*(r+cg)-cs/2;
+      const top=r+Math.sin(angle)*(r+cg)-cs/2;
+      chairsContainer.appendChild(makeChair(left,top,true));
     }
   } else {
     const perSide=Math.ceil(n/2);
     for(let i=0;i<Math.min(perSide,n);i++){
-      const ch=document.createElement('div');
-      ch.className='chair-2d';
-      ch.style.cssText=`width:${cs}px;height:${Math.round(cs*0.85)}px;background:${colors.chair};position:absolute;left:${(i+1)*(t.w/(perSide+1))-cs/2}px;top:${-(Math.round(cs*0.85)+cg)}px;border-radius:3px;`;
-      chairsContainer.appendChild(ch);
+      const left=(i+1)*(t.w/(perSide+1))-cs/2;
+      const top=-(Math.round(cs*0.85)+cg);
+      chairsContainer.appendChild(makeChair(left,top,false));
     }
     for(let i=0;i<Math.min(perSide,n-perSide);i++){
-      const ch=document.createElement('div');
-      ch.className='chair-2d';
-      ch.style.cssText=`width:${cs}px;height:${Math.round(cs*0.85)}px;background:${colors.chair};position:absolute;left:${(i+1)*(t.w/(perSide+1))-cs/2}px;top:${t.h+cg}px;border-radius:3px;`;
-      chairsContainer.appendChild(ch);
+      const left=(i+1)*(t.w/(perSide+1))-cs/2;
+      const top=t.h+cg;
+      chairsContainer.appendChild(makeChair(left,top,false));
     }
   }
   return chairsContainer;
