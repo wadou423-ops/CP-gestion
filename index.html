@@ -133,7 +133,10 @@ tbody tr:hover{background:var(--gold-dim);}
 .timeline-title{font-size:12px;color:var(--text);letter-spacing:1px;}
 .timeline-date{font-size:10px;color:var(--text-dim);margin-top:2px;}
 
-/* RECEIPT */
+/* PRESTA ITEMS */
+.presta-item{display:flex;align-items:center;gap:6px;padding:4px 0;}
+.presta-item input[type=checkbox]{flex-shrink:0;}
+
 .receipt{background:#fff;color:#111;padding:40px;max-width:600px;margin:0 auto;font-family:'Montserrat',sans-serif;}
 .receipt-header{text-align:center;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #C9963A;}
 .receipt-logo{font-size:22px;color:#C9963A;letter-spacing:4px;font-family:'Cormorant Garamond',serif;}
@@ -425,7 +428,7 @@ tbody tr:hover{background:var(--gold-dim);}
 
 <!-- MODAL NOUVEAU DEVIS -->
 <div class="modal-overlay" id="modalNewDevis">
-  <div class="modal">
+  <div class="modal" style="max-width:680px;">
     <div class="modal-title">Nouveau Devis</div>
     <div class="form-grid">
       <div class="form-group form-full"><label>Client *</label>
@@ -435,7 +438,100 @@ tbody tr:hover{background:var(--gold-dim);}
       <div class="form-group"><label>Validité (jours)</label><input type="number" id="d_validite" value="30"></div>
       <div class="form-group"><label>Montant total (FCFA)</label><input type="number" id="d_montant" placeholder="0"></div>
       <div class="form-group"><label>Acompte demandé (FCFA)</label><input type="number" id="d_acompte" placeholder="0"></div>
-      <div class="form-group form-full"><label>Détails des prestations</label><textarea id="d_details" placeholder="Liste des services inclus..."></textarea></div>
+
+      <div class="form-group form-full">
+        <label>Prestations incluses</label>
+        <div style="background:var(--dark3);border:1px solid var(--dark4);border-radius:6px;overflow:hidden;">
+          <!-- SERVICES -->
+          <div style="padding:10px 14px;background:var(--dark4);font-size:10px;color:var(--gold);letter-spacing:2px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="toggleSection('sec-services')">
+            NOS SERVICES <span id="sec-services-icon">▼</span>
+          </div>
+          <div id="sec-services" style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Organisation A à Z" style="accent-color:var(--gold);"> Organisation A à Z</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Coordination jour J" style="accent-color:var(--gold);"> Coordination jour J</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Maître de cérémonie" style="accent-color:var(--gold);"> Maître de cérémonie</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Traiteur" style="accent-color:var(--gold);"> Traiteur</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Vin d'honneur" style="accent-color:var(--gold);"> Vin d'honneur</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Décoration florale" style="accent-color:var(--gold);"> Décoration florale</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Photo / Vidéo" style="accent-color:var(--gold);"> Photo / Vidéo</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="DJ / Animation" style="accent-color:var(--gold);"> DJ / Animation</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Effets spéciaux" style="accent-color:var(--gold);"> Effets spéciaux</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Recherche de lieu" style="accent-color:var(--gold);"> Recherche de lieu</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Accueil VIP" style="accent-color:var(--gold);"> Accueil VIP</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" name="prestation" value="Album souvenir" style="accent-color:var(--gold);"> Album souvenir</label>
+          </div>
+
+          <!-- PRESTATAIRES -->
+          <div style="padding:10px 14px;background:var(--dark4);font-size:10px;color:var(--gold);letter-spacing:2px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--dark3);" onclick="toggleSection('sec-presta')">
+            PRESTATAIRES <span id="sec-presta-icon">▼</span>
+          </div>
+          <div id="sec-presta" style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;">
+
+            <div style="font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px;">📸 PHOTO / VIDÉO</div>
+            <div id="presta-photo" style="display:flex;flex-direction:column;gap:4px;">
+              <div class="presta-item">
+                <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+                <input type="text" placeholder="Nom du prestataire" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+                <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+              </div>
+            </div>
+            <button onclick="addPrestaRow('presta-photo')" style="background:transparent;border:1px dashed var(--dark4);border-radius:3px;color:var(--text-dim);font-size:10px;padding:4px;cursor:pointer;text-align:left;margin-bottom:6px;">+ Ajouter</button>
+
+            <div style="font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px;">🎵 DJ / ANIMATION</div>
+            <div id="presta-dj" style="display:flex;flex-direction:column;gap:4px;">
+              <div class="presta-item">
+                <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+                <input type="text" placeholder="Nom du prestataire" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+                <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+              </div>
+            </div>
+            <button onclick="addPrestaRow('presta-dj')" style="background:transparent;border:1px dashed var(--dark4);border-radius:3px;color:var(--text-dim);font-size:10px;padding:4px;cursor:pointer;text-align:left;margin-bottom:6px;">+ Ajouter</button>
+
+            <div style="font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px;">🍽️ TRAITEUR</div>
+            <div id="presta-traiteur" style="display:flex;flex-direction:column;gap:4px;">
+              <div class="presta-item">
+                <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+                <input type="text" placeholder="Nom du prestataire" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+                <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+              </div>
+            </div>
+            <button onclick="addPrestaRow('presta-traiteur')" style="background:transparent;border:1px dashed var(--dark4);border-radius:3px;color:var(--text-dim);font-size:10px;padding:4px;cursor:pointer;text-align:left;margin-bottom:6px;">+ Ajouter</button>
+
+            <div style="font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px;">🌸 DÉCORATION / FLEURS</div>
+            <div id="presta-deco" style="display:flex;flex-direction:column;gap:4px;">
+              <div class="presta-item">
+                <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+                <input type="text" placeholder="Nom du prestataire" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+                <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+              </div>
+            </div>
+            <button onclick="addPrestaRow('presta-deco')" style="background:transparent;border:1px dashed var(--dark4);border-radius:3px;color:var(--text-dim);font-size:10px;padding:4px;cursor:pointer;text-align:left;margin-bottom:6px;">+ Ajouter</button>
+
+            <div style="font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px;">✨ EFFETS SPÉCIAUX</div>
+            <div id="presta-effets" style="display:flex;flex-direction:column;gap:4px;">
+              <div class="presta-item">
+                <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+                <input type="text" placeholder="Nom du prestataire" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+                <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+              </div>
+            </div>
+            <button onclick="addPrestaRow('presta-effets')" style="background:transparent;border:1px dashed var(--dark4);border-radius:3px;color:var(--text-dim);font-size:10px;padding:4px;cursor:pointer;text-align:left;margin-bottom:6px;">+ Ajouter</button>
+
+            <div style="font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:4px;">🏛️ LIEU / SALLE</div>
+            <div id="presta-lieu" style="display:flex;flex-direction:column;gap:4px;">
+              <div class="presta-item">
+                <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+                <input type="text" placeholder="Nom du lieu" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+                <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+              </div>
+            </div>
+            <button onclick="addPrestaRow('presta-lieu')" style="background:transparent;border:1px dashed var(--dark4);border-radius:3px;color:var(--text-dim);font-size:10px;padding:4px;cursor:pointer;text-align:left;margin-bottom:6px;">+ Ajouter</button>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group form-full"><label>Notes complémentaires</label><textarea id="d_details" placeholder="Remarques, conditions spéciales..."></textarea></div>
       <div class="form-group form-full"><label>Statut</label>
         <select id="d_statut"><option>En attente</option><option>Envoyé</option><option>Accepté</option><option>Refusé</option></select>
       </div>
@@ -741,7 +837,45 @@ function renderEvenements() {
     </div>`).join('');
 }
 
-// ====== DEVIS ======
+// ====== SECTIONS & PRESTATAIRES ======
+function toggleSection(id){
+  const el=document.getElementById(id);
+  const icon=document.getElementById(id+'-icon');
+  const hidden=el.style.display==='none';
+  el.style.display=hidden?'':'none';
+  if(icon)icon.textContent=hidden?'▼':'▶';
+}
+
+function addPrestaRow(containerId){
+  const container=document.getElementById(containerId);
+  const row=document.createElement('div');
+  row.className='presta-item';
+  row.innerHTML=`
+    <input type="checkbox" name="prestataire" style="accent-color:var(--gold);">
+    <input type="text" placeholder="Nom du prestataire" style="flex:1;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+    <input type="tel" placeholder="Téléphone" style="width:130px;padding:5px 8px;background:var(--dark2);border:1px solid var(--dark4);border-radius:3px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;">
+    <span onclick="this.parentElement.remove()" style="color:var(--danger);cursor:pointer;font-size:14px;flex-shrink:0;">✕</span>`;
+  container.appendChild(row);
+}
+
+function getSelectedPrestations(){
+  const services=[];
+  document.querySelectorAll('input[name="prestation"]:checked').forEach(cb=>services.push(cb.value));
+  return services.join(', ');
+}
+
+function getSelectedPrestataires(){
+  const list=[];
+  document.querySelectorAll('.presta-item').forEach(row=>{
+    const cb=row.querySelector('input[type=checkbox]');
+    const nom=row.querySelectorAll('input[type=text]')[0]?.value||'';
+    const tel=row.querySelector('input[type=tel]')?.value||'';
+    if(cb?.checked && nom) list.push(`${nom}${tel?' ('+tel+')':''}`);
+  });
+  return list.join(' | ');
+}
+
+
 function saveDevis() {
   const clientId = document.getElementById('d_client').value;
   if(!clientId) { alert('Sélectionnez un client'); return; }
@@ -752,11 +886,14 @@ function saveDevis() {
     validite: document.getElementById('d_validite').value,
     montant: document.getElementById('d_montant').value,
     acompte: document.getElementById('d_acompte').value,
+    prestations: getSelectedPrestations(),
+    prestataires: getSelectedPrestataires(),
     details: document.getElementById('d_details').value,
     statut: document.getElementById('d_statut').value
   };
   data.devis.push(devis);
   ['d_date','d_validite','d_montant','d_acompte','d_details'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('input[name="prestation"]').forEach(cb=>cb.checked=false);
   closeModal('modalNewDevis');
   saveAll(); refreshAll();
   showToast('✅ Devis créé : ' + devis.numero);
