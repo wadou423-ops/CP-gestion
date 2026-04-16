@@ -3,967 +3,931 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Creative Planner — Plan de Salle</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<title>Créative Planner — Plan de Salle 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  --gold: #C9963A;
-  --gold-light: #e8b84b;
-  --gold-dim: rgba(201,150,58,0.15);
-  --dark: #0f0f0f;
-  --dark2: #1a1a1a;
-  --dark3: #242424;
-  --dark4: #2e2e2e;
-  --cream: #f5f0e8;
-  --cream2: #fdfaf5;
-  --text: #e8e0d0;
-  --text-dim: #888;
-  --terra: #C0624A;
-  --success: #4CAF50;
-  --danger: #e74c3c;
+  --gold:#C9963A; --gold-light:#e8b84b; --gold-dim:rgba(201,150,58,0.12);
+  --dark:#1a1a1a; --dark2:#222; --dark3:#2e2e2e;
+  --cream:#f5f0e8; --text:#e8e0d0; --text-dim:#888;
+  --success:#4CAF50; --danger:#e74c3c;
+  --floor:#f0e8d8; --floor2:#e8dcc8;
+  --wall:#d4c8b0; --wall-dark:#b8a888;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Montserrat',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; overflow-x:hidden; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Montserrat',sans-serif;background:#1a1a1a;color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
 
 /* HEADER */
-header {
-  background:var(--dark2);
-  border-bottom:1px solid var(--dark4);
-  padding:0 24px;
-  display:flex; align-items:center; justify-content:space-between;
-  height:60px; position:sticky; top:0; z-index:1000;
-}
-.header-brand { display:flex; align-items:center; gap:12px; }
-.header-brand-name { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--gold); letter-spacing:3px; }
-.header-brand-sep { width:1px; height:24px; background:var(--dark4); }
-.header-event-name { font-size:12px; color:var(--text-dim); letter-spacing:1px; }
-.header-actions { display:flex; gap:10px; }
-.btn { padding:8px 18px; border-radius:4px; font-size:11px; letter-spacing:1px; cursor:pointer; font-family:'Montserrat',sans-serif; border:none; transition:all 0.2s; }
-.btn-ghost { background:transparent; color:var(--text-dim); border:1px solid var(--dark4); }
-.btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
-.btn-gold { background:var(--gold); color:#fff; }
-.btn-gold:hover { background:var(--gold-light); }
-.btn-danger { background:transparent; color:var(--danger); border:1px solid var(--danger); }
+header{background:#111;border-bottom:1px solid #2e2e2e;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.brand{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold);letter-spacing:3px;}
+.htools{display:flex;gap:8px;align-items:center;}
+.btn{padding:7px 16px;border-radius:4px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:'Montserrat',sans-serif;border:none;transition:all 0.2s;}
+.btn-ghost{background:transparent;color:#aaa;border:1px solid #333;}
+.btn-ghost:hover,.btn-ghost.active{border-color:var(--gold);color:var(--gold);}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:var(--gold-light);}
+.view-toggle{display:flex;gap:4px;background:#111;border:1px solid #333;border-radius:6px;padding:3px;}
+.view-btn{padding:5px 14px;border-radius:4px;font-size:10px;letter-spacing:1px;cursor:pointer;color:#666;border:none;background:transparent;transition:all 0.2s;}
+.view-btn.active{background:var(--gold);color:#fff;}
 
 /* LAYOUT */
-.app { display:flex; height:calc(100vh - 60px); }
+.app{display:flex;flex:1;overflow:hidden;}
 
 /* SIDEBAR */
-.sidebar {
-  width:280px; min-width:280px;
-  background:var(--dark2);
-  border-right:1px solid var(--dark4);
-  display:flex; flex-direction:column;
-  overflow:hidden;
-}
-.sidebar-tabs { display:flex; border-bottom:1px solid var(--dark4); }
-.stab { flex:1; padding:12px 8px; text-align:center; font-size:10px; letter-spacing:1px; color:var(--text-dim); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; }
-.stab.active { color:var(--gold); border-bottom-color:var(--gold); }
-.sidebar-content { flex:1; overflow-y:auto; padding:16px; }
-.sidebar-content::-webkit-scrollbar { width:4px; }
-.sidebar-content::-webkit-scrollbar-thumb { background:var(--dark4); border-radius:2px; }
+.sidebar{width:240px;min-width:240px;background:#111;border-right:1px solid #2e2e2e;display:flex;flex-direction:column;overflow:hidden;}
+.stabs{display:flex;border-bottom:1px solid #2e2e2e;}
+.stab{flex:1;padding:10px 4px;text-align:center;font-size:9px;letter-spacing:1px;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+.stab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.scontent{flex:1;overflow-y:auto;padding:14px;}
+.scontent::-webkit-scrollbar{width:3px;}
+.scontent::-webkit-scrollbar-thumb{background:#333;}
+.slabel{font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;margin-top:12px;}
+.slabel:first-child{margin-top:0;}
+.panel{display:none;}
+.panel.active{display:block;}
 
-/* PANELS */
-.panel { display:none; }
-.panel.active { display:block; }
+/* TOOL GRID */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+.tbtn{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:6px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.tbtn:hover{border-color:var(--gold);background:var(--gold-dim);}
+.tbtn-icon{font-size:18px;margin-bottom:3px;}
+.tbtn-label{font-size:9px;color:#666;letter-spacing:1px;}
 
-.section-label { font-size:10px; color:var(--gold); letter-spacing:2px; margin-bottom:10px; }
+/* FORM */
+.fg{margin-bottom:10px;}
+.fg label{font-size:9px;color:#666;letter-spacing:1px;display:block;margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;}
+.fg input:focus,.fg select:focus{border-color:var(--gold);}
+.fg select option{background:#1a1a1a;}
+.cfg{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cfg label{font-size:10px;color:#666;}
+.cfg input[type=number]{width:60px;padding:4px 7px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;text-align:center;font-family:'Montserrat',sans-serif;outline:none;}
 
-/* EVENT INFO */
-.form-group { margin-bottom:12px; }
-.form-group label { font-size:10px; color:var(--text-dim); letter-spacing:1px; display:block; margin-bottom:5px; }
-.form-group input, .form-group select, .form-group textarea {
-  width:100%; padding:8px 10px; background:var(--dark3);
-  border:1px solid var(--dark4); border-radius:4px;
-  color:var(--text); font-size:12px; font-family:'Montserrat',sans-serif;
-  outline:none; transition:border-color 0.2s;
-}
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--gold); }
-.form-group textarea { height:70px; resize:vertical; }
-.form-group select option { background:var(--dark3); }
-
-/* TABLES TOOLS */
-.table-tools { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
-.tool-btn {
-  background:var(--dark3); border:1px solid var(--dark4);
-  border-radius:6px; padding:12px 8px; text-align:center;
-  cursor:pointer; transition:all 0.2s;
-}
-.tool-btn:hover { border-color:var(--gold); background:var(--gold-dim); }
-.tool-btn-icon { font-size:20px; margin-bottom:4px; }
-.tool-btn-label { font-size:10px; color:var(--text-dim); letter-spacing:1px; }
-
-.config-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-.config-row label { font-size:11px; color:var(--text-dim); }
-.config-row input[type=number] { width:70px; padding:5px 8px; background:var(--dark3); border:1px solid var(--dark4); border-radius:4px; color:var(--text); font-size:12px; text-align:center; font-family:'Montserrat',sans-serif; outline:none; }
-.config-row input[type=number]:focus { border-color:var(--gold); }
-
-/* GUESTS */
-.guest-input-row { display:flex; gap:6px; margin-bottom:12px; }
-.guest-input-row input { flex:1; padding:8px 10px; background:var(--dark3); border:1px solid var(--dark4); border-radius:4px; color:var(--text); font-size:12px; font-family:'Montserrat',sans-serif; outline:none; }
-.guest-input-row input:focus { border-color:var(--gold); }
-.guest-input-row button { padding:8px 12px; background:var(--gold); border:none; border-radius:4px; color:#fff; cursor:pointer; font-size:14px; }
-.guest-list { display:flex; flex-direction:column; gap:4px; max-height:300px; overflow-y:auto; }
-.guest-item {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:7px 10px; background:var(--dark3); border-radius:4px;
-  border-left:3px solid var(--dark4); font-size:11px;
-  cursor:grab; transition:all 0.2s;
-}
-.guest-item.assigned { border-left-color:var(--gold); color:var(--text-dim); }
-.guest-item.dragging { opacity:0.5; }
-.guest-item-name { flex:1; }
-.guest-item-table { font-size:10px; color:var(--gold); margin-right:8px; }
-.guest-item-del { color:var(--danger); cursor:pointer; font-size:14px; line-height:1; }
+/* GUEST */
+.ginput{display:flex;gap:5px;margin-bottom:10px;}
+.ginput input{flex:1;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;}
+.ginput button{padding:7px 11px;background:var(--gold);border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:13px;}
+.glist{display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto;}
+.gitem{display:flex;align-items:center;justify-content:space-between;padding:6px 9px;background:#1a1a1a;border-radius:4px;border-left:3px solid #2e2e2e;font-size:10px;cursor:grab;}
+.gitem.assigned{border-left-color:var(--gold);color:#666;}
+.gdel{color:var(--danger);cursor:pointer;font-size:13px;}
+.gtable{font-size:9px;color:var(--gold);margin-right:6px;}
 
 /* STATS */
-.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.stat-box { background:var(--dark3); border-radius:6px; padding:12px; text-align:center; border:1px solid var(--dark4); }
-.stat-num { font-family:'Cormorant Garamond',serif; font-size:24px; color:var(--gold); }
-.stat-lbl { font-size:10px; color:var(--text-dim); letter-spacing:1px; margin-top:2px; }
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.sbox{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:6px;padding:10px;text-align:center;}
+.snum{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);}
+.slbl{font-size:9px;color:#555;letter-spacing:1px;margin-top:2px;}
 
 /* CANVAS AREA */
-.canvas-area { flex:1; position:relative; overflow:hidden; background:var(--dark); }
-.canvas-toolbar {
-  position:absolute; top:12px; left:50%; transform:translateX(-50%);
-  background:var(--dark2); border:1px solid var(--dark4);
-  border-radius:8px; padding:6px 12px;
-  display:flex; gap:8px; align-items:center; z-index:100;
-}
-.canvas-toolbar button {
-  padding:6px 12px; border-radius:4px; font-size:11px;
-  cursor:pointer; font-family:'Montserrat',sans-serif;
-  border:1px solid var(--dark4); background:var(--dark3); color:var(--text-dim);
-  transition:all 0.2s; letter-spacing:1px;
-}
-.canvas-toolbar button:hover, .canvas-toolbar button.active { border-color:var(--gold); color:var(--gold); }
-.canvas-toolbar .sep { width:1px; height:20px; background:var(--dark4); }
+.canvas-area{flex:1;position:relative;overflow:hidden;background:#0f0f0f;}
 
-.canvas-wrap {
-  position:absolute; inset:60px 0 0 0;
-  overflow:auto;
-  display:flex; align-items:flex-start; justify-content:flex-start;
-}
-.canvas-wrap::-webkit-scrollbar { width:6px; height:6px; }
-.canvas-wrap::-webkit-scrollbar-thumb { background:var(--dark4); border-radius:3px; }
+/* TOOLBAR */
+.toolbar{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#111;border:1px solid #2e2e2e;border-radius:8px;padding:5px 10px;display:flex;gap:6px;align-items:center;z-index:100;}
+.toolbar button{padding:5px 11px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'Montserrat',sans-serif;border:1px solid #2e2e2e;background:#1a1a1a;color:#666;transition:all 0.2s;letter-spacing:1px;}
+.toolbar button:hover,.toolbar button.active{border-color:var(--gold);color:var(--gold);}
+.toolbar .sep{width:1px;height:18px;background:#2e2e2e;}
 
-#canvas {
-  position:relative;
-  width:1400px; height:900px;
-  background:
-    linear-gradient(rgba(201,150,58,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,150,58,0.03) 1px, transparent 1px);
-  background-size:40px 40px;
-  border:1px solid var(--dark4);
-  margin:20px;
-  flex-shrink:0;
-}
+/* 2D CANVAS */
+#canvas2d{position:absolute;inset:54px 0 0 0;overflow:auto;display:flex;align-items:flex-start;}
+.canvas2d-inner{position:relative;width:1400px;height:860px;background:#fff;background-image:linear-gradient(rgba(201,150,58,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(201,150,58,0.07) 1px,transparent 1px);background-size:40px 40px;margin:20px;flex-shrink:0;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
 
-/* ROOM LABEL */
-.room-label {
-  position:absolute; top:16px; left:50%; transform:translateX(-50%);
-  font-family:'Cormorant Garamond',serif; font-size:13px;
-  color:rgba(201,150,58,0.3); letter-spacing:4px; pointer-events:none;
-  white-space:nowrap;
-}
+/* 3D CANVAS */
+#canvas3d{position:absolute;inset:54px 0 0 0;display:none;overflow:auto;}
+.iso-scene{position:relative;width:1800px;height:1000px;margin:30px auto;}
 
-/* STAGE */
-.stage-element {
-  position:absolute; background:var(--gold-dim); border:1px solid rgba(201,150,58,0.4);
-  border-radius:4px; display:flex; align-items:center; justify-content:center;
-  font-size:10px; color:var(--gold); letter-spacing:2px;
-  cursor:move; user-select:none;
-  width:300px; height:60px; left:550px; top:30px;
-}
+/* ISO GRID */
+.iso-floor{position:absolute;top:0;left:0;width:100%;height:100%;}
 
-/* TABLE ELEMENT */
-.table-el {
-  position:absolute; cursor:move; user-select:none;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  transition:box-shadow 0.2s;
-}
-.table-el:hover { z-index:50; }
-.table-el.selected .table-shape { box-shadow:0 0 0 2px var(--gold), 0 0 20px rgba(201,150,58,0.3); }
-.table-el.drag-over .table-shape { box-shadow:0 0 0 2px var(--success), 0 0 20px rgba(76,175,80,0.3); }
+/* TABLE 2D */
+.table-el{position:absolute;cursor:move;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.table-el:hover{z-index:50;}
+.table-el.selected .tshape{box-shadow:0 0 0 2px var(--gold),0 0 16px rgba(201,150,58,0.3);}
+.tshape{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:2px solid #C9963A;position:relative;transition:all 0.2s;}
+.tshape.round{border-radius:50%;}
+.tshape.rect{border-radius:6px;}
+.tnum{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);}
+.tcap{font-size:8px;color:#888;letter-spacing:1px;margin-top:1px;}
+.tcount{font-size:8px;margin-top:2px;padding:1px 5px;border-radius:8px;background:#f5f0e8;}
+.tcount.full{color:var(--gold);}
+.tlabel{font-size:9px;color:#555;margin-top:5px;letter-spacing:1px;text-align:center;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-.table-shape {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:var(--dark2); border:1px solid var(--dark4);
-  position:relative; transition:all 0.2s;
-}
-.table-shape.round { border-radius:50%; }
-.table-shape.rect { border-radius:6px; }
+/* CHAIRS around table */
+.chair{position:absolute;width:12px;height:12px;background:#C9963A;border-radius:2px;opacity:0.7;}
 
-.table-number {
-  font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--gold); font-weight:300;
-}
-.table-capacity { font-size:9px; color:var(--text-dim); letter-spacing:1px; margin-top:2px; }
-.table-guests-count {
-  font-size:9px; margin-top:2px;
-  padding:2px 6px; border-radius:10px; background:var(--dark3);
-}
-.table-guests-count.full { color:var(--gold); }
-.table-guests-count.partial { color:var(--text-dim); }
-.table-label {
-  font-size:10px; color:var(--text-dim); margin-top:6px; letter-spacing:1px;
-  text-align:center; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
+/* DECO 2D */
+.deco-el{position:absolute;cursor:move;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:24px;width:56px;height:56px;border:1px dashed rgba(201,150,58,0.35);border-radius:6px;background:rgba(255,255,255,0.9);}
+.deco-lbl{font-size:8px;color:#C9963A;letter-spacing:1px;}
 
 /* TOOLTIP */
-.table-tooltip {
-  position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
-  background:var(--dark2); border:1px solid var(--gold);
-  border-radius:6px; padding:10px 14px; min-width:160px;
-  z-index:200; pointer-events:none; opacity:0; transition:opacity 0.2s;
-  box-shadow:0 4px 20px rgba(0,0,0,0.5);
-}
-.table-el:hover .table-tooltip { opacity:1; }
-.tooltip-title { font-size:11px; color:var(--gold); letter-spacing:1px; margin-bottom:6px; border-bottom:1px solid var(--dark4); padding-bottom:4px; }
-.tooltip-guest { font-size:11px; color:var(--text); padding:2px 0; }
-.tooltip-empty { font-size:10px; color:var(--text-dim); font-style:italic; }
+.ttip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#111;border:1px solid var(--gold);border-radius:6px;padding:8px 12px;min-width:140px;z-index:200;pointer-events:none;opacity:0;transition:opacity 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.5);}
+.table-el:hover .ttip{opacity:1;}
+.ttip-title{font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #2e2e2e;padding-bottom:3px;}
+.ttip-g{font-size:10px;color:var(--text);padding:1px 0;}
+.ttip-empty{font-size:9px;color:#555;font-style:italic;}
 
-/* PANEL DETAILS */
-.detail-panel {
-  position:absolute; right:0; top:0; bottom:0; width:260px;
-  background:var(--dark2); border-left:1px solid var(--dark4);
-  padding:16px; z-index:200; transform:translateX(100%);
-  transition:transform 0.3s; overflow-y:auto;
-}
-.detail-panel.open { transform:translateX(0); }
-.detail-panel-title { font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--gold); margin-bottom:16px; letter-spacing:2px; }
-.detail-guest-item {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:6px 8px; background:var(--dark3); border-radius:4px; margin-bottom:4px; font-size:11px;
-}
-.detail-guest-remove { color:var(--danger); cursor:pointer; font-size:14px; }
-.detail-section { margin-bottom:16px; }
-.detail-section-title { font-size:10px; color:var(--text-dim); letter-spacing:1px; margin-bottom:8px; }
-
-/* DECORATIVE ELEMENTS */
-.deco-el {
-  position:absolute; cursor:move; user-select:none;
-  display:flex; align-items:center; justify-content:center;
-  font-size:24px; width:50px; height:50px;
-  border:1px dashed rgba(201,150,58,0.2); border-radius:4px;
-}
+/* DETAIL PANEL */
+.detail{position:absolute;right:0;top:0;bottom:0;width:240px;background:#111;border-left:1px solid #2e2e2e;padding:14px;z-index:200;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;}
+.detail.open{transform:translateX(0);}
+.detail-title{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);margin-bottom:14px;letter-spacing:2px;}
+.dg-item{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:#1a1a1a;border-radius:4px;margin-bottom:3px;font-size:10px;}
+.dg-remove{color:var(--danger);cursor:pointer;font-size:12px;}
 
 /* MODAL */
-.modal-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:2000;
-  display:none; align-items:center; justify-content:center;
-}
-.modal-overlay.open { display:flex; }
-.modal {
-  background:var(--dark2); border:1px solid var(--dark4);
-  border-radius:10px; padding:28px; width:420px; max-width:90vw;
-}
-.modal-title { font-family:'Cormorant Garamond',serif; font-size:20px; color:var(--gold); margin-bottom:20px; letter-spacing:2px; }
-.modal-actions { display:flex; gap:8px; margin-top:20px; justify-content:flex-end; }
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;display:none;align-items:center;justify-content:center;}
+.moverlay.open{display:flex;}
+.modal{background:#111;border:1px solid #2e2e2e;border-radius:10px;padding:24px;width:380px;max-width:90vw;}
+.mtitle{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);margin-bottom:16px;letter-spacing:2px;}
+.mactions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
 
-/* PRINT */
-@media print {
-  .sidebar, .canvas-toolbar, .header-actions, .detail-panel { display:none !important; }
-  .app { height:auto; }
-  .canvas-area { position:static; }
-  .canvas-wrap { position:static; overflow:visible; }
-  #canvas { margin:0; border:none; }
-}
+/* 3D ISO OBJECTS */
+.iso-obj{position:absolute;cursor:pointer;transition:filter 0.2s;}
+.iso-obj:hover{filter:brightness(1.15);}
 
-/* SCROLLBAR */
-.sidebar-content::-webkit-scrollbar { width:3px; }
+/* LEGEND */
+.legend{position:absolute;bottom:16px;left:16px;background:rgba(17,17,17,0.9);border:1px solid #2e2e2e;border-radius:8px;padding:12px 16px;z-index:50;}
+.legend-title{font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:10px;color:#666;}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-brand">
-    <span class="header-brand-name">CRÉATIVE PLANNER</span>
-    <div class="header-brand-sep"></div>
-    <span class="header-event-name" id="headerEventName">Nouveau événement</span>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="brand">CRÉATIVE PLANNER</div>
+    <div style="width:1px;height:20px;background:#2e2e2e;"></div>
+    <span style="font-size:11px;color:#555;letter-spacing:1px;" id="hEventName">Plan de Salle</span>
   </div>
-  <div class="header-actions">
-    <button class="btn btn-ghost" onclick="exportPDF()">📄 Exporter PDF</button>
+  <div class="htools">
+    <div class="view-toggle">
+      <div class="view-btn active" id="btn2d" onclick="setView('2d')">2D</div>
+      <div class="view-btn" id="btn3d" onclick="setView('3d')">3D ISO</div>
+    </div>
     <button class="btn btn-ghost" onclick="saveData()">💾 Sauvegarder</button>
-    <button class="btn btn-gold" onclick="printPlan()">🖨️ Imprimer</button>
+    <button class="btn btn-gold" onclick="window.print()">🖨️ Imprimer</button>
   </div>
 </header>
 
 <div class="app">
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sidebar-tabs">
-      <div class="stab active" onclick="switchTab('info')">INFOS</div>
-      <div class="stab" onclick="switchTab('tables')">TABLES</div>
-      <div class="stab" onclick="switchTab('guests')">INVITÉS</div>
-      <div class="stab" onclick="switchTab('stats')">STATS</div>
+    <div class="stabs">
+      <div class="stab active" onclick="stab('info')">INFOS</div>
+      <div class="stab" onclick="stab('tables')">TABLES</div>
+      <div class="stab" onclick="stab('guests')">INVITÉS</div>
+      <div class="stab" onclick="stab('stats')">STATS</div>
     </div>
+    <div class="scontent">
 
-    <div class="sidebar-content">
-      <!-- INFO PANEL -->
+      <!-- INFO -->
       <div class="panel active" id="panel-info">
-        <div class="section-label">DÉTAILS DE L'ÉVÉNEMENT</div>
-        <div class="form-group">
-          <label>Nom de l'événement</label>
-          <input type="text" id="eventName" placeholder="Ex: Mariage Koné - Traoré" oninput="updateEventName()">
-        </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select id="eventType">
-            <option>Mariage</option>
-            <option>Anniversaire</option>
-            <option>Corporate</option>
-            <option>Baptême</option>
-            <option>Autre</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Date</label>
-          <input type="date" id="eventDate">
-        </div>
-        <div class="form-group">
-          <label>Lieu / Salle</label>
-          <input type="text" id="eventVenue" placeholder="Ex: Sofitel Abidjan">
-        </div>
-        <div class="form-group">
-          <label>Heure de début</label>
-          <input type="time" id="eventTime">
-        </div>
-        <div class="form-group">
-          <label>Offre</label>
-          <select id="eventOffer">
-            <option>Savane</option>
-            <option>Lagune</option>
-            <option>Ivoire</option>
-            <option>Sur-mesure</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Thème / Couleurs</label>
-          <input type="text" id="eventTheme" placeholder="Ex: Or & Blanc, Jardin fleuri...">
-        </div>
-        <div class="form-group">
-          <label>Menu</label>
-          <textarea id="eventMenu" placeholder="Entrée, plat, dessert..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Notes</label>
-          <textarea id="eventNotes" placeholder="Infos complémentaires..."></textarea>
-        </div>
+        <div class="slabel">ÉVÉNEMENT</div>
+        <div class="fg"><label>Nom de l'événement</label><input type="text" id="evName" placeholder="Ex: Mariage Koné" oninput="updateEvName()"></div>
+        <div class="fg"><label>Type</label><select id="evType"><option>Mariage</option><option>Anniversaire</option><option>Corporate</option><option>Baptême</option></select></div>
+        <div class="fg"><label>Date</label><input type="date" id="evDate"></div>
+        <div class="fg"><label>Lieu</label><input type="text" id="evLieu" placeholder="Ex: Sofitel Abidjan"></div>
+        <div class="fg"><label>Offre</label><select id="evOffre"><option>Savane</option><option>Lagune</option><option>Ivoire</option><option>Sur-mesure</option></select></div>
+        <div class="fg"><label>Thème / Couleurs</label><input type="text" id="evTheme" placeholder="Ex: Or & Blanc"></div>
+        <div class="fg"><label>Menu</label><textarea id="evMenu" style="height:60px;resize:vertical;" placeholder="Entrée, plat, dessert..."></textarea></div>
+        <div class="fg"><label>Notes</label><textarea id="evNotes" style="height:50px;resize:vertical;" placeholder="Notes..."></textarea></div>
       </div>
 
-      <!-- TABLES PANEL -->
+      <!-- TABLES -->
       <div class="panel" id="panel-tables">
-        <div class="section-label">AJOUTER UNE TABLE</div>
-        <div class="table-tools">
-          <div class="tool-btn" onclick="addTable('round')">
-            <div class="tool-btn-icon">⭕</div>
-            <div class="tool-btn-label">TABLE RONDE</div>
-          </div>
-          <div class="tool-btn" onclick="addTable('rect')">
-            <div class="tool-btn-icon">▬</div>
-            <div class="tool-btn-label">TABLE RECT.</div>
-          </div>
-          <div class="tool-btn" onclick="addDeco('🌸')">
-            <div class="tool-btn-icon">🌸</div>
-            <div class="tool-btn-label">DÉCORATION</div>
-          </div>
-          <div class="tool-btn" onclick="addDeco('🎤')">
-            <div class="tool-btn-icon">🎤</div>
-            <div class="tool-btn-label">SCÈNE / MC</div>
-          </div>
-          <div class="tool-btn" onclick="addDeco('📷')">
-            <div class="tool-btn-icon">📷</div>
-            <div class="tool-btn-label">PHOTO SPOT</div>
-          </div>
-          <div class="tool-btn" onclick="addDeco('🍽️')">
-            <div class="tool-btn-icon">🍽️</div>
-            <div class="tool-btn-label">BUFFET</div>
-          </div>
+        <div class="slabel">AJOUTER TABLE</div>
+        <div class="tgrid">
+          <div class="tbtn" onclick="addTable('round')"><div class="tbtn-icon">⭕</div><div class="tbtn-label">RONDE</div></div>
+          <div class="tbtn" onclick="addTable('rect')"><div class="tbtn-icon">▬</div><div class="tbtn-label">RECT.</div></div>
         </div>
-
-        <div class="section-label">CONFIGURATION</div>
-        <div class="config-row">
-          <label>Capacité par défaut</label>
-          <input type="number" id="defaultCapacity" value="8" min="1" max="20">
+        <div class="slabel">MOBILIER</div>
+        <div class="tgrid">
+          <div class="tbtn" onclick="addDeco('🪑','CHAISE')"><div class="tbtn-icon">🪑</div><div class="tbtn-label">CHAISE</div></div>
+          <div class="tbtn" onclick="addDeco('🛋️','CANAPÉ')"><div class="tbtn-icon">🛋️</div><div class="tbtn-label">CANAPÉ</div></div>
+          <div class="tbtn" onclick="addDeco('🍽️','COUVERTS')"><div class="tbtn-icon">🍽️</div><div class="tbtn-label">COUVERTS</div></div>
+          <div class="tbtn" onclick="addDeco('🥂','VERRES')"><div class="tbtn-icon">🥂</div><div class="tbtn-label">VERRES</div></div>
         </div>
-        <div class="config-row">
-          <label>Numérotation auto</label>
-          <input type="number" id="tableCounter" value="1" min="1">
+        <div class="slabel">ESPACES</div>
+        <div class="tgrid">
+          <div class="tbtn" onclick="addDeco('🎤','SCÈNE')"><div class="tbtn-icon">🎤</div><div class="tbtn-label">SCÈNE</div></div>
+          <div class="tbtn" onclick="addDeco('🍸','BAR')"><div class="tbtn-icon">🍸</div><div class="tbtn-label">BAR</div></div>
+          <div class="tbtn" onclick="addDeco('📷','PHOTO')"><div class="tbtn-icon">📷</div><div class="tbtn-label">PHOTO SPOT</div></div>
+          <div class="tbtn" onclick="addDeco('🎂','GÂTEAU')"><div class="tbtn-icon">🎂</div><div class="tbtn-label">GÂTEAU</div></div>
+          <div class="tbtn" onclick="addDeco('🎵','DJ/SONO')"><div class="tbtn-icon">🎵</div><div class="tbtn-label">DJ/SONO</div></div>
+          <div class="tbtn" onclick="addDeco('🍽️','BUFFET')"><div class="tbtn-icon">🍽️</div><div class="tbtn-label">BUFFET</div></div>
         </div>
-
-        <div class="section-label" style="margin-top:16px;">ACTIONS</div>
-        <button class="btn btn-ghost" style="width:100%;margin-bottom:8px;" onclick="clearSelected()">🗑 Supprimer sélection</button>
-        <button class="btn btn-ghost" style="width:100%;" onclick="clearAll()">⚠️ Tout effacer</button>
+        <div class="slabel">DÉCORATION</div>
+        <div class="tgrid">
+          <div class="tbtn" onclick="addDeco('🌸','FLEURS')"><div class="tbtn-icon">🌸</div><div class="tbtn-label">FLEURS</div></div>
+          <div class="tbtn" onclick="addDeco('🕯️','BOUGIES')"><div class="tbtn-icon">🕯️</div><div class="tbtn-label">BOUGIES</div></div>
+          <div class="tbtn" onclick="addDeco('🌿','VERDURE')"><div class="tbtn-icon">🌿</div><div class="tbtn-label">VERDURE</div></div>
+          <div class="tbtn" onclick="addDeco('🚪','ENTRÉE')"><div class="tbtn-icon">🚪</div><div class="tbtn-label">ENTRÉE</div></div>
+          <div class="tbtn" onclick="addDeco('🚻','WC')"><div class="tbtn-icon">🚻</div><div class="tbtn-label">TOILETTES</div></div>
+          <div class="tbtn" onclick="addDeco('🅿️','PARKING')"><div class="tbtn-icon">🅿️</div><div class="tbtn-label">PARKING</div></div>
+        </div>
+        <div class="slabel">CONFIG</div>
+        <div class="cfg"><label>Capacité défaut</label><input type="number" id="defCap" value="8" min="1" max="30"></div>
+        <div class="cfg"><label>Prochaine table N°</label><input type="number" id="tCounter" value="1" min="1"></div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="deleteSelected()">🗑 Supprimer sélection</button>
+          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="clearAll()">⚠️ Tout effacer</button>
+          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="toggleStage()">🎙️ Scène/Estrade</button>
+        </div>
       </div>
 
-      <!-- GUESTS PANEL -->
+      <!-- GUESTS -->
       <div class="panel" id="panel-guests">
-        <div class="section-label">AJOUTER UN INVITÉ</div>
-        <div class="guest-input-row">
-          <input type="text" id="guestInput" placeholder="Nom de l'invité..." onkeydown="if(event.key==='Enter')addGuest()">
+        <div class="slabel">AJOUTER INVITÉ</div>
+        <div class="ginput">
+          <input type="text" id="gInput" placeholder="Nom de l'invité..." onkeydown="if(event.key==='Enter')addGuest()">
           <button onclick="addGuest()">+</button>
         </div>
-        <div style="margin-bottom:12px;">
-          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="importGuests()">📋 Importer liste (texte)</button>
-        </div>
-        <div class="section-label">LISTE DES INVITÉS</div>
-        <div class="guest-list" id="guestList"></div>
+        <button class="btn btn-ghost" style="width:100%;font-size:10px;margin-bottom:12px;" onclick="document.getElementById('importModal').classList.add('open')">📋 Importer liste</button>
+        <div class="slabel">LISTE</div>
+        <div class="glist" id="guestList"></div>
       </div>
 
-      <!-- STATS PANEL -->
+      <!-- STATS -->
       <div class="panel" id="panel-stats">
-        <div class="section-label">RÉSUMÉ</div>
-        <div class="stats-grid" style="margin-bottom:16px;">
-          <div class="stat-box"><div class="stat-num" id="statTables">0</div><div class="stat-lbl">TABLES</div></div>
-          <div class="stat-box"><div class="stat-num" id="statCapacity">0</div><div class="stat-lbl">PLACES</div></div>
-          <div class="stat-box"><div class="stat-num" id="statGuests">0</div><div class="stat-lbl">INVITÉS</div></div>
-          <div class="stat-box"><div class="stat-num" id="statAssigned">0</div><div class="stat-lbl">PLACÉS</div></div>
+        <div class="slabel">RÉSUMÉ</div>
+        <div class="sgrid" style="margin-bottom:14px;">
+          <div class="sbox"><div class="snum" id="stTables">0</div><div class="slbl">TABLES</div></div>
+          <div class="sbox"><div class="snum" id="stPlaces">0</div><div class="slbl">PLACES</div></div>
+          <div class="sbox"><div class="snum" id="stInvites">0</div><div class="slbl">INVITÉS</div></div>
+          <div class="sbox"><div class="snum" id="stPlaces2">0</div><div class="slbl">PLACÉS</div></div>
         </div>
-        <div class="section-label">PAR TABLE</div>
-        <div id="tableStatsList" style="display:flex;flex-direction:column;gap:4px;"></div>
+        <div class="slabel">PAR TABLE</div>
+        <div id="tableStats" style="display:flex;flex-direction:column;gap:4px;"></div>
       </div>
+
     </div>
   </div>
 
-  <!-- CANVAS -->
-  <div class="canvas-area">
-    <div class="canvas-toolbar">
-      <button onclick="zoomIn()">＋</button>
-      <button onclick="zoomOut()">－</button>
+  <!-- CANVAS AREA -->
+  <div class="canvas-area" id="canvasArea">
+
+    <div class="toolbar">
+      <button onclick="zoom(0.1)">＋</button>
+      <button onclick="zoom(-0.1)">－</button>
       <button onclick="resetZoom()">100%</button>
       <div class="sep"></div>
       <button onclick="toggleGrid()" id="gridBtn" class="active">Grille</button>
       <button onclick="toggleStage()" id="stageBtn">Scène</button>
       <div class="sep"></div>
-      <span style="font-size:10px;color:var(--text-dim);letter-spacing:1px;">Cliquez sur une table pour la sélectionner</span>
+      <span style="font-size:9px;color:#444;letter-spacing:1px;">Double-clic pour supprimer un élément</span>
     </div>
 
-    <div class="canvas-wrap" id="canvasWrap">
-      <div id="canvas">
-        <div class="room-label" id="roomLabel">PLAN DE SALLE</div>
-        <div class="stage-element" id="stageEl" style="display:none;">
-          🎙️ &nbsp; SCÈNE / ESTRADE
-        </div>
+    <!-- 2D VIEW -->
+    <div id="canvas2d" style="position:absolute;inset:54px 0 0 0;overflow:auto;display:flex;align-items:flex-start;">
+      <div id="canvas" style="position:relative;width:1400px;height:860px;background:#fff;background-image:linear-gradient(rgba(201,150,58,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(201,150,58,0.07) 1px,transparent 1px);background-size:40px 40px;margin:20px;flex-shrink:0;box-shadow:0 4px 24px rgba(0,0,0,0.3);">
+        <div id="roomLabel" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-size:12px;color:rgba(201,150,58,0.25);letter-spacing:4px;pointer-events:none;white-space:nowrap;">PLAN DE SALLE</div>
+        <div id="stageEl" style="display:none;position:absolute;background:rgba(201,150,58,0.12);border:1px solid rgba(201,150,58,0.4);border-radius:4px;display:none;align-items:center;justify-content:center;font-size:10px;color:var(--gold);letter-spacing:2px;cursor:move;user-select:none;width:280px;height:55px;left:560px;top:28px;">🎙️ &nbsp; SCÈNE / ESTRADE</div>
       </div>
+    </div>
+
+    <!-- 3D ISO VIEW -->
+    <div id="canvas3d" style="position:absolute;inset:54px 0 0 0;overflow:auto;display:none;">
+      <canvas id="isoCanvas" style="display:block;margin:20px auto;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);"></canvas>
+      <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(17,17,17,0.9);border:1px solid #2e2e2e;border-radius:6px;padding:8px 16px;font-size:10px;color:#555;letter-spacing:1px;">Basé sur votre plan 2D — Revenez en 2D pour modifier</div>
     </div>
 
     <!-- DETAIL PANEL -->
-    <div class="detail-panel" id="detailPanel">
-      <div class="detail-panel-title" id="detailTitle">Table 1</div>
-      <div class="detail-section">
-        <div class="detail-section-title">NOM DE LA TABLE</div>
-        <input type="text" id="detailTableName" placeholder="Ex: Table des mariés" style="width:100%;padding:7px 10px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;" oninput="updateTableName()">
+    <div class="detail" id="detailPanel">
+      <div class="detail-title" id="detailTitle">Table</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:9px;color:#555;letter-spacing:1px;margin-bottom:5px;">NOM</div>
+        <input type="text" id="detailName" style="width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;" placeholder="Ex: Table des mariés" oninput="updateTName()">
       </div>
-      <div class="detail-section">
-        <div class="detail-section-title">CAPACITÉ</div>
-        <input type="number" id="detailCapacity" min="1" max="30" style="width:100%;padding:7px 10px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;" oninput="updateTableCapacity()">
+      <div style="margin-bottom:12px;">
+        <div style="font-size:9px;color:#555;letter-spacing:1px;margin-bottom:5px;">CAPACITÉ</div>
+        <input type="number" id="detailCap" min="1" max="30" style="width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;" oninput="updateTCap()">
       </div>
-      <div class="detail-section">
-        <div class="detail-section-title">INVITÉS ASSIGNÉS</div>
-        <div id="detailGuestList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>
-        <select id="detailAddGuest" style="width:100%;padding:7px 10px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;margin-bottom:6px;">
-          <option value="">— Ajouter un invité —</option>
-        </select>
-        <button class="btn btn-gold" style="width:100%;font-size:11px;" onclick="assignGuestFromSelect()">Assigner</button>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:9px;color:#555;letter-spacing:1px;margin-bottom:5px;">INVITÉS</div>
+        <div id="detailGuests" style="display:flex;flex-direction:column;gap:3px;margin-bottom:8px;"></div>
+        <select id="detailAddG" style="width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;margin-bottom:6px;"><option value="">— Ajouter invité —</option></select>
+        <button class="btn btn-gold" style="width:100%;font-size:10px;" onclick="assignFromSelect()">Assigner</button>
       </div>
-      <div class="detail-section">
-        <button class="btn btn-danger" style="width:100%;font-size:11px;" onclick="deleteSelectedTable()">🗑 Supprimer cette table</button>
-      </div>
-      <button class="btn btn-ghost" style="width:100%;font-size:11px;margin-top:4px;" onclick="closeDetail()">← Fermer</button>
+      <button class="btn btn-ghost" style="width:100%;font-size:10px;color:var(--danger);border-color:var(--danger);margin-bottom:6px;" onclick="deleteSelected()">🗑 Supprimer table</button>
+      <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="closeDetail()">← Fermer</button>
     </div>
+
   </div>
 </div>
 
-<!-- MODAL IMPORT -->
-<div class="modal-overlay" id="importModal">
+<!-- IMPORT MODAL -->
+<div class="moverlay" id="importModal">
   <div class="modal">
-    <div class="modal-title">Importer une liste</div>
-    <div class="form-group">
-      <label>Collez vos noms (un par ligne)</label>
-      <textarea id="importText" style="width:100%;height:200px;padding:10px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;resize:vertical;" placeholder="Koné Adjoua&#10;Traoré Mamadou&#10;Bamba Fatoumata&#10;..."></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeImport()">Annuler</button>
+    <div class="mtitle">Importer une liste</div>
+    <div class="fg"><label>Un nom par ligne</label><textarea id="importTxt" style="width:100%;height:180px;padding:9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;resize:vertical;" placeholder="Koné Adjoua&#10;Traoré Mamadou&#10;..."></textarea></div>
+    <div class="mactions">
+      <button class="btn btn-ghost" onclick="document.getElementById('importModal').classList.remove('open')">Annuler</button>
       <button class="btn btn-gold" onclick="doImport()">Importer</button>
     </div>
   </div>
 </div>
 
 <script>
-// STATE
-let tables = [];
-let guests = [];
-let selectedTable = null;
-let tableIdCounter = 1;
-let zoom = 1;
-let gridVisible = true;
-let stageVisible = false;
+// ===== STATE =====
+let tables=[], guests=[], decos=[], selectedTable=null, zoomLevel=1, gridOn=true, stageOn=false;
+let tIdCounter=1;
 
-// TABS
-function switchTab(tab) {
-  document.querySelectorAll('.stab').forEach((t,i) => {
-    t.classList.toggle('active', ['info','tables','guests','stats'][i] === tab);
-  });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-'+tab).classList.add('active');
-  if(tab === 'stats') updateStats();
+// ===== VIEW =====
+let currentView='2d';
+function setView(v){
+  currentView=v;
+  document.getElementById('btn2d').classList.toggle('active',v==='2d');
+  document.getElementById('btn3d').classList.toggle('active',v==='3d');
+  document.getElementById('canvas2d').style.display=v==='2d'?'flex':'none';
+  document.getElementById('canvas3d').style.display=v==='3d'?'block':'none';
+  if(v==='3d') render3D();
 }
 
-// EVENT NAME
-function updateEventName() {
-  const name = document.getElementById('eventName').value;
-  document.getElementById('headerEventName').textContent = name || 'Nouveau événement';
-  document.getElementById('roomLabel').textContent = name ? name.toUpperCase() : 'PLAN DE SALLE';
+// ===== TABS =====
+function stab(t){
+  document.querySelectorAll('.stab').forEach((s,i)=>s.classList.toggle('active',['info','tables','guests','stats'][i]===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  if(t==='stats') updateStats();
 }
 
-// ADD TABLE
-function addTable(type) {
-  const cap = parseInt(document.getElementById('defaultCapacity').value) || 8;
-  const num = parseInt(document.getElementById('tableCounter').value) || tableIdCounter;
-  const size = type === 'round' ? Math.max(80, cap * 10) : null;
-  const w = type === 'round' ? size : Math.max(120, cap * 14);
-  const h = type === 'round' ? size : 70;
+function updateEvName(){
+  const n=document.getElementById('evName').value;
+  document.getElementById('hEventName').textContent=n||'Plan de Salle';
+  document.getElementById('roomLabel').textContent=n?n.toUpperCase():'PLAN DE SALLE';
+}
 
-  const table = {
-    id: 'table_' + Date.now(),
-    type, number: num, name: '', capacity: cap,
-    guests: [],
-    x: 200 + Math.random()*400, y: 150 + Math.random()*300,
-    w, h
-  };
-  tables.push(table);
-  document.getElementById('tableCounter').value = num + 1;
-  tableIdCounter = num + 1;
-  renderTable(table);
+// ===== ZOOM =====
+function zoom(d){zoomLevel=Math.max(0.3,Math.min(2,zoomLevel+d));applyZoom();}
+function resetZoom(){zoomLevel=1;applyZoom();}
+function applyZoom(){const c=document.getElementById('canvas');c.style.transform=`scale(${zoomLevel})`;c.style.transformOrigin='top left';}
+
+// ===== GRID =====
+function toggleGrid(){
+  gridOn=!gridOn;
+  const c=document.getElementById('canvas');
+  c.style.backgroundImage=gridOn?'linear-gradient(rgba(201,150,58,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(201,150,58,0.07) 1px,transparent 1px)':'none';
+  document.getElementById('gridBtn').classList.toggle('active',gridOn);
+}
+
+// ===== STAGE =====
+function toggleStage(){
+  stageOn=!stageOn;
+  const s=document.getElementById('stageEl');
+  s.style.display=stageOn?'flex':'none';
+  document.getElementById('stageBtn').classList.toggle('active',stageOn);
+  if(stageOn) makeDraggableEl(s,{x:560,y:28});
+}
+
+function makeDraggableEl(el,pos){
+  let dragging=false,sx,sy,ox,oy;
+  el.onmousedown=e=>{dragging=true;sx=e.clientX;sy=e.clientY;ox=pos.x;oy=pos.y;e.preventDefault();};
+  document.addEventListener('mousemove',e=>{if(!dragging)return;pos.x=ox+(e.clientX-sx)/zoomLevel;pos.y=oy+(e.clientY-sy)/zoomLevel;el.style.left=pos.x+'px';el.style.top=pos.y+'px';});
+  document.addEventListener('mouseup',()=>dragging=false);
+}
+
+// ===== TABLES =====
+function addTable(type){
+  const cap=parseInt(document.getElementById('defCap').value)||8;
+  const num=parseInt(document.getElementById('tCounter').value)||tIdCounter;
+  const sz=type==='round'?Math.max(80,cap*10):null;
+  const w=type==='round'?sz:Math.max(110,cap*13);
+  const h=type==='round'?sz:65;
+  const t={id:'T'+Date.now(),type,number:num,name:'',capacity:cap,guests:[],x:180+Math.random()*500,y:130+Math.random()*300,w,h};
+  tables.push(t);
+  document.getElementById('tCounter').value=num+1;
+  tIdCounter=num+1;
+  renderTable(t);
   updateStats();
 }
 
-function renderTable(table) {
-  const el = document.createElement('div');
-  el.className = 'table-el';
-  el.id = table.id;
-  el.style.left = table.x + 'px';
-  el.style.top = table.y + 'px';
-  el.style.width = table.w + 'px';
-  el.style.height = (table.h + 40) + 'px';
+function renderTable(t){
+  const el=document.createElement('div');
+  el.className='table-el'; el.id=t.id;
+  el.style.cssText=`left:${t.x}px;top:${t.y}px;width:${t.w}px;`;
 
-  const shape = document.createElement('div');
-  shape.className = 'table-shape ' + table.type;
-  shape.style.width = table.w + 'px';
-  shape.style.height = table.h + 'px';
+  const shape=document.createElement('div');
+  shape.className='tshape '+t.type;
+  shape.style.cssText=`width:${t.w}px;height:${t.h}px;`;
 
-  const num = document.createElement('div');
-  num.className = 'table-number';
-  num.textContent = table.number;
+  // Chairs around table
+  const chairs=drawChairs(t);
+  shape.appendChild(chairs);
 
-  const cap = document.createElement('div');
-  cap.className = 'table-capacity';
-  cap.textContent = table.capacity + ' places';
+  const num=document.createElement('div'); num.className='tnum'; num.textContent=t.number;
+  const cap=document.createElement('div'); cap.className='tcap'; cap.textContent=t.capacity+' places';
+  const gc=document.createElement('div'); gc.className='tcount partial'; gc.textContent='0/'+t.capacity;
+  const tip=document.createElement('div'); tip.className='ttip';
+  tip.innerHTML=`<div class="ttip-title">TABLE ${t.number}</div><div class="ttip-empty">Aucun invité</div>`;
 
-  const gc = document.createElement('div');
-  gc.className = 'table-guests-count partial';
-  gc.textContent = '0/' + table.capacity;
+  shape.appendChild(num); shape.appendChild(cap); shape.appendChild(gc); shape.appendChild(tip);
 
-  const tooltip = document.createElement('div');
-  tooltip.className = 'table-tooltip';
-  tooltip.innerHTML = `<div class="tooltip-title">TABLE ${table.number}</div><div class="tooltip-empty">Aucun invité assigné</div>`;
+  const lbl=document.createElement('div'); lbl.className='tlabel'; lbl.textContent=t.name||'';
+  el.appendChild(shape); el.appendChild(lbl);
 
-  shape.appendChild(num);
-  shape.appendChild(cap);
-  shape.appendChild(gc);
-  shape.appendChild(tooltip);
+  // Drag
+  let dragging=false,sx,sy,ox,oy;
+  el.addEventListener('mousedown',e=>{if(e.target.closest('.ttip')||e.target.classList.contains('dg-remove'))return;dragging=true;sx=e.clientX;sy=e.clientY;ox=t.x;oy=t.y;e.preventDefault();});
+  document.addEventListener('mousemove',e=>{if(!dragging)return;t.x=Math.max(0,ox+(e.clientX-sx)/zoomLevel);t.y=Math.max(0,oy+(e.clientY-sy)/zoomLevel);el.style.left=t.x+'px';el.style.top=t.y+'px';});
+  document.addEventListener('mouseup',()=>dragging=false);
 
-  const label = document.createElement('div');
-  label.className = 'table-label';
-  label.textContent = table.name || '';
+  // Drop
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('selected');});
+  el.addEventListener('dragleave',()=>el.classList.remove('selected'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('selected');assignGuest(e.dataTransfer.getData('gid'),t.id);});
 
-  el.appendChild(shape);
-  el.appendChild(label);
-
-  // DRAG
-  makeDraggable(el, table);
-
-  // DROP (for guests)
-  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
-  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-  el.addEventListener('drop', e => {
-    e.preventDefault();
-    el.classList.remove('drag-over');
-    const guestId = e.dataTransfer.getData('guestId');
-    assignGuestToTable(guestId, table.id);
-  });
-
-  // CLICK
-  el.addEventListener('click', (e) => {
-    e.stopPropagation();
-    selectTable(table.id);
-  });
-
+  el.addEventListener('click',e=>{e.stopPropagation();selectTable(t.id);});
   document.getElementById('canvas').appendChild(el);
-  updateTableEl(table);
+  updateTableEl(t);
 }
 
-function updateTableEl(table) {
-  const el = document.getElementById(table.id);
-  if(!el) return;
-  const shape = el.querySelector('.table-shape');
-  const gc = el.querySelector('.table-guests-count');
-  const label = el.querySelector('.table-label');
-  const tooltip = el.querySelector('.table-tooltip');
-  const num = el.querySelector('.table-number');
-
-  num.textContent = table.number;
-  gc.textContent = table.guests.length + '/' + table.capacity;
-  gc.className = 'table-guests-count ' + (table.guests.length >= table.capacity ? 'full' : 'partial');
-  label.textContent = table.name || '';
-
-  // tooltip
-  const assignedGuests = table.guests.map(gid => {
-    const g = guests.find(g => g.id === gid);
-    return g ? `<div class="tooltip-guest">• ${g.name}</div>` : '';
-  }).join('');
-  tooltip.innerHTML = `<div class="tooltip-title">TABLE ${table.number}${table.name ? ' — '+table.name : ''}</div>
-    ${assignedGuests || '<div class="tooltip-empty">Aucun invité assigné</div>'}`;
-
-  // size
-  shape.style.width = table.w + 'px';
-  shape.style.height = table.h + 'px';
-  el.style.width = table.w + 'px';
+function drawChairs(t){
+  const frag=document.createDocumentFragment();
+  const n=Math.min(t.capacity,20);
+  if(t.type==='round'){
+    const r=t.w/2;
+    for(let i=0;i<n;i++){
+      const angle=(i/n)*2*Math.PI-Math.PI/2;
+      const ch=document.createElement('div');
+      ch.className='chair';
+      ch.style.cssText=`left:${r+Math.cos(angle)*(r+8)-6}px;top:${r+Math.sin(angle)*(r+8)-6}px;border-radius:50%;`;
+      frag.appendChild(ch);
+    }
+  } else {
+    const perSide=Math.ceil(n/2);
+    for(let i=0;i<Math.min(perSide,n);i++){
+      const ch=document.createElement('div'); ch.className='chair';
+      ch.style.cssText=`left:${(i+1)*(t.w/(perSide+1))-6}px;top:-14px;`;
+      frag.appendChild(ch);
+    }
+    for(let i=0;i<Math.min(perSide,n-perSide);i++){
+      const ch=document.createElement('div'); ch.className='chair';
+      ch.style.cssText=`left:${(i+1)*(t.w/(perSide+1))-6}px;top:${t.h+2}px;`;
+      frag.appendChild(ch);
+    }
+  }
+  return frag;
 }
 
-function makeDraggable(el, table) {
-  let ox, oy, startX, startY, dragging = false;
-  el.addEventListener('mousedown', e => {
-    if(e.target.closest('.table-tooltip') || e.target.classList.contains('detail-guest-remove')) return;
-    dragging = true;
-    startX = e.clientX; startY = e.clientY;
-    ox = table.x; oy = table.y;
-    e.preventDefault();
-  });
-  document.addEventListener('mousemove', e => {
-    if(!dragging) return;
-    const dx = (e.clientX - startX) / zoom;
-    const dy = (e.clientY - startY) / zoom;
-    table.x = Math.max(0, ox + dx);
-    table.y = Math.max(0, oy + dy);
-    el.style.left = table.x + 'px';
-    el.style.top = table.y + 'px';
-  });
-  document.addEventListener('mouseup', () => { dragging = false; });
+function updateTableEl(t){
+  const el=document.getElementById(t.id); if(!el)return;
+  const gc=el.querySelector('.tcount');
+  const lbl=el.querySelector('.tlabel');
+  const tip=el.querySelector('.ttip');
+  const num=el.querySelector('.tnum');
+  num.textContent=t.number;
+  gc.textContent=t.guests.length+'/'+t.capacity;
+  gc.className='tcount '+(t.guests.length>=t.capacity?'full':'partial');
+  lbl.textContent=t.name||'';
+  const gs=t.guests.map(gid=>{const g=guests.find(x=>x.id===gid);return g?`<div class="ttip-g">• ${g.name}</div>`:''}).join('');
+  tip.innerHTML=`<div class="ttip-title">TABLE ${t.number}${t.name?' — '+t.name:''}</div>${gs||'<div class="ttip-empty">Aucun invité</div>'}`;
 }
 
-function selectTable(id) {
-  document.querySelectorAll('.table-el').forEach(el => el.classList.remove('selected'));
-  selectedTable = tables.find(t => t.id === id);
-  if(!selectedTable) return;
+// ===== SELECT TABLE =====
+function selectTable(id){
+  document.querySelectorAll('.table-el').forEach(e=>e.classList.remove('selected'));
+  selectedTable=tables.find(t=>t.id===id);
+  if(!selectedTable)return;
   document.getElementById(id).classList.add('selected');
   openDetail(selectedTable);
 }
 
-function openDetail(table) {
-  const panel = document.getElementById('detailPanel');
-  panel.classList.add('open');
-  document.getElementById('detailTitle').textContent = 'Table ' + table.number;
-  document.getElementById('detailTableName').value = table.name || '';
-  document.getElementById('detailCapacity').value = table.capacity;
-  renderDetailGuests(table);
-  renderDetailGuestSelect(table);
+function openDetail(t){
+  const p=document.getElementById('detailPanel'); p.classList.add('open');
+  document.getElementById('detailTitle').textContent='Table '+t.number;
+  document.getElementById('detailName').value=t.name||'';
+  document.getElementById('detailCap').value=t.capacity;
+  renderDetailGuests(t); renderDetailSelect(t);
 }
 
-function closeDetail() {
+function closeDetail(){
   document.getElementById('detailPanel').classList.remove('open');
-  document.querySelectorAll('.table-el').forEach(el => el.classList.remove('selected'));
-  selectedTable = null;
+  document.querySelectorAll('.table-el').forEach(e=>e.classList.remove('selected'));
+  selectedTable=null;
 }
 
-function renderDetailGuests(table) {
-  const list = document.getElementById('detailGuestList');
-  list.innerHTML = '';
-  table.guests.forEach(gid => {
-    const g = guests.find(g => g.id === gid);
-    if(!g) return;
-    const item = document.createElement('div');
-    item.className = 'detail-guest-item';
-    item.innerHTML = `<span>${g.name}</span><span class="detail-guest-remove" onclick="removeGuestFromTable('${gid}','${table.id}')">✕</span>`;
-    list.appendChild(item);
+function renderDetailGuests(t){
+  const list=document.getElementById('detailGuests'); list.innerHTML='';
+  t.guests.forEach(gid=>{
+    const g=guests.find(x=>x.id===gid); if(!g)return;
+    const d=document.createElement('div'); d.className='dg-item';
+    d.innerHTML=`<span>${g.name}</span><span class="dg-remove" onclick="removeGuestFromTable('${gid}','${t.id}')">✕</span>`;
+    list.appendChild(d);
   });
 }
 
-function renderDetailGuestSelect(table) {
-  const sel = document.getElementById('detailAddGuest');
-  sel.innerHTML = '<option value="">— Ajouter un invité —</option>';
-  guests.filter(g => !g.tableId).forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g.id; opt.textContent = g.name;
-    sel.appendChild(opt);
-  });
+function renderDetailSelect(t){
+  const sel=document.getElementById('detailAddG');
+  sel.innerHTML='<option value="">— Ajouter invité —</option>'+guests.filter(g=>!g.tableId).map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
 }
 
-function assignGuestFromSelect() {
-  if(!selectedTable) return;
-  const sel = document.getElementById('detailAddGuest');
-  const gid = sel.value;
-  if(!gid) return;
-  assignGuestToTable(gid, selectedTable.id);
+function assignFromSelect(){
+  if(!selectedTable)return;
+  const gid=document.getElementById('detailAddG').value;
+  if(gid) assignGuest(gid,selectedTable.id);
 }
 
-function assignGuestToTable(guestId, tableId) {
-  const guest = guests.find(g => g.id === guestId);
-  const table = tables.find(t => t.id === tableId);
-  if(!guest || !table) return;
-  if(table.guests.length >= table.capacity) { alert('Cette table est complète !'); return; }
-  if(guest.tableId) {
-    const oldTable = tables.find(t => t.id === guest.tableId);
-    if(oldTable) oldTable.guests = oldTable.guests.filter(id => id !== guestId);
-  }
-  guest.tableId = tableId;
-  if(!table.guests.includes(guestId)) table.guests.push(guestId);
-  updateTableEl(table);
-  renderGuestList();
-  updateStats();
-  if(selectedTable && selectedTable.id === tableId) {
-    renderDetailGuests(table);
-    renderDetailGuestSelect(table);
-  }
+function assignGuest(gid,tid){
+  const g=guests.find(x=>x.id===gid);
+  const t=tables.find(x=>x.id===tid);
+  if(!g||!t)return;
+  if(t.guests.length>=t.capacity){alert('Table complète !');return;}
+  if(g.tableId){const ot=tables.find(x=>x.id===g.tableId);if(ot){ot.guests=ot.guests.filter(id=>id!==gid);updateTableEl(ot);}}
+  g.tableId=tid;
+  if(!t.guests.includes(gid))t.guests.push(gid);
+  updateTableEl(t); renderGuestList(); updateStats();
+  if(selectedTable&&selectedTable.id===tid){renderDetailGuests(t);renderDetailSelect(t);}
 }
 
-function removeGuestFromTable(guestId, tableId) {
-  const guest = guests.find(g => g.id === guestId);
-  const table = tables.find(t => t.id === tableId);
-  if(guest) guest.tableId = null;
-  if(table) table.guests = table.guests.filter(id => id !== guestId);
-  updateTableEl(table);
-  renderGuestList();
-  updateStats();
-  if(selectedTable) { renderDetailGuests(selectedTable); renderDetailGuestSelect(selectedTable); }
+function removeGuestFromTable(gid,tid){
+  const g=guests.find(x=>x.id===gid);
+  const t=tables.find(x=>x.id===tid);
+  if(g)g.tableId=null;
+  if(t){t.guests=t.guests.filter(id=>id!==gid);updateTableEl(t);}
+  renderGuestList(); updateStats();
+  if(selectedTable){renderDetailGuests(selectedTable);renderDetailSelect(selectedTable);}
 }
 
-function updateTableName() {
-  if(!selectedTable) return;
-  selectedTable.name = document.getElementById('detailTableName').value;
-  updateTableEl(selectedTable);
+function updateTName(){if(!selectedTable)return;selectedTable.name=document.getElementById('detailName').value;updateTableEl(selectedTable);}
+function updateTCap(){if(!selectedTable)return;selectedTable.capacity=parseInt(document.getElementById('detailCap').value)||8;updateTableEl(selectedTable);updateStats();}
+
+function deleteSelected(){
+  if(!selectedTable)return;
+  selectedTable.guests.forEach(gid=>{const g=guests.find(x=>x.id===gid);if(g)g.tableId=null;});
+  tables=tables.filter(t=>t.id!==selectedTable.id);
+  const el=document.getElementById(selectedTable.id); if(el)el.remove();
+  closeDetail(); renderGuestList(); updateStats();
 }
 
-function updateTableCapacity() {
-  if(!selectedTable) return;
-  selectedTable.capacity = parseInt(document.getElementById('detailCapacity').value) || 8;
-  updateTableEl(selectedTable);
-  updateStats();
+function clearAll(){
+  if(!confirm('Effacer toutes les tables ?'))return;
+  tables.forEach(t=>{t.guests.forEach(gid=>{const g=guests.find(x=>x.id===gid);if(g)g.tableId=null;});const el=document.getElementById(t.id);if(el)el.remove();});
+  tables=[]; closeDetail(); renderGuestList(); updateStats();
 }
 
-function deleteSelectedTable() {
-  if(!selectedTable) return;
-  selectedTable.guests.forEach(gid => {
-    const g = guests.find(g => g.id === gid);
-    if(g) g.tableId = null;
-  });
-  tables = tables.filter(t => t.id !== selectedTable.id);
-  const el = document.getElementById(selectedTable.id);
-  if(el) el.remove();
-  closeDetail();
-  renderGuestList();
-  updateStats();
-}
-
-function clearSelected() { deleteSelectedTable(); }
-function clearAll() {
-  if(!confirm('Effacer toutes les tables ?')) return;
-  tables.forEach(t => {
-    t.guests.forEach(gid => { const g = guests.find(g => g.id===gid); if(g) g.tableId=null; });
-    const el = document.getElementById(t.id); if(el) el.remove();
-  });
-  tables = [];
-  closeDetail();
-  renderGuestList();
-  updateStats();
-}
-
-// GUESTS
-function addGuest() {
-  const input = document.getElementById('guestInput');
-  const name = input.value.trim();
-  if(!name) return;
-  const guest = { id: 'g_'+Date.now()+'_'+Math.random(), name, tableId: null };
-  guests.push(guest);
-  input.value = '';
-  renderGuestList();
-  updateStats();
-  if(selectedTable) renderDetailGuestSelect(selectedTable);
-}
-
-function renderGuestList() {
-  const list = document.getElementById('guestList');
-  list.innerHTML = '';
-  guests.forEach(g => {
-    const item = document.createElement('div');
-    item.className = 'guest-item' + (g.tableId ? ' assigned' : '');
-    item.draggable = true;
-    item.dataset.guestId = g.id;
-    const table = g.tableId ? tables.find(t => t.id === g.tableId) : null;
-    item.innerHTML = `
-      <span class="guest-item-name">${g.name}</span>
-      ${table ? `<span class="guest-item-table">T${table.number}</span>` : ''}
-      <span class="guest-item-del" onclick="removeGuest('${g.id}')">✕</span>`;
-    item.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('guestId', g.id);
-      item.classList.add('dragging');
-    });
-    item.addEventListener('dragend', () => item.classList.remove('dragging'));
-    list.appendChild(item);
-  });
-}
-
-function removeGuest(guestId) {
-  const guest = guests.find(g => g.id === guestId);
-  if(guest && guest.tableId) {
-    const table = tables.find(t => t.id === guest.tableId);
-    if(table) { table.guests = table.guests.filter(id => id !== guestId); updateTableEl(table); }
-  }
-  guests = guests.filter(g => g.id !== guestId);
-  renderGuestList();
-  updateStats();
-  if(selectedTable) { renderDetailGuests(selectedTable); renderDetailGuestSelect(selectedTable); }
-}
-
-function importGuests() { document.getElementById('importModal').classList.add('open'); }
-function closeImport() { document.getElementById('importModal').classList.remove('open'); }
-function doImport() {
-  const text = document.getElementById('importText').value;
-  const names = text.split('\n').map(n => n.trim()).filter(n => n);
-  names.forEach(name => {
-    if(!guests.find(g => g.name === name)) {
-      guests.push({ id: 'g_'+Date.now()+'_'+Math.random(), name, tableId: null });
-    }
-  });
-  document.getElementById('importText').value = '';
-  closeImport();
-  renderGuestList();
-  updateStats();
-}
-
-// DECO
-function addDeco(emoji) {
-  const el = document.createElement('div');
-  el.className = 'deco-el';
-  el.textContent = emoji;
-  let x = 300 + Math.random()*200, y = 200 + Math.random()*200;
-  el.style.left = x + 'px'; el.style.top = y + 'px';
-  let ox, oy, sx, sy, dragging = false;
-  el.addEventListener('mousedown', e => {
-    dragging=true; sx=e.clientX; sy=e.clientY; ox=x; oy=y; e.preventDefault();
-  });
-  document.addEventListener('mousemove', e => {
-    if(!dragging) return;
-    x = ox + (e.clientX-sx)/zoom; y = oy + (e.clientY-sy)/zoom;
-    el.style.left=x+'px'; el.style.top=y+'px';
-  });
-  document.addEventListener('mouseup', () => dragging=false);
-  el.addEventListener('dblclick', () => el.remove());
+// ===== DECO =====
+function addDeco(emoji,label){
+  const el=document.createElement('div'); el.className='deco-el';
+  el.innerHTML=`<span>${emoji}</span><span class="deco-lbl">${label}</span>`;
+  let x=250+Math.random()*300,y=200+Math.random()*250;
+  el.style.left=x+'px'; el.style.top=y+'px';
+  let dragging=false,sx,sy,ox,oy;
+  el.addEventListener('mousedown',e=>{dragging=true;sx=e.clientX;sy=e.clientY;ox=x;oy=y;e.preventDefault();});
+  document.addEventListener('mousemove',e=>{if(!dragging)return;x=ox+(e.clientX-sx)/zoomLevel;y=oy+(e.clientY-sy)/zoomLevel;el.style.left=x+'px';el.style.top=y+'px';});
+  document.addEventListener('mouseup',()=>dragging=false);
+  el.addEventListener('dblclick',()=>el.remove());
   document.getElementById('canvas').appendChild(el);
 }
 
-// STAGE
-function toggleStage() {
-  stageVisible = !stageVisible;
-  document.getElementById('stageEl').style.display = stageVisible ? 'flex' : 'none';
-  document.getElementById('stageBtn').classList.toggle('active', stageVisible);
-  if(stageVisible) {
-    const stage = document.getElementById('stageEl');
-    let x=550, y=30, ox, oy, sx, sy, dragging=false;
-    stage.addEventListener('mousedown', e => { dragging=true; sx=e.clientX; sy=e.clientY; ox=x; oy=y; e.preventDefault(); });
-    document.addEventListener('mousemove', e => { if(!dragging) return; x=ox+(e.clientX-sx)/zoom; y=oy+(e.clientY-sy)/zoom; stage.style.left=x+'px'; stage.style.top=y+'px'; });
-    document.addEventListener('mouseup', () => dragging=false);
-  }
+// ===== GUESTS =====
+function addGuest(){
+  const inp=document.getElementById('gInput');
+  const name=inp.value.trim(); if(!name)return;
+  guests.push({id:'G'+Date.now()+'_'+Math.random(),name,tableId:null});
+  inp.value=''; renderGuestList(); updateStats();
+  if(selectedTable)renderDetailSelect(selectedTable);
 }
 
-// GRID
-function toggleGrid() {
-  gridVisible = !gridVisible;
-  const canvas = document.getElementById('canvas');
-  canvas.style.backgroundImage = gridVisible
-    ? 'linear-gradient(rgba(201,150,58,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(201,150,58,0.03) 1px, transparent 1px)'
-    : 'none';
-  document.getElementById('gridBtn').classList.toggle('active', gridVisible);
-}
-
-// ZOOM
-function zoomIn() { zoom = Math.min(2, zoom + 0.1); applyZoom(); }
-function zoomOut() { zoom = Math.max(0.4, zoom - 0.1); applyZoom(); }
-function resetZoom() { zoom = 1; applyZoom(); }
-function applyZoom() {
-  document.getElementById('canvas').style.transform = `scale(${zoom})`;
-  document.getElementById('canvas').style.transformOrigin = 'top left';
-}
-
-// STATS
-function updateStats() {
-  const totalCap = tables.reduce((s,t) => s+t.capacity, 0);
-  const assigned = guests.filter(g => g.tableId).length;
-  document.getElementById('statTables').textContent = tables.length;
-  document.getElementById('statCapacity').textContent = totalCap;
-  document.getElementById('statGuests').textContent = guests.length;
-  document.getElementById('statAssigned').textContent = assigned;
-  const list = document.getElementById('tableStatsList');
-  list.innerHTML = '';
-  tables.forEach(t => {
-    const div = document.createElement('div');
-    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--dark3);border-radius:4px;font-size:11px;cursor:pointer;';
-    div.innerHTML = `<span style="color:var(--text-dim)">Table ${t.number}${t.name?' — '+t.name:''}</span><span style="color:var(--gold)">${t.guests.length}/${t.capacity}</span>`;
-    div.onclick = () => { selectTable(t.id); switchTab('tables'); };
-    list.appendChild(div);
+function renderGuestList(){
+  const list=document.getElementById('guestList'); list.innerHTML='';
+  guests.forEach(g=>{
+    const item=document.createElement('div'); item.className='gitem'+(g.tableId?' assigned':'');
+    item.draggable=true; item.dataset.gid=g.id;
+    const t=g.tableId?tables.find(x=>x.id===g.tableId):null;
+    item.innerHTML=`<span class="gtable">${t?'T'+t.number:''}</span><span style="flex:1;">${g.name}</span><span class="gdel" onclick="removeGuest('${g.id}')">✕</span>`;
+    item.addEventListener('dragstart',e=>{e.dataTransfer.setData('gid',g.id);item.classList.add('assigned');});
+    list.appendChild(item);
   });
 }
 
-// SAVE
-function saveData() {
-  const data = {
-    eventName: document.getElementById('eventName').value,
-    eventType: document.getElementById('eventType').value,
-    eventDate: document.getElementById('eventDate').value,
-    eventVenue: document.getElementById('eventVenue').value,
-    eventTime: document.getElementById('eventTime').value,
-    eventOffer: document.getElementById('eventOffer').value,
-    eventTheme: document.getElementById('eventTheme').value,
-    eventMenu: document.getElementById('eventMenu').value,
-    eventNotes: document.getElementById('eventNotes').value,
-    tables, guests
+function removeGuest(gid){
+  const g=guests.find(x=>x.id===gid);
+  if(g&&g.tableId){const t=tables.find(x=>x.id===g.tableId);if(t){t.guests=t.guests.filter(id=>id!==gid);updateTableEl(t);}}
+  guests=guests.filter(x=>x.id!==gid);
+  renderGuestList(); updateStats();
+  if(selectedTable){renderDetailGuests(selectedTable);renderDetailSelect(selectedTable);}
+}
+
+function doImport(){
+  const txt=document.getElementById('importTxt').value;
+  txt.split('\n').map(n=>n.trim()).filter(n=>n).forEach(name=>{
+    if(!guests.find(g=>g.name===name))guests.push({id:'G'+Date.now()+'_'+Math.random(),name,tableId:null});
+  });
+  document.getElementById('importTxt').value='';
+  document.getElementById('importModal').classList.remove('open');
+  renderGuestList(); updateStats();
+}
+
+// ===== STATS =====
+function updateStats(){
+  const totalCap=tables.reduce((s,t)=>s+t.capacity,0);
+  const assigned=guests.filter(g=>g.tableId).length;
+  document.getElementById('stTables').textContent=tables.length;
+  document.getElementById('stPlaces').textContent=totalCap;
+  document.getElementById('stInvites').textContent=guests.length;
+  document.getElementById('stPlaces2').textContent=assigned;
+  const list=document.getElementById('tableStats'); list.innerHTML='';
+  tables.forEach(t=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:flex;justify-content:space-between;padding:5px 8px;background:#1a1a1a;border-radius:4px;font-size:10px;cursor:pointer;';
+    d.innerHTML=`<span style="color:#666;">T${t.number}${t.name?' — '+t.name:''}</span><span style="color:var(--gold);">${t.guests.length}/${t.capacity}</span>`;
+    d.onclick=()=>selectTable(t.id);
+    list.appendChild(d);
+  });
+}
+
+// ===== 3D ISO RENDERING =====
+function render3D(){
+  const canvas=document.getElementById('isoCanvas');
+  const W=1200, H=700;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // ISO transform
+  const ISO_X=0.866, ISO_Y=0.5;
+  const SCALE=0.55;
+  const OX=W/2, OY=120;
+
+  function toIso(x,y){
+    return {
+      sx: OX + (x-y)*ISO_X*SCALE,
+      sy: OY + (x+y)*ISO_Y*SCALE
+    };
+  }
+
+  // Background
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(0,0,W,H);
+
+  // Floor
+  const floorW=1400, floorH=860;
+  const corners=[
+    toIso(0,0), toIso(floorW,0), toIso(floorW,floorH), toIso(0,floorH)
+  ];
+  ctx.beginPath();
+  ctx.moveTo(corners[0].sx,corners[0].sy);
+  corners.forEach(c=>ctx.lineTo(c.sx,c.sy));
+  ctx.closePath();
+  ctx.fillStyle='#f5f0e8';
+  ctx.fill();
+  ctx.strokeStyle='rgba(201,150,58,0.3)';
+  ctx.lineWidth=1;
+  ctx.stroke();
+
+  // Floor grid
+  ctx.strokeStyle='rgba(201,150,58,0.06)';
+  ctx.lineWidth=0.5;
+  for(let gx=0;gx<=floorW;gx+=80){
+    const a=toIso(gx,0), b=toIso(gx,floorH);
+    ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy); ctx.stroke();
+  }
+  for(let gy=0;gy<=floorH;gy+=80){
+    const a=toIso(0,gy), b=toIso(floorW,gy);
+    ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy); ctx.stroke();
+  }
+
+  // Wall hint (back wall)
+  const wallH=80;
+  ctx.beginPath();
+  ctx.moveTo(corners[0].sx,corners[0].sy);
+  ctx.lineTo(corners[0].sx,corners[0].sy-wallH*SCALE);
+  ctx.lineTo(corners[1].sx,corners[1].sy-wallH*SCALE);
+  ctx.lineTo(corners[1].sx,corners[1].sy);
+  ctx.closePath();
+  ctx.fillStyle='rgba(220,208,188,0.4)';
+  ctx.fill();
+  ctx.strokeStyle='rgba(201,150,58,0.2)';
+  ctx.stroke();
+
+  // Room label
+  ctx.font=`${12*SCALE*2}px Cormorant Garamond`;
+  ctx.fillStyle='rgba(201,150,58,0.25)';
+  ctx.textAlign='center';
+  const mid=toIso(floorW/2,60);
+  ctx.fillText(document.getElementById('evName').value.toUpperCase()||'PLAN DE SALLE',mid.sx,mid.sy);
+
+  // Draw tables
+  tables.forEach(t=>{
+    const cx=t.x+t.w/2, cy=t.y+t.h/2;
+    const tableH=30;
+    const legH=28;
+
+    if(t.type==='round'){
+      const r=t.w/2;
+      // Table shadow
+      ctx.save();
+      ctx.globalAlpha=0.15;
+      const sc=toIso(cx,cy);
+      ctx.beginPath();
+      ctx.ellipse(sc.sx+6,sc.sy+4,r*ISO_X*SCALE*1.1,r*ISO_Y*SCALE*0.7,0,0,Math.PI*2);
+      ctx.fillStyle='#000';
+      ctx.fill();
+      ctx.restore();
+
+      // Table legs (isometric cylinders simplified)
+      const legPositions=[{dx:-r*0.35,dy:-r*0.35},{dx:r*0.35,dy:-r*0.35},{dx:0,dy:r*0.4}];
+      legPositions.forEach(lp=>{
+        const lb=toIso(cx+lp.dx,cy+lp.dy);
+        ctx.beginPath();
+        ctx.moveTo(lb.sx-3,lb.sy);
+        ctx.lineTo(lb.sx-3,lb.sy+legH*SCALE*0.8);
+        ctx.lineTo(lb.sx+3,lb.sy+legH*SCALE*0.8);
+        ctx.lineTo(lb.sx+3,lb.sy);
+        ctx.fillStyle='#8B6914';
+        ctx.fill();
+      });
+
+      // Table top (ellipse)
+      const tc=toIso(cx,cy);
+      ctx.beginPath();
+      ctx.ellipse(tc.sx,tc.sy,r*ISO_X*SCALE,r*ISO_Y*SCALE*0.85,0,0,Math.PI*2);
+      ctx.fillStyle='#fff';
+      ctx.fill();
+      ctx.strokeStyle='#C9963A';
+      ctx.lineWidth=2;
+      ctx.stroke();
+
+      // Tablecloth highlight
+      ctx.beginPath();
+      ctx.ellipse(tc.sx-4,tc.sy-3,r*ISO_X*SCALE*0.55,r*ISO_Y*SCALE*0.4,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(201,150,58,0.08)';
+      ctx.fill();
+
+      // Table number
+      ctx.font=`bold ${14*SCALE*1.4}px Cormorant Garamond`;
+      ctx.fillStyle='#C9963A';
+      ctx.textAlign='center';
+      ctx.fillText(t.number,tc.sx,tc.sy+4);
+
+      // Chairs around
+      const chairCount=Math.min(t.capacity,12);
+      for(let i=0;i<chairCount;i++){
+        const angle=(i/chairCount)*2*Math.PI-Math.PI/2;
+        const cr=r+22;
+        const chx=cx+Math.cos(angle)*cr;
+        const chy=cy+Math.sin(angle)*cr;
+        const chPos=toIso(chx,chy);
+        drawIsoChair(ctx,chPos.sx,chPos.sy,angle,SCALE);
+      }
+
+      // Guest count badge
+      if(t.guests.length>0){
+        ctx.beginPath();
+        ctx.arc(tc.sx+r*ISO_X*SCALE*0.6,tc.sy-r*ISO_Y*SCALE*0.5,10,0,Math.PI*2);
+        ctx.fillStyle='#C9963A';
+        ctx.fill();
+        ctx.font=`bold ${10*SCALE*1.4}px Montserrat`;
+        ctx.fillStyle='#fff';
+        ctx.fillText(t.guests.length,tc.sx+r*ISO_X*SCALE*0.6,tc.sy-r*ISO_Y*SCALE*0.5+3);
+      }
+
+    } else {
+      // Rectangular table
+      const hw=t.w/2, hh=t.h/2;
+      const tl=toIso(cx-hw,cy-hh), tr=toIso(cx+hw,cy-hh);
+      const br=toIso(cx+hw,cy+hh), bl=toIso(cx-hw,cy+hh);
+
+      // Shadow
+      ctx.save(); ctx.globalAlpha=0.12;
+      ctx.beginPath(); ctx.moveTo(tl.sx+5,tl.sy+5); ctx.lineTo(tr.sx+5,tr.sy+5); ctx.lineTo(br.sx+5,br.sy+5); ctx.lineTo(bl.sx+5,bl.sy+5); ctx.closePath();
+      ctx.fillStyle='#000'; ctx.fill(); ctx.restore();
+
+      // Legs
+      [[cx-hw+8,cy-hh+8],[cx+hw-8,cy-hh+8],[cx+hw-8,cy+hh-8],[cx-hw+8,cy+hh-8]].forEach(([lx,ly])=>{
+        const lb=toIso(lx,ly);
+        ctx.beginPath(); ctx.moveTo(lb.sx-2,lb.sy); ctx.lineTo(lb.sx-2,lb.sy+legH*SCALE*0.8); ctx.lineTo(lb.sx+2,lb.sy+legH*SCALE*0.8); ctx.lineTo(lb.sx+2,lb.sy);
+        ctx.fillStyle='#8B6914'; ctx.fill();
+      });
+
+      // Table top - right face
+      ctx.beginPath(); ctx.moveTo(tr.sx,tr.sy); ctx.lineTo(br.sx,br.sy); ctx.lineTo(br.sx,br.sy+tableH*SCALE*0.4); ctx.lineTo(tr.sx,tr.sy+tableH*SCALE*0.4); ctx.closePath();
+      ctx.fillStyle='#d4c8b0'; ctx.fill(); ctx.strokeStyle='#C9963A'; ctx.lineWidth=1; ctx.stroke();
+
+      // Table top - front face
+      ctx.beginPath(); ctx.moveTo(bl.sx,bl.sy); ctx.lineTo(br.sx,br.sy); ctx.lineTo(br.sx,br.sy+tableH*SCALE*0.4); ctx.lineTo(bl.sx,bl.sy+tableH*SCALE*0.4); ctx.closePath();
+      ctx.fillStyle='#c8bc9c'; ctx.fill(); ctx.stroke();
+
+      // Table top surface
+      ctx.beginPath(); ctx.moveTo(tl.sx,tl.sy); ctx.lineTo(tr.sx,tr.sy); ctx.lineTo(br.sx,br.sy); ctx.lineTo(bl.sx,bl.sy); ctx.closePath();
+      ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle='#C9963A'; ctx.lineWidth=2; ctx.stroke();
+
+      // Center cloth
+      const cl=toIso(cx-hw*0.5,cy-hh*0.5), cr2=toIso(cx+hw*0.5,cy-hh*0.5);
+      const cbr=toIso(cx+hw*0.5,cy+hh*0.5), cbl=toIso(cx-hw*0.5,cy+hh*0.5);
+      ctx.beginPath(); ctx.moveTo(cl.sx,cl.sy); ctx.lineTo(cr2.sx,cr2.sy); ctx.lineTo(cbr.sx,cbr.sy); ctx.lineTo(cbl.sx,cbl.sy); ctx.closePath();
+      ctx.fillStyle='rgba(201,150,58,0.07)'; ctx.fill();
+
+      // Table number
+      const mc=toIso(cx,cy);
+      ctx.font=`bold ${13*SCALE*1.4}px Cormorant Garamond`;
+      ctx.fillStyle='#C9963A'; ctx.textAlign='center';
+      ctx.fillText(t.number,mc.sx,mc.sy+4);
+
+      // Chairs - top side
+      const cPerSide=Math.ceil(Math.min(t.capacity,12)/2);
+      for(let i=0;i<cPerSide;i++){
+        const chx=cx-hw+(i+1)*(t.w/(cPerSide+1));
+        const ch=toIso(chx,cy-hh-20);
+        drawIsoChair(ctx,ch.sx,ch.sy,0,SCALE);
+      }
+      for(let i=0;i<Math.min(cPerSide,t.capacity-cPerSide);i++){
+        const chx=cx-hw+(i+1)*(t.w/(cPerSide+1));
+        const ch=toIso(chx,cy+hh+20);
+        drawIsoChair(ctx,ch.sx,ch.sy,Math.PI,SCALE);
+      }
+
+      // Guest badge
+      if(t.guests.length>0){
+        const mc2=toIso(cx+hw*0.6,cy-hh*0.6);
+        ctx.beginPath(); ctx.arc(mc2.sx,mc2.sy,10,0,Math.PI*2);
+        ctx.fillStyle='#C9963A'; ctx.fill();
+        ctx.font=`bold ${10*SCALE*1.4}px Montserrat`;
+        ctx.fillStyle='#fff'; ctx.textAlign='center';
+        ctx.fillText(t.guests.length,mc2.sx,mc2.sy+3);
+      }
+    }
+
+    // Table name label
+    if(t.name){
+      const lp=toIso(cx,cy+t.h/2+35);
+      ctx.font=`${9*SCALE*1.5}px Montserrat`;
+      ctx.fillStyle='#888'; ctx.textAlign='center';
+      ctx.fillText(t.name.toUpperCase(),lp.sx,lp.sy);
+    }
+  });
+
+  // Legend
+  ctx.font=`${10}px Montserrat`;
+  ctx.textAlign='left';
+  ctx.fillStyle='rgba(201,150,58,0.6)';
+  ctx.fillText('VUE 3D ISOMÉTRIQUE — CRÉATIVE PLANNER',20,H-16);
+}
+
+function drawIsoChair(ctx,sx,sy,angle,scale){
+  const s=14*scale;
+  ctx.save();
+  ctx.translate(sx,sy);
+  // Chair seat
+  ctx.beginPath();
+  ctx.roundRect(-s/2,-s/2,s,s,2);
+  ctx.fillStyle='#C9963A';
+  ctx.globalAlpha=0.8;
+  ctx.fill();
+  ctx.strokeStyle='#8B6914';
+  ctx.lineWidth=0.5;
+  ctx.stroke();
+  ctx.globalAlpha=1;
+  // Chair back
+  ctx.beginPath();
+  ctx.roundRect(-s/2,-s/2-s*0.5,s,s*0.35,2);
+  ctx.fillStyle='#b5832e';
+  ctx.fill();
+  ctx.restore();
+}
+
+// ===== SAVE / LOAD =====
+function saveData(){
+  const d={
+    evName:document.getElementById('evName').value,
+    evType:document.getElementById('evType').value,
+    evDate:document.getElementById('evDate').value,
+    evLieu:document.getElementById('evLieu').value,
+    evOffre:document.getElementById('evOffre').value,
+    evTheme:document.getElementById('evTheme').value,
+    evMenu:document.getElementById('evMenu').value,
+    evNotes:document.getElementById('evNotes').value,
+    tables,guests
   };
-  localStorage.setItem('cp_plan', JSON.stringify(data));
-  alert('✅ Plan sauvegardé !');
+  localStorage.setItem('cp_plan3d',JSON.stringify(d));
+  showToast('💾 Sauvegardé !');
 }
 
-function loadData() {
-  const raw = localStorage.getItem('cp_plan');
-  if(!raw) return;
-  const data = JSON.parse(raw);
-  document.getElementById('eventName').value = data.eventName || '';
-  document.getElementById('eventType').value = data.eventType || 'Mariage';
-  document.getElementById('eventDate').value = data.eventDate || '';
-  document.getElementById('eventVenue').value = data.eventVenue || '';
-  document.getElementById('eventTime').value = data.eventTime || '';
-  document.getElementById('eventOffer').value = data.eventOffer || 'Savane';
-  document.getElementById('eventTheme').value = data.eventTheme || '';
-  document.getElementById('eventMenu').value = data.eventMenu || '';
-  document.getElementById('eventNotes').value = data.eventNotes || '';
-  updateEventName();
-  guests = data.guests || [];
-  tables = data.tables || [];
-  tables.forEach(t => renderTable(t));
-  renderGuestList();
-  updateStats();
+function loadData(){
+  const raw=localStorage.getItem('cp_plan3d'); if(!raw)return;
+  const d=JSON.parse(raw);
+  ['evName','evType','evDate','evLieu','evOffre','evTheme','evMenu','evNotes'].forEach(id=>{
+    if(document.getElementById(id))document.getElementById(id).value=d[id]||'';
+  });
+  updateEvName();
+  guests=d.guests||[];
+  tables=d.tables||[];
+  tables.forEach(t=>renderTable(t));
+  renderGuestList(); updateStats();
 }
 
-// PRINT
-function printPlan() { window.print(); }
-function exportPDF() { alert('Pour exporter en PDF : utilisez Fichier → Imprimer → Enregistrer en PDF dans votre navigateur.'); window.print(); }
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:20px;right:20px;background:#111;border:1px solid var(--gold);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--text);z-index:9999;letter-spacing:1px;';
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
 
-// CLOSE DETAIL ON CANVAS CLICK
-document.getElementById('canvas').addEventListener('click', (e) => {
-  if(e.target === document.getElementById('canvas')) closeDetail();
-});
-
-// INIT
+// ===== INIT =====
+document.getElementById('canvas').addEventListener('click',e=>{if(e.target===document.getElementById('canvas'))closeDetail();});
+document.querySelectorAll('.moverlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
 loadData();
+setInterval(saveData,60000);
 </script>
 </body>
 </html>
