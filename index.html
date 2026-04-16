@@ -188,7 +188,7 @@ tbody tr:hover{background:var(--gold-dim);}
     <div class="nav-item" onclick="goTo('paiements')"><span class="nav-item-icon">💰</span>Paiements</div>
     <div class="nav-item" onclick="goTo('recus')"><span class="nav-item-icon">🧾</span>Reçus</div>
     <div class="nav-section">OUTILS</div>
-    <div class="nav-item" onclick="goTo('plan_salle')"><span class="nav-item-icon">🗺️</span>Plan de salle</div>
+    <div class="nav-item" onclick="window.open('https://cp-gestion-seven.vercel.app/plan-salle.html','_blank')"><span class="nav-item-icon">🗺️</span>Plan de salle</div>
     <div class="nav-item" onclick="goTo('post_event')"><span class="nav-item-icon">⭐</span>Post-event</div>
   </div>
   <div class="nav-footer">
@@ -1083,7 +1083,7 @@ function formatMoney(n) {
 }
 
 function openPlanSalle() {
-  showToast('💡 Ouvrez le fichier plan-salle.html dans votre navigateur');
+  window.open('https://cp-gestion-seven.vercel.app/plan-salle.html', '_blank');
 }
 
 // ====== INIT ======
