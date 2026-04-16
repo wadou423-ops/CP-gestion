@@ -237,9 +237,22 @@ header{background:#111;border-bottom:1px solid #2e2e2e;padding:0 20px;height:52p
           <div class="tbtn" onclick="addDeco('🚻','WC')"><div class="tbtn-icon">🚻</div><div class="tbtn-label">TOILETTES</div></div>
           <div class="tbtn" onclick="addDeco('🅿️','PARKING')"><div class="tbtn-icon">🅿️</div><div class="tbtn-label">PARKING</div></div>
         </div>
-        <div class="slabel">CONFIG</div>
+        <div class="slabel">CONFIG TABLES</div>
         <div class="cfg"><label>Capacité défaut</label><input type="number" id="defCap" value="8" min="1" max="30"></div>
         <div class="cfg"><label>Prochaine table N°</label><input type="number" id="tCounter" value="1" min="1"></div>
+
+        <div class="slabel">CHAISES</div>
+        <div class="color-section">
+          <div class="color-row">
+            <label>TAILLE <span id="chairSizeVal" style="color:var(--gold);">13px</span></label>
+          </div>
+          <input type="range" id="chairSize" min="6" max="24" value="13" step="1" style="width:100%;margin-bottom:10px;accent-color:#C0624A;" oninput="updateChairSize()">
+          <div class="color-row">
+            <label>ESPACEMENT <span id="chairGapVal" style="color:var(--gold);">10px</span></label>
+          </div>
+          <input type="range" id="chairGap" min="2" max="30" value="10" step="1" style="width:100%;accent-color:#C0624A;" oninput="updateChairGap()">
+        </div>
+
         <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px;">
           <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="deleteSelected()">🗑 Supprimer sélection</button>
           <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="clearAll()">⚠️ Tout effacer</button>
@@ -339,6 +352,27 @@ header{background:#111;border-bottom:1px solid #2e2e2e;padding:0 20px;height:52p
 <script>
 let tables=[],guests=[],selectedTable=null,zoomLevel=1,gridOn=true,stageOn=false,tIdCounter=1;
 let colors={table:'#C0624A',chair:'#8B3A2A',floor:'#f5f0e8',accent:'#C9963A'};
+let chairSize=13, chairGap=10;
+
+function updateChairSize(){
+  chairSize=parseInt(document.getElementById('chairSize').value);
+  document.getElementById('chairSizeVal').textContent=chairSize+'px';
+  redrawAllChairs();
+}
+function updateChairGap(){
+  chairGap=parseInt(document.getElementById('chairGap').value);
+  document.getElementById('chairGapVal').textContent=chairGap+'px';
+  redrawAllChairs();
+}
+function redrawAllChairs(){
+  tables.forEach(t=>{
+    const el=document.getElementById(t.id); if(!el)return;
+    const shape=el.querySelector('.tshape');
+    const container=shape.querySelector('.chairs-container');
+    if(container) container.remove();
+    shape.insertBefore(buildChairs(t),shape.firstChild);
+  });
+}
 
 const THEMES={
   terra:{table:'#C0624A',chair:'#8B3A2A',floor:'#f5f0e8',accent:'#C9963A'},
@@ -373,6 +407,7 @@ function applyColors(){
   document.querySelectorAll('.tnum').forEach(n=>n.style.color=colors.table);
   document.querySelectorAll('.chair-2d').forEach(c=>c.style.background=colors.chair);
   document.querySelectorAll('.deco-lbl').forEach(l=>l.style.color=colors.table);
+  redrawAllChairs();
   // Update canvas grid color
   const cv=document.getElementById('canvas');
   cv.style.backgroundImage=gridOn?`linear-gradient(${colors.table}18 1px,transparent 1px),linear-gradient(90deg,${colors.table}18 1px,transparent 1px)`:'none';
@@ -445,6 +480,39 @@ function addTable(type){
   updateStats();
 }
 
+function buildChairs(t){
+  const chairsContainer=document.createElement('div');
+  chairsContainer.className='chairs-container';
+  chairsContainer.style.cssText='position:absolute;inset:0;pointer-events:none;';
+  const n=Math.min(t.capacity,20);
+  const cs=chairSize, cg=chairGap;
+  if(t.type==='round'){
+    const r=t.w/2;
+    for(let i=0;i<n;i++){
+      const angle=(i/n)*2*Math.PI-Math.PI/2;
+      const ch=document.createElement('div');
+      ch.className='chair-2d';
+      ch.style.cssText=`width:${cs}px;height:${cs}px;background:${colors.chair};position:absolute;left:${r+Math.cos(angle)*(r+cg)-cs/2}px;top:${r+Math.sin(angle)*(r+cg)-cs/2}px;border-radius:50%;`;
+      chairsContainer.appendChild(ch);
+    }
+  } else {
+    const perSide=Math.ceil(n/2);
+    for(let i=0;i<Math.min(perSide,n);i++){
+      const ch=document.createElement('div');
+      ch.className='chair-2d';
+      ch.style.cssText=`width:${cs}px;height:${Math.round(cs*0.85)}px;background:${colors.chair};position:absolute;left:${(i+1)*(t.w/(perSide+1))-cs/2}px;top:${-(Math.round(cs*0.85)+cg)}px;border-radius:3px;`;
+      chairsContainer.appendChild(ch);
+    }
+    for(let i=0;i<Math.min(perSide,n-perSide);i++){
+      const ch=document.createElement('div');
+      ch.className='chair-2d';
+      ch.style.cssText=`width:${cs}px;height:${Math.round(cs*0.85)}px;background:${colors.chair};position:absolute;left:${(i+1)*(t.w/(perSide+1))-cs/2}px;top:${t.h+cg}px;border-radius:3px;`;
+      chairsContainer.appendChild(ch);
+    }
+  }
+  return chairsContainer;
+}
+
 function renderTable(t){
   const el=document.createElement('div');
   el.className='table-el';el.id=t.id;
@@ -455,33 +523,7 @@ function renderTable(t){
   shape.style.cssText=`width:${t.w}px;height:${t.h}px;background:#fff;border-color:${colors.table};`;
 
   // Chairs
-  const chairsContainer=document.createElement('div');
-  chairsContainer.style.cssText='position:absolute;inset:0;pointer-events:none;';
-  const n=Math.min(t.capacity,16);
-  if(t.type==='round'){
-    const r=t.w/2;
-    for(let i=0;i<n;i++){
-      const angle=(i/n)*2*Math.PI-Math.PI/2;
-      const ch=document.createElement('div');
-      ch.className='chair-2d';
-      ch.style.cssText=`width:13px;height:13px;background:${colors.chair};position:absolute;left:${r+Math.cos(angle)*(r+10)-6.5}px;top:${r+Math.sin(angle)*(r+10)-6.5}px;border-radius:50%;`;
-      chairsContainer.appendChild(ch);
-    }
-  } else {
-    const perSide=Math.ceil(n/2);
-    for(let i=0;i<Math.min(perSide,n);i++){
-      const ch=document.createElement('div');
-      ch.className='chair-2d';
-      ch.style.cssText=`width:13px;height:11px;background:${colors.chair};position:absolute;left:${(i+1)*(t.w/(perSide+1))-6.5}px;top:-14px;border-radius:3px;`;
-      chairsContainer.appendChild(ch);
-    }
-    for(let i=0;i<Math.min(perSide,n-perSide);i++){
-      const ch=document.createElement('div');
-      ch.className='chair-2d';
-      ch.style.cssText=`width:13px;height:11px;background:${colors.chair};position:absolute;left:${(i+1)*(t.w/(perSide+1))-6.5}px;top:${t.h+3}px;border-radius:3px;`;
-      chairsContainer.appendChild(ch);
-    }
-  }
+  const chairsContainer=buildChairs(t);
   shape.appendChild(chairsContainer);
 
   const num=document.createElement('div');num.className='tnum';num.textContent=t.number;num.style.color=colors.table;
@@ -587,7 +629,19 @@ function removeGuestFromTable(gid,tid){
 }
 
 function updateTName(){if(!selectedTable)return;selectedTable.name=document.getElementById('detailName').value;updateTableEl(selectedTable);}
-function updateTCap(){if(!selectedTable)return;selectedTable.capacity=parseInt(document.getElementById('detailCap').value)||8;updateTableEl(selectedTable);updateStats();}
+function updateTCap(){
+  if(!selectedTable)return;
+  selectedTable.capacity=parseInt(document.getElementById('detailCap').value)||8;
+  // Redraw chairs
+  const el=document.getElementById(selectedTable.id);
+  if(el){
+    const shape=el.querySelector('.tshape');
+    const old=shape.querySelector('.chairs-container');
+    if(old)old.remove();
+    shape.insertBefore(buildChairs(selectedTable),shape.firstChild);
+  }
+  updateTableEl(selectedTable);updateStats();
+}
 
 function deleteSelected(){
   if(!selectedTable)return;
