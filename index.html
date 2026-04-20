@@ -676,6 +676,7 @@ function renderEventApercu(c){
   const clientDevis=data.devis.filter(d=>d.clientId===c.id);
   const clientPay=data.paiements.filter(p=>p.clientId===c.id);
   const totalPay=clientPay.reduce((s,p)=>s+parseFloat(p.montant||0),0);
+  const lastDevis=clientDevis[clientDevis.length-1];
   const div=document.getElementById('eventApercu');
   div.innerHTML=`
     <div class="card">
@@ -683,18 +684,37 @@ function renderEventApercu(c){
       ${[['TÉLÉPHONE',c.tel||'-'],['EMAIL',c.email||'-'],['TYPE',c.type||'-'],['OFFRE',c.offre||'-'],['PACKAGE',c.package||'-'],['DATE',c.date?formatDate(c.date):'-'],['LIEU',c.lieu||'-'],['BUDGET',c.budget?formatMoney(c.budget)+' FCFA':'-'],['STATUT',`<span class="badge ${STATUT_COLORS[c.statut]||'badge-muted'}">${c.statut}</span>`]].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--dark3);font-size:12px;"><span style="color:var(--text-dim);font-size:10px;letter-spacing:1px;">${l}</span><span>${v}</span></div>`).join('')}
       <div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" onclick="ouvrirModalStatut('${c.id}')">🔄 Changer statut</button></div>
     </div>
-    <div>
-      <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px;">Devis</div>
+        ${lastDevis?`
+          <div style="background:var(--gold-dim);border:1px solid rgba(201,150,58,0.3);border-radius:6px;padding:12px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:11px;color:var(--text-dim);">${lastDevis.numero}</span><span class="badge badge-${lastDevis.statut==='Accepté'?'success':lastDevis.statut==='Refusé'?'danger':'warning'}">${lastDevis.statut}</span></div>
+            <div style="font-size:20px;font-family:'Cormorant Garamond',serif;color:var(--gold);">${formatMoney(lastDevis.montant)} FCFA</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">Acompte : ${formatMoney(lastDevis.acompte)} FCFA</div>
+            ${lastDevis.prestations?`<div style="font-size:10px;color:var(--text-dim);margin-top:6px;padding-top:6px;border-top:1px solid var(--dark4);">${lastDevis.prestations}</div>`:''}
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="printDevis('${lastDevis.id}')">🖨️ Imprimer</button>
+            <button class="btn btn-gold btn-sm" onclick="openModal('modalNewDevis')">+ Nouveau devis</button>
+          </div>
+        `:`
+          <div class="empty-state" style="padding:20px;">
+            <div class="empty-state-icon" style="font-size:32px;">📋</div>
+            <div class="empty-state-text">Aucun devis créé</div>
+          </div>
+          <button class="btn btn-gold" style="width:100%;" onclick="openModal('modalNewDevis')">+ Créer un devis</button>
+        `}
+      </div>
+      <div class="card">
         <div class="card-title" style="margin-bottom:12px;">Finances</div>
-        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--dark3);font-size:12px;"><span style="color:var(--text-dim);font-size:10px;">DEVIS</span><span>${clientDevis.length}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--dark3);font-size:12px;"><span style="color:var(--text-dim);font-size:10px;">PAIEMENTS</span><span>${clientPay.length}</span></div>
         <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:12px;"><span style="color:var(--text-dim);font-size:10px;">ENCAISSÉ</span><span style="color:var(--gold);font-weight:500;">${formatMoney(totalPay)} FCFA</span></div>
-        <div style="margin-top:10px;display:flex;gap:6px;">
-          <button class="btn btn-gold btn-sm" onclick="openModal('modalNewDevis')">+ Devis</button>
-          <button class="btn btn-ghost btn-sm" onclick="openModal('modalNewPaiement')">+ Paiement</button>
-        </div>
+        <div style="margin-top:10px;"><button class="btn btn-ghost btn-sm" onclick="openModal('modalNewPaiement')">+ Paiement</button></div>
       </div>
       ${c.notes?`<div class="card"><div class="card-title" style="margin-bottom:8px;">Notes</div><p style="font-size:12px;color:var(--text-dim);line-height:1.6;">${c.notes}</p></div>`:''}
     </div>`;
+}
 }
 
 // ===== FICHES =====
