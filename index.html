@@ -795,7 +795,7 @@ function ouvrirPlanSalle(){
   const w=document.getElementById('salleW').value||15;
   const c=data.clients.find(x=>x.id===currentEventId);
   if(c){c.salleConfig={forme:selectedShape,longueur:parseInt(l),largeur:parseInt(w)};saveAll();}
-  const url=`plan-salle.html?event=${currentEventId}&forme=${selectedShape}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c?c.nom:'')}`;
+  const url=`https://cp-gestion-seven.vercel.app/plan-salle.html?event=${currentEventId}&forme=${selectedShape}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c?c.nom:'')}`;
   window.open(url,'_blank');
 }
 
