@@ -933,6 +933,64 @@ function drawChair3D(ctx,sx,sy,scale,chairColor,accentColor){
   ctx.globalAlpha=1;ctx.restore();
 }
 
+function getURLParams(){
+  const params=new URLSearchParams(window.location.search);
+  return {
+    eventId:params.get('event')||'',
+    forme:params.get('forme')||'rect',
+    longueur:parseInt(params.get('longueur'))||20,
+    largeur:parseInt(params.get('largeur'))||15,
+    nom:params.get('nom')||''
+  };
+}
+
+function appliquerFormeSalle(forme, longueur, largeur){
+  const SCALE=60;
+  const canvas=document.getElementById('canvas');
+  const W=Math.max(800, longueur*SCALE);
+  const H=Math.max(500, largeur*SCALE);
+  canvas.style.width=W+'px';
+  canvas.style.height=H+'px';
+  canvas.style.minWidth=W+'px';
+  canvas.style.minHeight=H+'px';
+
+  // Appliquer la forme via clip-path ou border-radius
+  if(forme==='round'||forme==='round'){
+    canvas.style.borderRadius='50%';
+  } else if(forme==='square'){
+    const size=Math.max(W,H);
+    canvas.style.width=size+'px';canvas.style.height=size+'px';
+    canvas.style.borderRadius='0';
+  } else if(forme==='L'){
+    canvas.style.borderRadius='0';
+    canvas.style.clipPath=`polygon(0 0, 100% 0, 100% 40%, 60% 40%, 60% 100%, 0 100%)`;
+  } else if(forme==='U'){
+    canvas.style.borderRadius='0';
+    canvas.style.clipPath=`polygon(0 0, 20% 0, 20% 60%, 80% 60%, 80% 0, 100% 0, 100% 100%, 0 100%)`;
+  } else if(forme==='tent'){
+    canvas.style.borderRadius='40% 40% 0 0';
+  } else {
+    canvas.style.borderRadius='0';
+    canvas.style.clipPath='none';
+  }
+
+  // Afficher les dimensions dans le label
+  const label=document.getElementById('roomLabel');
+  const nom=document.getElementById('evName').value;
+  label.textContent=(nom?nom.toUpperCase()+' — ':'')+longueur+'m × '+largeur+'m';
+
+  // Afficher indicateur de dimensions dans la toolbar
+  let dimEl=document.getElementById('dimIndicator');
+  if(!dimEl){
+    dimEl=document.createElement('span');
+    dimEl.id='dimIndicator';
+    dimEl.style.cssText='font-size:10px;color:var(--gold);letter-spacing:1px;font-weight:500;';
+    document.querySelector('.toolbar').appendChild(dimEl);
+  }
+  const formeLabels={rect:'Rectangulaire',square:'Carrée',round:'Ronde',L:'En L',U:'En U',tent:'Tente/Chapiteau'};
+  dimEl.textContent=`${formeLabels[forme]||forme} — ${longueur}m × ${largeur}m`;
+}
+
 function saveData(){
   const d={
     evName:document.getElementById('evName').value,
@@ -950,11 +1008,23 @@ function saveData(){
 }
 
 function loadData(){
-  const raw=localStorage.getItem('cp_plan3d');if(!raw)return;
+  // Lire les paramètres URL en priorité
+  const params=getURLParams();
+  if(params.nom) document.getElementById('evName').value=params.nom;
+  if(params.forme) appliquerFormeSalle(params.forme, params.longueur, params.largeur);
+
+  // Charger depuis localStorage
+  const raw=localStorage.getItem('cp_plan3d');if(!raw){updateEvName();return;}
   const d=JSON.parse(raw);
-  ['evName','evType','evDate','evLieu','evOffre','evTheme','evMenu','evNotes'].forEach(id=>{
-    if(d[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=d[id];
-  });
+  if(!params.nom){
+    ['evName','evType','evDate','evLieu','evOffre','evTheme','evMenu','evNotes'].forEach(id=>{
+      if(d[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=d[id];
+    });
+  } else {
+    ['evType','evDate','evLieu','evOffre','evTheme','evMenu','evNotes'].forEach(id=>{
+      if(d[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=d[id];
+    });
+  }
   if(d.colors){
     colors={...d.colors};
     document.getElementById('colorTable').value=colors.table;
@@ -967,6 +1037,9 @@ function loadData(){
   tables=d.tables||[];
   tables.forEach(t=>renderTable(t));
   renderGuestList();updateStats();applyColors();
+
+  // Appliquer la forme après le chargement
+  if(params.forme) appliquerFormeSalle(params.forme, params.longueur, params.largeur);
 }
 
 function showToast(msg){
