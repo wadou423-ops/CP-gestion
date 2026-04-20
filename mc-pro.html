@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MC Pro — Créative Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#C9963A;--gold-light:#e8b84b;--gold-dim:rgba(201,150,58,0.12);
+  --terra:#C0624A;--terra-dim:rgba(192,98,74,0.12);
+  --dark:#0f0f0f;--dark2:#1a1a1a;--dark3:#222;--dark4:#2e2e2e;--dark5:#3a3a3a;
+  --text:#e8e0d0;--text-dim:#888;--text-muted:#555;
+  --success:#4CAF50;--danger:#e74c3c;--warning:#f39c12;--info:#3498db;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Montserrat',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* NAV */
+.nav{background:var(--dark2);border-bottom:1px solid var(--dark4);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-brand{display:flex;align-items:center;gap:12px;}
+.nav-brand-name{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);letter-spacing:3px;}
+.nav-brand-sub{font-size:10px;color:var(--text-muted);letter-spacing:2px;}
+.nav-clock{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);letter-spacing:2px;}
+.nav-date{font-size:10px;color:var(--text-muted);letter-spacing:1px;text-align:right;}
+
+/* TABS */
+.tabs{display:flex;background:var(--dark2);border-bottom:1px solid var(--dark4);}
+.tab{flex:1;padding:14px;text-align:center;font-size:11px;letter-spacing:1px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--gold-dim);}
+.tab:hover{color:var(--text);}
+
+.page{display:none;padding:24px;}
+.page.active{display:block;}
+
+/* CARDS */
+.card{background:var(--dark2);border:1px solid var(--dark4);border-radius:10px;padding:20px;margin-bottom:16px;}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);letter-spacing:2px;margin-bottom:16px;}
+
+/* BUTTONS */
+.btn{padding:8px 18px;border-radius:4px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:'Montserrat',sans-serif;border:none;transition:all 0.2s;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--dark4);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.btn-success{background:var(--success);color:#fff;}
+.btn-sm{padding:5px 12px;font-size:10px;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;letter-spacing:1px;}
+.badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,150,58,0.3);}
+.badge-success{background:rgba(76,175,80,0.15);color:var(--success);border:1px solid rgba(76,175,80,0.3);}
+.badge-danger{background:rgba(231,76,60,0.15);color:var(--danger);border:1px solid rgba(231,76,60,0.3);}
+.badge-warning{background:rgba(243,156,18,0.15);color:var(--warning);border:1px solid rgba(243,156,18,0.3);}
+.badge-info{background:rgba(52,152,219,0.15);color:var(--info);border:1px solid rgba(52,152,219,0.3);}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold);}
+.form-group select option{background:var(--dark3);}
+.form-group textarea{height:70px;resize:vertical;}
+.form-full{grid-column:1/-1;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--dark2);border:1px solid var(--dark4);border-radius:10px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);margin-bottom:20px;letter-spacing:2px;}
+.modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
+
+/* ===== PAGE 1 : BOOKING ===== */
+.booking-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.bstat{background:var(--dark2);border:1px solid var(--dark4);border-radius:8px;padding:16px;text-align:center;position:relative;overflow:hidden;}
+.bstat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);}
+.bstat-val{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--gold);}
+.bstat-lbl{font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-top:4px;}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px;}
+.cal-header{text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;padding:6px 0;}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all 0.2s;position:relative;border:1px solid transparent;}
+.cal-day:hover{border-color:var(--gold);color:var(--gold);}
+.cal-day.today{border-color:var(--gold);color:var(--gold);font-weight:600;}
+.cal-day.has-event{background:var(--gold-dim);}
+.cal-day.has-event::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold);}
+.cal-day.empty{cursor:default;}
+.cal-day.other-month{color:var(--text-muted);opacity:0.4;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-nav button{padding:6px 12px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text-dim);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;}
+.cal-nav button:hover{border-color:var(--gold);color:var(--gold);}
+.cal-month{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text);letter-spacing:2px;}
+
+.event-list{display:flex;flex-direction:column;gap:8px;}
+.event-item{background:var(--dark3);border:1px solid var(--dark4);border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;border-left:3px solid var(--gold);}
+.event-item:hover{border-color:var(--gold);background:var(--gold-dim);}
+.event-item.past{border-left-color:var(--text-muted);opacity:0.6;}
+.event-item.today-event{border-left-color:var(--success);}
+.event-date-box{text-align:center;min-width:44px;}
+.event-date-day{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold);line-height:1;}
+.event-date-month{font-size:10px;color:var(--text-muted);letter-spacing:1px;}
+.event-info{flex:1;}
+.event-name{font-size:13px;color:var(--text);font-weight:500;margin-bottom:3px;}
+.event-details{font-size:10px;color:var(--text-muted);letter-spacing:1px;}
+.event-time{font-size:12px;color:var(--gold);font-weight:500;white-space:nowrap;}
+
+/* ===== PAGE 2 : PROGRAMME JOUR J ===== */
+.programme-header{background:var(--dark2);border:1px solid var(--dark4);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.programme-event-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);letter-spacing:2px;}
+.programme-meta{font-size:11px;color:var(--text-muted);}
+
+.etape-list{display:flex;flex-direction:column;gap:0;}
+.etape{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--dark3);align-items:flex-start;cursor:pointer;transition:background 0.15s;border-radius:6px;padding-left:8px;}
+.etape:hover{background:var(--dark2);}
+.etape.done{opacity:0.6;}
+.etape.active-step{background:var(--gold-dim);border:1px solid rgba(201,150,58,0.3);border-radius:8px;padding:12px;}
+.etape-check{width:28px;height:28px;border-radius:50%;border:2px solid var(--dark4);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;cursor:pointer;transition:all 0.2s;margin-top:2px;}
+.etape.done .etape-check{background:var(--success);border-color:var(--success);color:#fff;}
+.etape.active-step .etape-check{border-color:var(--gold);color:var(--gold);}
+.etape-heure{font-size:13px;color:var(--gold);font-weight:500;min-width:50px;margin-top:4px;}
+.etape-content{flex:1;}
+.etape-titre{font-size:13px;color:var(--text);font-weight:500;}
+.etape-note{font-size:11px;color:var(--text-dim);margin-top:3px;line-height:1.5;}
+.etape-timer{font-size:11px;color:var(--warning);margin-top:4px;}
+.etape-actions{display:flex;gap:6px;margin-top:6px;}
+
+/* MINUTEUR */
+.timer-box{background:var(--dark2);border:2px solid var(--gold);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;}
+.timer-label{font-size:10px;color:var(--text-muted);letter-spacing:2px;margin-bottom:6px;}
+.timer-display{font-family:'Cormorant Garamond',serif;font-size:56px;color:var(--gold);letter-spacing:4px;line-height:1;}
+.timer-display.danger{color:var(--danger);}
+.timer-display.warning{color:var(--warning);}
+.timer-etape{font-size:12px;color:var(--text-dim);margin-top:6px;}
+.timer-controls{display:flex;gap:8px;justify-content:center;margin-top:14px;}
+
+/* PROGRESS */
+.progress-bar{background:var(--dark3);border-radius:10px;height:6px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:var(--gold);border-radius:10px;transition:width 0.5s;}
+
+/* ===== PAGE 3 : CHECKLIST ===== */
+.checklist-section{margin-bottom:20px;}
+.checklist-section-title{font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--dark4);}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--dark3);cursor:pointer;}
+.check-item:hover{color:var(--gold);}
+.check-box{width:22px;height:22px;border-radius:4px;border:2px solid var(--dark5);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;margin-top:1px;}
+.check-item.checked .check-box{background:var(--gold);border-color:var(--gold);color:#fff;}
+.check-item.checked .check-text{text-decoration:line-through;color:var(--text-muted);}
+.check-text{font-size:12px;color:var(--text);line-height:1.5;}
+.check-note{font-size:10px;color:var(--text-muted);margin-top:2px;}
+
+/* STATS CHECKLIST */
+.checklist-progress{background:var(--dark2);border:1px solid var(--dark4);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;}
+.cl-stat{text-align:center;}
+.cl-stat-val{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold);}
+.cl-stat-lbl{font-size:9px;color:var(--text-muted);letter-spacing:1px;}
+
+/* ===== PAGE 4 : NOTES ===== */
+.note-card{background:var(--dark2);border:1px solid var(--dark4);border-radius:8px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;}
+.note-card:hover{border-color:var(--gold);}
+.note-card-title{font-size:13px;color:var(--text);font-weight:500;margin-bottom:4px;}
+.note-card-preview{font-size:11px;color:var(--text-dim);line-height:1.5;}
+.note-card-date{font-size:10px;color:var(--text-muted);margin-top:6px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--dark2);border:1px solid var(--gold);border-radius:6px;padding:12px 20px;font-size:12px;color:var(--text);z-index:9999;letter-spacing:1px;animation:slideIn 0.3s;}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:var(--text-muted);}
+.empty-icon{font-size:40px;margin-bottom:10px;opacity:0.4;}
+.empty-text{font-size:12px;letter-spacing:1px;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--dark4);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <div>
+      <div class="nav-brand-name">MC PRO</div>
+      <div class="nav-brand-sub">CRÉATIVE PLANNER</div>
+    </div>
+  </div>
+  <div style="text-align:center;">
+    <div class="nav-clock" id="navClock">00:00:00</div>
+    <div class="nav-date" id="navDate"></div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-gold btn-sm" onclick="openModal('modalNewEvent')">+ Événement</button>
+    <button class="btn btn-ghost btn-sm" onclick="saveAll()">💾</button>
+  </div>
+</nav>
+
+<div class="tabs">
+  <div class="tab active" onclick="goTab('booking')">📅 BOOKING</div>
+  <div class="tab" onclick="goTab('programme')">🎙️ PROGRAMME</div>
+  <div class="tab" onclick="goTab('checklist')">✅ CHECKLIST</div>
+  <div class="tab" onclick="goTab('notes')">📝 NOTES</div>
+</div>
+
+<!-- ===== BOOKING ===== -->
+<div class="page active" id="page-booking">
+  <div class="booking-stats">
+    <div class="bstat"><div class="bstat-val" id="bsTotal">0</div><div class="bstat-lbl">TOTAL ÉVÉNEMENTS</div></div>
+    <div class="bstat"><div class="bstat-val" id="bsMonth">0</div><div class="bstat-lbl">CE MOIS</div></div>
+    <div class="bstat"><div class="bstat-val" id="bsUpcoming">0</div><div class="bstat-lbl">À VENIR</div></div>
+    <div class="bstat"><div class="bstat-val" id="bsDone">0</div><div class="bstat-lbl">RÉALISÉS</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="card">
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">←</button>
+        <div class="cal-month" id="calMonth">Avril 2026</div>
+        <button onclick="changeMonth(1)">→</button>
+      </div>
+      <div class="calendar-grid">
+        <div class="cal-header">LUN</div><div class="cal-header">MAR</div><div class="cal-header">MER</div>
+        <div class="cal-header">JEU</div><div class="cal-header">VEN</div><div class="cal-header">SAM</div>
+        <div class="cal-header">DIM</div>
+      </div>
+      <div class="calendar-grid" id="calGrid"></div>
+    </div>
+
+    <div>
+      <div class="card-title" style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);letter-spacing:2px;margin-bottom:14px;">Mes événements</div>
+      <div class="event-list" id="eventList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROGRAMME ===== -->
+<div class="page" id="page-programme">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div>
+      <select id="selectEvent" onchange="chargerProgramme()" style="padding:9px 14px;background:var(--dark2);border:1px solid var(--dark4);border-radius:6px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;min-width:240px;">
+        <option value="">— Sélectionner un événement —</option>
+      </select>
+    </div>
+    <button class="btn btn-gold btn-sm" onclick="openModal('modalNewEtape')">+ Ajouter étape</button>
+  </div>
+
+  <div id="programmeContent">
+    <div class="timer-box">
+      <div class="timer-label">COMPTE À REBOURS — PROCHAINE ÉTAPE</div>
+      <div class="timer-display" id="timerDisplay">--:--:--</div>
+      <div class="timer-etape" id="timerEtape">Sélectionnez un événement</div>
+      <div class="timer-controls">
+        <button class="btn btn-ghost btn-sm" onclick="startTimer()">▶ Démarrer</button>
+        <button class="btn btn-ghost btn-sm" onclick="pauseTimer()">⏸ Pause</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetTimer()">↺ Reset</button>
+        <button class="btn btn-gold btn-sm" onclick="nextEtape()">Étape suivante →</button>
+      </div>
+    </div>
+
+    <div id="progressProgramme" style="margin-bottom:16px;display:none;">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-bottom:4px;">
+        <span>Progression</span><span id="progressText">0/0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="etape-list" id="etapeList">
+      <div class="empty"><div class="empty-icon">🎙️</div><div class="empty-text">Sélectionnez un événement pour voir son programme</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKLIST ===== -->
+<div class="page" id="page-checklist">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <select id="selectEventChecklist" onchange="chargerChecklist()" style="padding:9px 14px;background:var(--dark2);border:1px solid var(--dark4);border-radius:6px;color:var(--text);font-size:12px;font-family:'Montserrat',sans-serif;outline:none;min-width:240px;">
+      <option value="">— Sélectionner un événement —</option>
+    </select>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="resetChecklist()">↺ Reset</button>
+      <button class="btn btn-gold btn-sm" onclick="openModal('modalNewCheck')">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="checklist-progress">
+    <div class="cl-stat"><div class="cl-stat-val" id="clTotal">0</div><div class="cl-stat-lbl">TOTAL</div></div>
+    <div class="cl-stat"><div class="cl-stat-val" id="clDone">0</div><div class="cl-stat-lbl">FAIT</div></div>
+    <div class="cl-stat"><div class="cl-stat-val" id="clLeft">0</div><div class="cl-stat-lbl">RESTANT</div></div>
+    <div style="flex:1;">
+      <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:4px;">PROGRESSION</div>
+      <div class="progress-bar"><div class="progress-fill" id="clProgress" style="width:0%"></div></div>
+      <div style="font-size:10px;color:var(--gold);margin-top:4px;" id="clPercent">0%</div>
+    </div>
+  </div>
+
+  <div id="checklistContent">
+    <div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Sélectionnez un événement</div></div>
+  </div>
+</div>
+
+<!-- ===== NOTES ===== -->
+<div class="page" id="page-notes">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);letter-spacing:2px;">Mes notes</div>
+    <button class="btn btn-gold" onclick="openModal('modalNewNote')">+ Nouvelle note</button>
+  </div>
+  <div id="notesList">
+    <div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Aucune note</div></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalNewEvent">
+  <div class="modal">
+    <div class="modal-title">Nouvel Événement</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Nom de l'événement *</label><input type="text" id="ev_nom" placeholder="Ex: Mariage Koné - Traoré"></div>
+      <div class="form-group"><label>Type</label><select id="ev_type"><option>Mariage</option><option>Anniversaire</option><option>Corporate</option><option>Baptême</option><option>Autre</option></select></div>
+      <div class="form-group"><label>Date *</label><input type="date" id="ev_date"></div>
+      <div class="form-group"><label>Heure de début</label><input type="time" id="ev_heure" value="18:00"></div>
+      <div class="form-group"><label>Lieu</label><input type="text" id="ev_lieu" placeholder="Ex: Sofitel Abidjan"></div>
+      <div class="form-group"><label>Nombre d'invités</label><input type="number" id="ev_invites" placeholder="Ex: 150"></div>
+      <div class="form-group"><label>Cachet (FCFA)</label><input type="number" id="ev_cachet" placeholder="Ex: 150000"></div>
+      <div class="form-group"><label>Statut</label><select id="ev_statut"><option>Confirmé</option><option>En attente</option><option>Annulé</option></select></div>
+      <div class="form-group form-full"><label>Notes</label><textarea id="ev_notes" placeholder="Thème, instructions particulières..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalNewEvent')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveEvent()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalNewEtape">
+  <div class="modal">
+    <div class="modal-title">Ajouter une étape</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Heure *</label><input type="time" id="et_heure" value="18:00"></div>
+      <div class="form-group"><label>Durée (minutes)</label><input type="number" id="et_duree" value="15" min="1"></div>
+      <div class="form-group form-full"><label>Titre de l'étape *</label><input type="text" id="et_titre" placeholder="Ex: Entrée des mariés"></div>
+      <div class="form-group form-full"><label>Notes / Instructions</label><textarea id="et_note" placeholder="Ce que le MC doit dire ou faire..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalNewEtape')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveEtape()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalNewCheck">
+  <div class="modal">
+    <div class="modal-title">Ajouter une tâche</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Tâche *</label><input type="text" id="ck_titre" placeholder="Ex: Vérifier le micro"></div>
+      <div class="form-group"><label>Catégorie</label><select id="ck_cat"><option>Avant la cérémonie</option><option>Pendant la cérémonie</option><option>Fin de soirée</option><option>Général</option></select></div>
+      <div class="form-group form-full"><label>Notes</label><input type="text" id="ck_note" placeholder="Détails..."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalNewCheck')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveCheck()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalNewNote">
+  <div class="modal">
+    <div class="modal-title">Nouvelle note</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Titre</label><input type="text" id="nt_titre" placeholder="Titre de la note"></div>
+      <div class="form-group form-full"><label>Contenu</label><textarea id="nt_contenu" style="height:120px;" placeholder="Votre note..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalNewNote')">Annuler</button>
+      <button class="btn btn-gold" onclick="saveNote()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEventDetail">
+  <div class="modal">
+    <div class="modal-title" id="detailEventTitle">Détail</div>
+    <div id="detailEventContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="detailDeleteBtn">🗑 Supprimer</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalEventDetail')">Fermer</button>
+      <button class="btn btn-gold" onclick="goToProgramme()">🎙️ Programme</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+let data={events:[],notes:[]};
+let currentEventId=null;
+let timerInterval=null;
+let timerRunning=false;
+let timerSeconds=0;
+let currentEtapeIndex=0;
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth();
+
+// ===== SAVE/LOAD =====
+function saveAll(){localStorage.setItem('mc_pro',JSON.stringify(data));showToast('💾 Sauvegardé !');}
+function loadAll(){const r=localStorage.getItem('mc_pro');if(r)data=JSON.parse(r);refreshAll();}
+function refreshAll(){renderBookingStats();renderCalendar();renderEventList();updateEventSelects();renderNotes();}
+
+// ===== CLOCK =====
+function updateClock(){
+  const now=new Date();
+  document.getElementById('navClock').textContent=now.toLocaleTimeString('fr-FR');
+  document.getElementById('navDate').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ===== TABS =====
+function goTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{if(t.textContent.toLowerCase().includes(tab.substring(0,4)))t.classList.add('active');});
+}
+
+// ===== MODALS =====
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+
+// ===== EVENTS =====
+function saveEvent(){
+  const nom=document.getElementById('ev_nom').value.trim();
+  if(!nom){alert('Le nom est obligatoire');return;}
+  const ev={
+    id:'EV_'+Date.now(),nom,
+    type:document.getElementById('ev_type').value,
+    date:document.getElementById('ev_date').value,
+    heure:document.getElementById('ev_heure').value,
+    lieu:document.getElementById('ev_lieu').value,
+    invites:document.getElementById('ev_invites').value,
+    cachet:document.getElementById('ev_cachet').value,
+    statut:document.getElementById('ev_statut').value,
+    notes:document.getElementById('ev_notes').value,
+    etapes:[],checklist:[]
+  };
+
+  // Ajouter checklist par défaut
+  ev.checklist=defaultChecklist();
+  // Ajouter programme par défaut selon le type
+  ev.etapes=defaultEtapes(ev.heure,ev.type);
+
+  data.events.push(ev);
+  ['ev_nom','ev_date','ev_lieu','ev_invites','ev_cachet','ev_notes'].forEach(id=>document.getElementById(id).value='');
+  closeModal('modalNewEvent');
+  saveAll();refreshAll();
+  showToast('✅ Événement enregistré !');
+}
+
+function defaultEtapes(heure,type){
+  const [h,m]=heure?heure.split(':').map(Number):[18,0];
+  const addMin=(h2,m2,mins)=>{const d=new Date(2000,0,1,h2,m2+mins);return d.toTimeString().slice(0,5);};
+  const base=[
+    {id:'et_'+Date.now()+'_1',heure:heure||'18:00',duree:30,titre:'Accueil des invités',note:'Musique d\'ambiance, orienter les invités',done:false},
+    {id:'et_'+Date.now()+'_2',heure:addMin(h,m,30),duree:15,titre:'Ouverture de la cérémonie',note:'Discours d\'ouverture du MC',done:false},
+    {id:'et_'+Date.now()+'_3',heure:addMin(h,m,45),duree:20,titre:'Entrée des hôtes principaux',note:type==='Mariage'?'Entrée des mariés':'Entrée des hôtes',done:false},
+    {id:'et_'+Date.now()+'_4',heure:addMin(h,m,65),duree:45,titre:'Cocktail / Vin d\'honneur',note:'Service des boissons et amuse-bouches',done:false},
+    {id:'et_'+Date.now()+'_5',heure:addMin(h,m,110),duree:60,titre:'Repas',note:'Service du repas, vérifier le traiteur',done:false},
+    {id:'et_'+Date.now()+'_6',heure:addMin(h,m,170),duree:30,titre:'Discours et animations',note:'Gérer le timing des discours',done:false},
+    {id:'et_'+Date.now()+'_7',heure:addMin(h,m,200),duree:30,titre:'Découpe du gâteau',note:'Annoncer et coordonner la découpe',done:false},
+    {id:'et_'+Date.now()+'_8',heure:addMin(h,m,230),duree:60,titre:'Soirée dansante',note:'DJ en place, ambiance festive',done:false},
+    {id:'et_'+Date.now()+'_9',heure:addMin(h,m,290),duree:30,titre:'Clôture de la soirée',note:'Remercier les invités, fin officielle',done:false},
+  ];
+  return base;
+}
+
+function defaultChecklist(){
+  return [
+    {id:'ck_1',titre:'Vérifier le micro et le système sonore',cat:'Avant la cérémonie',note:'',done:false},
+    {id:'ck_2',titre:'Confirmer l\'ordre du programme avec les organisateurs',cat:'Avant la cérémonie',note:'',done:false},
+    {id:'ck_3',titre:'Vérifier la liste des discours et intervenants',cat:'Avant la cérémonie',note:'',done:false},
+    {id:'ck_4',titre:'Se présenter aux hôtes principaux',cat:'Avant la cérémonie',note:'',done:false},
+    {id:'ck_5',titre:'Coordonner avec le DJ / musiciens',cat:'Avant la cérémonie',note:'',done:false},
+    {id:'ck_6',titre:'Vérifier le plan de salle',cat:'Avant la cérémonie',note:'',done:false},
+    {id:'ck_7',titre:'Gérer les retards éventuels',cat:'Pendant la cérémonie',note:'Communiquer avec les organisateurs',done:false},
+    {id:'ck_8',titre:'Annoncer chaque moment clé',cat:'Pendant la cérémonie',note:'',done:false},
+    {id:'ck_9',titre:'Coordonner le service traiteur',cat:'Pendant la cérémonie',note:'',done:false},
+    {id:'ck_10',titre:'Gérer le timing des discours',cat:'Pendant la cérémonie',note:'Max 5 min par discours',done:false},
+    {id:'ck_11',titre:'Annoncer la fin officielle',cat:'Fin de soirée',note:'',done:false},
+    {id:'ck_12',titre:'Remercier les prestataires',cat:'Fin de soirée',note:'',done:false},
+    {id:'ck_13',titre:'Récupérer le matériel sonore',cat:'Fin de soirée',note:'',done:false},
+  ];
+}
+
+function deleteEvent(id){
+  if(!confirm('Supprimer cet événement ?'))return;
+  data.events=data.events.filter(e=>e.id!==id);
+  closeModal('modalEventDetail');
+  saveAll();refreshAll();
+}
+
+function viewEvent(id){
+  currentEventId=id;
+  const ev=data.events.find(e=>e.id===id);if(!ev)return;
+  document.getElementById('detailEventTitle').textContent=ev.nom;
+  const isUpcoming=ev.date>=new Date().toISOString().split('T')[0];
+  document.getElementById('detailEventContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      ${[['TYPE',ev.type],['DATE',ev.date?formatDate(ev.date):'-'],['HEURE',ev.heure||'-'],['LIEU',ev.lieu||'-'],['INVITÉS',ev.invites||'-'],['CACHET',ev.cachet?formatMoney(ev.cachet)+' FCFA':'-'],['STATUT',ev.statut]].map(([l,v])=>`
+        <div style="background:var(--dark3);border-radius:6px;padding:10px;">
+          <div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-bottom:3px;">${l}</div>
+          <div style="font-size:13px;color:var(--text);">${v}</div>
+        </div>`).join('')}
+    </div>
+    ${ev.notes?`<div style="background:var(--dark3);border-radius:6px;padding:12px;font-size:12px;color:var(--text-dim);line-height:1.6;">${ev.notes}</div>`:''}
+    <div style="margin-top:14px;display:flex;gap:8px;">
+      <span class="badge ${ev.statut==='Confirmé'?'badge-success':ev.statut==='Annulé'?'badge-danger':'badge-warning'}">${ev.statut}</span>
+      <span class="badge ${isUpcoming?'badge-gold':'badge-muted'}">${isUpcoming?'À venir':'Passé'}</span>
+    </div>`;
+  document.getElementById('detailDeleteBtn').onclick=()=>deleteEvent(id);
+  openModal('modalEventDetail');
+}
+
+function goToProgramme(){
+  closeModal('modalEventDetail');
+  document.getElementById('selectEvent').value=currentEventId;
+  chargerProgramme();
+  goTab('programme');
+}
+
+// ===== BOOKING =====
+function renderBookingStats(){
+  const now=new Date().toISOString().split('T')[0];
+  const thisMonth=new Date().toISOString().slice(0,7);
+  document.getElementById('bsTotal').textContent=data.events.length;
+  document.getElementById('bsMonth').textContent=data.events.filter(e=>e.date&&e.date.startsWith(thisMonth)).length;
+  document.getElementById('bsUpcoming').textContent=data.events.filter(e=>e.date&&e.date>=now&&e.statut!=='Annulé').length;
+  document.getElementById('bsDone').textContent=data.events.filter(e=>e.date&&e.date<now).length;
+}
+
+function renderEventList(){
+  const list=document.getElementById('eventList');
+  const now=new Date().toISOString().split('T')[0];
+  const sorted=[...data.events].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!sorted.length){list.innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Aucun événement — cliquez sur + pour ajouter</div></div>';return;}
+  list.innerHTML=sorted.map(ev=>{
+    const isToday=ev.date===now;
+    const isPast=ev.date<now;
+    const d=ev.date?ev.date.split('-'):['','',''];
+    const mois=['','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    return `<div class="event-item ${isPast?'past':''} ${isToday?'today-event':''}" onclick="viewEvent('${ev.id}')">
+      <div class="event-date-box">
+        <div class="event-date-day">${d[2]||'--'}</div>
+        <div class="event-date-month">${mois[parseInt(d[1])]||'---'}</div>
+      </div>
+      <div class="event-info">
+        <div class="event-name">${ev.nom}</div>
+        <div class="event-details">${ev.type} ${ev.lieu?'— '+ev.lieu:''} ${ev.invites?'— '+ev.invites+' invités':''}</div>
+        ${ev.cachet?`<div style="font-size:10px;color:var(--gold);margin-top:2px;">${formatMoney(ev.cachet)} FCFA</div>`:''}
+      </div>
+      <div style="text-align:right;">
+        <div class="event-time">${ev.heure||''}</div>
+        <span class="badge ${ev.statut==='Confirmé'?'badge-success':ev.statut==='Annulé'?'badge-danger':'badge-warning'}" style="margin-top:4px;">${ev.statut}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== CALENDRIER =====
+function renderCalendar(){
+  const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  document.getElementById('calMonth').textContent=mois[calMonth]+' '+calYear;
+  const grid=document.getElementById('calGrid');
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const offset=firstDay===0?6:firstDay-1;
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const eventDates=new Set(data.events.map(e=>e.date));
+  let html='';
+  for(let i=0;i<offset;i++) html+=`<div class="cal-day empty other-month"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const hasEv=eventDates.has(dateStr);
+    html+=`<div class="cal-day ${isToday?'today':''} ${hasEv?'has-event':''}" onclick="filterByDate('${dateStr}')">${d}</div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function changeMonth(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+
+function filterByDate(date){
+  const evs=data.events.filter(e=>e.date===date);
+  if(evs.length===1){viewEvent(evs[0].id);}
+  else if(evs.length>1){showToast(evs.length+' événements ce jour');}
+}
+
+// ===== PROGRAMME =====
+function updateEventSelects(){
+  ['selectEvent','selectEventChecklist'].forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const val=sel.value;
+    sel.innerHTML='<option value="">— Sélectionner un événement —</option>'+
+      data.events.map(e=>`<option value="${e.id}" ${e.id===val?'selected':''}>${e.nom} (${e.date?formatDate(e.date):'sans date'})</option>`).join('');
+  });
+}
+
+function chargerProgramme(){
+  const id=document.getElementById('selectEvent').value;
+  if(!id){document.getElementById('etapeList').innerHTML='<div class="empty"><div class="empty-icon">🎙️</div><div class="empty-text">Sélectionnez un événement</div></div>';return;}
+  currentEventId=id;
+  const ev=data.events.find(e=>e.id===id);if(!ev)return;
+  renderEtapes(ev);
+}
+
+function saveEtape(){
+  if(!currentEventId){alert('Sélectionnez d\'abord un événement');closeModal('modalNewEtape');return;}
+  const ev=data.events.find(e=>e.id===currentEventId);if(!ev)return;
+  const titre=document.getElementById('et_titre').value.trim();
+  if(!titre){alert('Le titre est obligatoire');return;}
+  const etape={id:'et_'+Date.now(),heure:document.getElementById('et_heure').value,duree:parseInt(document.getElementById('et_duree').value)||15,titre,note:document.getElementById('et_note').value,done:false};
+  ev.etapes.push(etape);
+  ev.etapes.sort((a,b)=>a.heure.localeCompare(b.heure));
+  ['et_titre','et_note'].forEach(id=>document.getElementById(id).value='');
+  closeModal('modalNewEtape');
+  saveAll();renderEtapes(ev);
+  showToast('✅ Étape ajoutée !');
+}
+
+function renderEtapes(ev){
+  const list=document.getElementById('etapeList');
+  const done=ev.etapes.filter(e=>e.done).length;
+  document.getElementById('progressProgramme').style.display='block';
+  document.getElementById('progressText').textContent=done+'/'+ev.etapes.length;
+  document.getElementById('progressFill').style.width=(ev.etapes.length?Math.round(done/ev.etapes.length*100):0)+'%';
+
+  if(!ev.etapes.length){list.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Aucune étape — ajoutez-en une</div></div>';return;}
+
+  const nextIndex=ev.etapes.findIndex(e=>!e.done);
+  list.innerHTML=ev.etapes.map((et,i)=>`
+    <div class="etape ${et.done?'done':''} ${i===nextIndex?'active-step':''}" id="etape_${et.id}">
+      <div class="etape-check" onclick="toggleEtape('${ev.id}','${et.id}')">
+        ${et.done?'✓':''}
+      </div>
+      <div class="etape-heure">${et.heure}</div>
+      <div class="etape-content">
+        <div class="etape-titre">${et.titre}</div>
+        ${et.note?`<div class="etape-note">${et.note}</div>`:''}
+        <div class="etape-timer">⏱ ${et.duree} min</div>
+        ${i===nextIndex?`<div class="etape-actions">
+          <button class="btn btn-gold btn-sm" onclick="lancerMinuteur('${ev.id}','${et.id}',${et.duree})">▶ Lancer minuteur</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteEtape('${ev.id}','${et.id}')">🗑</button>
+        </div>`:`<button class="btn btn-ghost btn-sm" style="margin-top:4px;" onclick="deleteEtape('${ev.id}','${et.id}')">🗑</button>`}
+      </div>
+    </div>`).join('');
+
+  // Mettre à jour le timer label
+  if(nextIndex>=0){
+    const next=ev.etapes[nextIndex];
+    document.getElementById('timerEtape').textContent='Prochaine : '+next.heure+' — '+next.titre;
+  } else {
+    document.getElementById('timerEtape').textContent='Programme terminé ! 🎉';
+  }
+}
+
+function toggleEtape(evId,etId){
+  const ev=data.events.find(e=>e.id===evId);if(!ev)return;
+  const et=ev.etapes.find(e=>e.id===etId);if(!et)return;
+  et.done=!et.done;
+  saveAll();renderEtapes(ev);
+}
+
+function deleteEtape(evId,etId){
+  const ev=data.events.find(e=>e.id===evId);if(!ev)return;
+  ev.etapes=ev.etapes.filter(e=>e.id!==etId);
+  saveAll();renderEtapes(ev);
+}
+
+function nextEtape(){
+  const ev=data.events.find(e=>e.id===currentEventId);if(!ev)return;
+  const nextIndex=ev.etapes.findIndex(e=>!e.done);
+  if(nextIndex>=0){ev.etapes[nextIndex].done=true;saveAll();renderEtapes(ev);showToast('✅ Étape validée !');}
+}
+
+// ===== MINUTEUR =====
+function lancerMinuteur(evId,etId,duree){
+  resetTimer();
+  timerSeconds=duree*60;
+  const ev=data.events.find(e=>e.id===evId);
+  const et=ev?.etapes.find(e=>e.id===etId);
+  if(et)document.getElementById('timerEtape').textContent=et.heure+' — '+et.titre;
+  updateTimerDisplay();
+  startTimer();
+}
+
+function startTimer(){
+  if(timerRunning)return;
+  timerRunning=true;
+  timerInterval=setInterval(()=>{
+    if(timerSeconds>0){timerSeconds--;updateTimerDisplay();}
+    else{clearInterval(timerInterval);timerRunning=false;showToast('⏰ Temps écoulé !');}
+  },1000);
+}
+
+function pauseTimer(){clearInterval(timerInterval);timerRunning=false;}
+function resetTimer(){clearInterval(timerInterval);timerRunning=false;timerSeconds=0;updateTimerDisplay();}
+
+function updateTimerDisplay(){
+  const h=Math.floor(timerSeconds/3600);
+  const m=Math.floor((timerSeconds%3600)/60);
+  const s=timerSeconds%60;
+  const display=document.getElementById('timerDisplay');
+  display.textContent=(h?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  display.className='timer-display'+(timerSeconds<60?' danger':timerSeconds<300?' warning':'');
+}
+
+// ===== CHECKLIST =====
+function chargerChecklist(){
+  const id=document.getElementById('selectEventChecklist').value;
+  if(!id){document.getElementById('checklistContent').innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Sélectionnez un événement</div></div>';updateChecklistStats([]);return;}
+  currentEventId=id;
+  const ev=data.events.find(e=>e.id===id);if(!ev)return;
+  renderChecklist(ev);
+}
+
+function saveCheck(){
+  if(!currentEventId){alert('Sélectionnez d\'abord un événement');closeModal('modalNewCheck');return;}
+  const ev=data.events.find(e=>e.id===currentEventId);if(!ev)return;
+  const titre=document.getElementById('ck_titre').value.trim();
+  if(!titre){alert('La tâche est obligatoire');return;}
+  ev.checklist.push({id:'ck_'+Date.now(),titre,cat:document.getElementById('ck_cat').value,note:document.getElementById('ck_note').value,done:false});
+  ['ck_titre','ck_note'].forEach(id=>document.getElementById(id).value='');
+  closeModal('modalNewCheck');
+  saveAll();renderChecklist(ev);
+}
+
+function renderChecklist(ev){
+  const cats=['Avant la cérémonie','Pendant la cérémonie','Fin de soirée','Général'];
+  updateChecklistStats(ev.checklist);
+  const div=document.getElementById('checklistContent');
+  div.innerHTML=cats.map(cat=>{
+    const items=ev.checklist.filter(c=>c.cat===cat);
+    if(!items.length)return'';
+    return `<div class="checklist-section">
+      <div class="checklist-section-title">${cat}</div>
+      ${items.map(ck=>`
+        <div class="check-item ${ck.done?'checked':''}" onclick="toggleCheck('${ev.id}','${ck.id}')">
+          <div class="check-box">${ck.done?'✓':''}</div>
+          <div>
+            <div class="check-text">${ck.titre}</div>
+            ${ck.note?`<div class="check-note">${ck.note}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function toggleCheck(evId,ckId){
+  const ev=data.events.find(e=>e.id===evId);if(!ev)return;
+  const ck=ev.checklist.find(c=>c.id===ckId);if(!ck)return;
+  ck.done=!ck.done;
+  saveAll();renderChecklist(ev);
+}
+
+function updateChecklistStats(checklist){
+  const total=checklist.length;
+  const done=checklist.filter(c=>c.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('clTotal').textContent=total;
+  document.getElementById('clDone').textContent=done;
+  document.getElementById('clLeft').textContent=total-done;
+  document.getElementById('clProgress').style.width=pct+'%';
+  document.getElementById('clPercent').textContent=pct+'%';
+}
+
+function resetChecklist(){
+  const ev=data.events.find(e=>e.id===currentEventId);if(!ev)return;
+  if(!confirm('Remettre toute la checklist à zéro ?'))return;
+  ev.checklist.forEach(c=>c.done=false);
+  saveAll();renderChecklist(ev);
+  showToast('↺ Checklist remise à zéro');
+}
+
+// ===== NOTES =====
+function saveNote(){
+  const titre=document.getElementById('nt_titre').value.trim()||'Note sans titre';
+  const contenu=document.getElementById('nt_contenu').value.trim();
+  if(!contenu){alert('Le contenu est obligatoire');return;}
+  data.notes.push({id:'nt_'+Date.now(),titre,contenu,date:new Date().toLocaleDateString('fr-FR')});
+  ['nt_titre','nt_contenu'].forEach(id=>document.getElementById(id).value='');
+  closeModal('modalNewNote');
+  saveAll();renderNotes();
+  showToast('✅ Note enregistrée !');
+}
+
+function renderNotes(){
+  const div=document.getElementById('notesList');
+  if(!data.notes.length){div.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Aucune note</div></div>';return;}
+  div.innerHTML=[...data.notes].reverse().map(n=>`
+    <div class="note-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;">
+        <div class="note-card-title">${n.titre}</div>
+        <button onclick="deleteNote('${n.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div class="note-card-preview">${n.contenu.slice(0,120)}${n.contenu.length>120?'...':''}</div>
+      <div class="note-card-date">${n.date}</div>
+    </div>`).join('');
+}
+
+function deleteNote(id){
+  data.notes=data.notes.filter(n=>n.id!==id);
+  saveAll();renderNotes();
+}
+
+// ===== HELPERS =====
+function formatDate(d){if(!d)return'-';const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function formatMoney(n){return(parseFloat(n)||0).toLocaleString('fr-FR');}
+
+// ===== INIT =====
+loadAll();
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
+setInterval(saveAll,60000);
+</script>
+</body>
+</html>
