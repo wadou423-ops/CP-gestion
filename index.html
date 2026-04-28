@@ -527,10 +527,157 @@ let selectedShape='rect';
 const STATUTS=['Demande reçue','Devis envoyé','Contrat signé','Acompte reçu','En préparation','Événement passé','Clôturé'];
 const STATUT_COLORS={'Demande reçue':'badge-info','Devis envoyé':'badge-warning','Contrat signé':'badge-gold','Acompte reçu':'badge-warning','En préparation':'badge-success','Événement passé':'badge-muted','Clôturé':'badge-success'};
 
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL='https://fhmlkzvlnxoxefkjfdaf.supabase.co';
+const SUPABASE_KEY='sb_publishable_MGXALhIJ_7H_areh27H8CQ_9ActdvWr';
+
+async function sbFetch(table,method='GET',body=null,filter=''){
+  const url=`${SUPABASE_URL}/rest/v1/${table}${filter}`;
+  const opts={method,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  if(!res.ok){const err=await res.text();console.error('Supabase error:',err);return null;}
+  if(method==='DELETE'||method==='PATCH')return true;
+  return res.json();
+}
+
 // ===== SAVE/LOAD =====
-function saveAll(){localStorage.setItem('cp_crm_v2',JSON.stringify(data));showToast('💾 Sauvegardé !');}
-function loadAll(){const r=localStorage.getItem('cp_crm_v2');if(r)data=JSON.parse(r);refreshAll();}
-function refreshAll(){updateDashboard();renderClients();renderEvenements();renderDevis();renderPaiements();renderRecus();renderPostEvents();renderContrats();updateClientSelects();}
+async function saveAll(){
+  showToast('💾 Sauvegarde en cours...');
+  try{
+    // Sauvegarder aussi en localStorage comme backup offline
+    localStorage.setItem('cp_crm_backup',JSON.stringify(data));
+    showToast('✅ Sauvegardé !');
+  }catch(e){showToast('❌ Erreur de sauvegarde');}
+}
+
+async function loadAll(){
+  showToast('⏳ Chargement...');
+  try{
+    // Charger depuis Supabase
+    const [clients,devis,paiements,recus,contrats,postEvents]=await Promise.all([
+      sbFetch('clients','GET',null,'?order=created_at.desc'),
+      sbFetch('devis','GET',null,'?order=created_at.desc'),
+      sbFetch('paiements','GET',null,'?order=created_at.desc'),
+      sbFetch('recus','GET',null,'?order=created_at.desc'),
+      sbFetch('contrats','GET',null,'?order=created_at.desc'),
+      sbFetch('post_events','GET',null,'?order=created_at.desc'),
+    ]);
+    data.clients=(clients||[]).map(c=>({
+      id:c.id,nom:c.nom,tel:c.tel,email:c.email,type:c.type,
+      offre:c.offre,package:c.package,date:c.date,lieu:c.lieu,
+      budget:c.budget,source:c.source,notes:c.notes,statut:c.statut,
+      createdAt:c.created_at,salleConfig:c.salle_config||{forme:'rect',longueur:20,largeur:15}
+    }));
+    data.devis=(devis||[]).map(d=>({
+      id:d.id,numero:d.numero,clientId:d.client_id,date:d.date,
+      validite:d.validite,montant:d.montant,acompte:d.acompte,
+      prestations:d.prestations,prestataires:d.prestataires,
+      details:d.details,statut:d.statut
+    }));
+    data.paiements=(paiements||[]).map(p=>({
+      id:p.id,clientId:p.client_id,type:p.type,montant:p.montant,
+      date:p.date,mode:p.mode,ref:p.ref,notes:p.notes
+    }));
+    data.recus=(recus||[]).map(r=>({
+      id:r.id,numero:r.numero,clientId:r.client_id,montant:r.montant,
+      date:r.date,type:r.type,desc:r.description
+    }));
+    data.contrats=(contrats||[]).map(ct=>({
+      id:ct.id,clientId:ct.client_id,date:ct.date,montant:ct.montant,statut:ct.statut
+    }));
+    data.postEvents=(postEvents||[]).map(pe=>({
+      id:pe.id,clientId:pe.client_id,note:pe.note,temoignage:pe.temoignage,
+      positif:pe.positif,ameliorer:pe.ameliorer,date:pe.date
+    }));
+    // Backup local
+    localStorage.setItem('cp_crm_backup',JSON.stringify(data));
+    showToast('✅ Données chargées !');
+  }catch(e){
+    console.error('Erreur chargement Supabase:',e);
+    // Fallback localStorage
+    const r=localStorage.getItem('cp_crm_backup');
+    if(r){data=JSON.parse(r);showToast('⚠️ Mode hors ligne — données locales');}
+    else showToast('❌ Erreur de chargement');
+  }
+  refreshAll();
+}
+
+// ===== SAVE CLIENT =====
+async function saveClientDB(client){
+  const row={
+    id:client.id,nom:client.nom,tel:client.tel,email:client.email,
+    type:client.type,offre:client.offre,package:client.package,
+    date:client.date,lieu:client.lieu,budget:client.budget,
+    source:client.source,notes:client.notes,statut:client.statut,
+    salle_config:client.salleConfig
+  };
+  return await sbFetch('clients','POST',row);
+}
+
+async function updateClientDB(client){
+  const row={
+    nom:client.nom,tel:client.tel,email:client.email,type:client.type,
+    offre:client.offre,package:client.package,date:client.date,
+    lieu:client.lieu,budget:client.budget,source:client.source,
+    notes:client.notes,statut:client.statut,salle_config:client.salleConfig
+  };
+  return await sbFetch('clients','PATCH',row,`?id=eq.${client.id}`);
+}
+
+async function deleteClientDB(id){
+  await sbFetch('devis','DELETE',null,`?client_id=eq.${id}`);
+  await sbFetch('paiements','DELETE',null,`?client_id=eq.${id}`);
+  await sbFetch('recus','DELETE',null,`?client_id=eq.${id}`);
+  await sbFetch('contrats','DELETE',null,`?client_id=eq.${id}`);
+  await sbFetch('post_events','DELETE',null,`?client_id=eq.${id}`);
+  return await sbFetch('clients','DELETE',null,`?id=eq.${id}`);
+}
+
+// ===== SAVE DEVIS =====
+async function saveDevisDB(devis){
+  const row={
+    id:devis.id,numero:devis.numero,client_id:devis.clientId,
+    date:devis.date,validite:devis.validite,montant:devis.montant,
+    acompte:devis.acompte,prestations:devis.prestations,
+    prestataires:devis.prestataires,details:devis.details,statut:devis.statut
+  };
+  return await sbFetch('devis','POST',row);
+}
+
+// ===== SAVE PAIEMENT =====
+async function savePaiementDB(p){
+  const row={
+    id:p.id,client_id:p.clientId,type:p.type,montant:p.montant,
+    date:p.date,mode:p.mode,ref:p.ref,notes:p.notes
+  };
+  return await sbFetch('paiements','POST',row);
+}
+
+// ===== SAVE RECU =====
+async function saveRecuDB(r){
+  const row={
+    id:r.id,numero:r.numero,client_id:r.clientId,
+    montant:r.montant,date:r.date,type:r.type,description:r.desc
+  };
+  return await sbFetch('recus','POST',row);
+}
+
+// ===== SAVE CONTRAT =====
+async function saveContratDB(ct){
+  const row={id:ct.id,client_id:ct.clientId,date:ct.date,montant:ct.montant,statut:ct.statut};
+  return await sbFetch('contrats','POST',row);
+}
+
+// ===== SAVE POST EVENT =====
+async function savePostEventDB(pe){
+  const row={
+    id:pe.id,client_id:pe.clientId,note:pe.note,temoignage:pe.temoignage,
+    positif:pe.positif,ameliorer:pe.ameliorer,date:pe.date
+  };
+  return await sbFetch('post_events','POST',row);
+}
+
 
 // ===== NAVIGATION =====
 function goTo(page){
@@ -557,7 +704,7 @@ function showToast(msg){
 }
 
 // ===== CLIENTS =====
-function saveClient(){
+async function saveClient(){
   const nom=document.getElementById('c_nom').value.trim();
   if(!nom){alert('Le nom est obligatoire');return;}
   const client={
@@ -579,7 +726,8 @@ function saveClient(){
   data.clients.push(client);
   ['c_nom','c_tel','c_email','c_date','c_lieu','c_budget','c_notes'].forEach(id=>document.getElementById(id).value='');
   closeModal('modalNewClient');
-  saveAll();refreshAll();
+  await saveClientDB(client);
+  refreshAll();
   showToast('✅ Client enregistré !');
 }
 
@@ -623,18 +771,20 @@ function changerStatutDirect(clientId,statut){
   showToast('✅ Statut : '+statut);
 }
 
-function changerStatut(clientId,statut){
+async function changerStatut(clientId,statut){
   const c=data.clients.find(x=>x.id===clientId);if(!c)return;
   c.statut=statut;
+  await updateClientDB(c);
   saveAll();refreshAll();
   closeModal('modalStatut');
   showToast('Statut mis à jour : '+statut);
 }
 
-function deleteClient(id){
+async function deleteClient(id){
   if(!confirm('Supprimer ce client ?'))return;
   data.clients=data.clients.filter(c=>c.id!==id);
-  saveAll();refreshAll();
+  await deleteClientDB(id);
+  refreshAll();
 }
 
 // ===== OUVERTURE ÉVÉNEMENT =====
@@ -821,7 +971,7 @@ function ouvrirPlanSalle(){
 }
 
 // ===== CONTRAT =====
-function genererContrat(){
+async function genererContrat(){
   const c=data.clients.find(x=>x.id===currentEventId);if(!c)return;
   const clientDevis=data.devis.filter(d=>d.clientId===c.id);
   const lastDevis=clientDevis[clientDevis.length-1];
@@ -830,7 +980,11 @@ function genererContrat(){
   const today=new Date().toLocaleDateString('fr-FR');
 
   const contrat={id:'CTR_'+Date.now(),clientId:c.id,date:today,montant:lastDevis?.montant||0,statut:'Généré'};
-  if(!data.contrats.find(ct=>ct.clientId===c.id)){data.contrats.push(contrat);saveAll();renderContrats();}
+  if(!data.contrats.find(ct=>ct.clientId===c.id)){
+    data.contrats.push(contrat);
+    await saveContratDB(contrat);
+    renderContrats();
+  }
 
   const preview=document.getElementById('contratPreview');
   preview.innerHTML=`
@@ -997,14 +1151,16 @@ function addPrestaRow(cid){const c=document.getElementById(cid);const r=document
 function getSelectedPrestations(){const s=[];document.querySelectorAll('input[name="prestation"]:checked').forEach(cb=>s.push(cb.value));return s.join(', ');}
 function getSelectedPrestataires(){const l=[];document.querySelectorAll('.presta-item').forEach(r=>{const cb=r.querySelector('input[type=checkbox]');const n=r.querySelectorAll('input[type=text]')[0]?.value||'';const t=r.querySelector('input[type=tel]')?.value||'';if(cb?.checked&&n)l.push(`${n}${t?' ('+t+')':''}`)});return l.join(' | ');}
 
-function saveDevis(){
+async function saveDevis(){
   const clientId=document.getElementById('d_client').value;
   if(!clientId){alert('Sélectionnez un client');return;}
   const devis={id:'DEV_'+Date.now(),numero:'DEV-'+String(data.devis.length+1).padStart(3,'0'),clientId,date:document.getElementById('d_date').value,validite:document.getElementById('d_validite').value,montant:document.getElementById('d_montant').value,acompte:document.getElementById('d_acompte').value,prestations:getSelectedPrestations(),prestataires:getSelectedPrestataires(),details:document.getElementById('d_details').value,statut:document.getElementById('d_statut').value};
   data.devis.push(devis);
   ['d_date','d_validite','d_montant','d_acompte','d_details'].forEach(id=>document.getElementById(id).value='');
   document.querySelectorAll('input[name="prestation"]').forEach(cb=>cb.checked=false);
-  closeModal('modalNewDevis');saveAll();refreshAll();
+  closeModal('modalNewDevis');
+  await saveDevisDB(devis);
+  refreshAll();
   showToast('✅ Devis créé : '+devis.numero);
 }
 
@@ -1061,13 +1217,15 @@ function renderContrats(){
 }
 
 // ===== PAIEMENTS =====
-function savePaiement(){
+async function savePaiement(){
   const clientId=document.getElementById('p_client').value;
   if(!clientId){alert('Sélectionnez un client');return;}
   const p={id:'PAY_'+Date.now(),clientId,type:document.getElementById('p_type').value,montant:document.getElementById('p_montant').value,date:document.getElementById('p_date').value,mode:document.getElementById('p_mode').value,ref:document.getElementById('p_ref').value,notes:document.getElementById('p_notes').value};
   data.paiements.push(p);
   ['p_montant','p_date','p_ref','p_notes'].forEach(id=>document.getElementById(id).value='');
-  closeModal('modalNewPaiement');saveAll();refreshAll();
+  closeModal('modalNewPaiement');
+  await savePaiementDB(p);
+  refreshAll();
   showToast('✅ Paiement enregistré !');
 }
 
@@ -1090,12 +1248,14 @@ function renderPaiements(){
 function deletePaiement(id){if(!confirm('Supprimer ?'))return;data.paiements=data.paiements.filter(p=>p.id!==id);saveAll();renderPaiements();updateDashboard();}
 
 // ===== REÇUS =====
-function saveRecu(){
+async function saveRecu(){
   const clientId=document.getElementById('r_client').value;
   if(!clientId){alert('Sélectionnez un client');return;}
   const r={id:'REC_'+Date.now(),numero:'REC-'+String(data.recus.length+1).padStart(3,'0'),clientId,montant:document.getElementById('r_montant').value,date:document.getElementById('r_date').value,type:document.getElementById('r_type').value,desc:document.getElementById('r_desc').value};
   data.recus.push(r);
-  closeModal('modalNewRecu');saveAll();renderRecus();
+  closeModal('modalNewRecu');
+  await saveRecuDB(r);
+  renderRecus();
   printReceiptById(r.id);
   showToast('✅ Reçu généré : '+r.numero);
 }
@@ -1139,13 +1299,15 @@ function printReceiptById(id){
 function deleteRecu(id){if(!confirm('Supprimer ?'))return;data.recus=data.recus.filter(r=>r.id!==id);saveAll();renderRecus();}
 
 // ===== POST-EVENT =====
-function savePostEvent(){
+async function savePostEvent(){
   const clientId=document.getElementById('pe_client').value;
   if(!clientId){alert('Sélectionnez un client');return;}
   const pe={id:'PE_'+Date.now(),clientId,note:document.getElementById('pe_note').value,temoignage:document.getElementById('pe_temoignage').value,positif:document.getElementById('pe_positif').value,ameliorer:document.getElementById('pe_ameliorer').value,date:new Date().toISOString().split('T')[0]};
   data.postEvents.push(pe);
-  const c=data.clients.find(x=>x.id===clientId);if(c)c.statut='Clôturé';
-  closeModal('modalPostEvent');saveAll();refreshAll();
+  const c=data.clients.find(x=>x.id===clientId);if(c){c.statut='Clôturé';await updateClientDB(c);}
+  closeModal('modalPostEvent');
+  await savePostEventDB(pe);
+  refreshAll();
   showToast('✅ Rapport post-event enregistré !');
 }
 
@@ -1195,11 +1357,12 @@ function updateClientSelects(){
 function formatDate(d){if(!d)return'-';const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function formatMoney(n){return(parseFloat(n)||0).toLocaleString('fr-FR');}
 
+function refreshAll(){updateDashboard();renderPipeline();renderClients();renderEvenements();renderDevis();renderPaiements();renderRecus();renderPostEvents();renderContrats();updateClientSelects();}
+
 // ===== INIT =====
 loadAll();
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
-setInterval(saveAll,60000);
 </script>
 </body>
 </html>
