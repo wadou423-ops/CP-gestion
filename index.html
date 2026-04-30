@@ -1738,84 +1738,81 @@ function printFicheMateriel(clientId){
   const pr=c.prestataires||{};
   const couleurs=c.couleurs||[];
   const date=c.date?fd(c.date):'/';
-  const cats={photo:'📸 Photo/Vidéo',dj:'🎵 DJ/Animation',traiteur:'🍽️ Traiteur',deco:'🌸 Décoration',mc:'🎤 MC',orchestre:'🎻 Orchestre',chanteur:'🎤 Chanteur',voiture:'🚗 Voiture'};
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><title>Fiche — ${c.nom}</title>
+  const cats={photo:'📸 Photo/Vidéo',dj:'🎵 DJ/Animation',traiteur:'🍽️ Traiteur',mignardises:'🍬 Mignardises',deco:'🌸 Décoration',mc:'🎤 MC',orchestre:'🎻 Orchestre',chanteur:'🎤 Chanteur',chorale:'🎵 Chorale',voiture:'🚗 Voiture'};
+  const planImg=localStorage.getItem('cp_plan_img_'+clientId)||null;
+
+  // Construire le HTML de la fiche
+  let matRows='';
+  mat.forEach(m=>{matRows+=`<tr><td>${m.icon} ${m.name}</td><td class="qty">${m.qty||0}</td></tr>`;});
+
+  let prestaHtml='';
+  Object.entries(cats).forEach(([k,l])=>{
+    const ps=(pr[k]||[]).filter(p=>p&&p.nom);
+    prestaHtml+=`<div class="presta-cat"><div class="pcat-t">${l}</div>`;
+    if(!ps.length)prestaHtml+='<div class="pcat-row" style="color:#A09A93;">—</div>';
+    else ps.forEach(p=>{prestaHtml+=`<div class="pcat-row">${p.nom}${p.tel?' · '+p.tel:''}${p.signe?' ✓':''}</div>`;});
+    prestaHtml+='</div>';
+  });
+
+  const planSection=planImg
+    ?`<img src="${planImg}" style="max-width:100%;max-height:190px;object-fit:contain;"/>`
+    :`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#A09A93;text-align:center;font-size:9px;padding:16px;">
+        <div style="font-size:28px;">🗺️</div>
+        <div>Plan non disponible. Ouvrez le Plan de Salle depuis cet événement<br>et cliquez sur <strong>📸 Enregistrer pour la fiche</strong></div>
+      </div>`;
+
+  const couleursHtml=couleurs.map(col=>`<div style="width:12px;height:12px;border-radius:50%;background:${col};border:1px solid rgba(0,0,0,0.1);display:inline-block;margin-right:4px;"></div>`).join('');
+
+  const html=`<!DOCTYPE html><html><head><title>Fiche — ${c.nom}</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
-  @page{size:A4 landscape;margin:10mm;}
+  @page{size:A4 landscape;margin:8mm;}
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'DM Sans',sans-serif;color:#1C1A17;font-size:9px;background:#fff;}
-  .wrap{padding:6mm;}
-  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:2px solid #B8872A;margin-bottom:10px;}
-  .logo{font-family:'Playfair Display',serif;font-size:16px;color:#B8872A;letter-spacing:3px;}
+  .wrap{padding:4mm;}
+  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:7px;border-bottom:2px solid #B8872A;margin-bottom:8px;}
+  .logo{font-family:'Playfair Display',serif;font-size:15px;color:#B8872A;letter-spacing:3px;}
   .event-name{font-family:'Playfair Display',serif;font-size:13px;color:#1C1A17;text-align:center;}
   .event-meta{font-size:8px;color:#A09A93;text-align:center;margin-top:2px;}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-  .section{background:#FAFAF8;border:1px solid #EEECE8;border-radius:6px;padding:8px;}
-  .stitle{font-size:8px;color:#B8872A;letter-spacing:2px;font-weight:600;margin-bottom:6px;text-transform:uppercase;border-bottom:1px solid rgba(184,135,42,0.2);padding-bottom:4px;}
-  /* PLAN DE SALLE BOX */
-  .plan-box{background:#fff;border:1px solid #EEECE8;border-radius:4px;height:130px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;}
-  .plan-lbl{font-size:8px;color:#A09A93;}
-  .plan-info{font-size:9px;color:#B8872A;font-weight:600;}
-  /* TABLES VISUAL */
-  .tables-mini{display:flex;flex-wrap:wrap;gap:3px;padding:6px;}
-  .t-mini{width:22px;height:22px;border:1.5px solid #B8872A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;color:#B8872A;font-weight:700;}
-  .t-mini.maries{background:#fff9f0;border-width:2px;font-size:6px;}
+  .plan-section{margin-bottom:8px;border:1px solid #EEECE8;border-radius:6px;overflow:hidden;}
+  .stitle{font-size:8px;color:#B8872A;letter-spacing:2px;font-weight:600;padding:5px 9px;background:#FAFAF8;text-transform:uppercase;border-bottom:1px solid #EEECE8;}
+  .plan-box{width:100%;height:190px;background:#FFFEF9;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .section{border:1px solid #EEECE8;border-radius:5px;overflow:hidden;}
   table{width:100%;border-collapse:collapse;font-size:8px;}
-  th{background:#1C1A17;color:#fff;padding:4px 6px;text-align:left;font-size:7.5px;letter-spacing:0.5px;}
+  th{background:#1C1A17;color:#fff;padding:4px 6px;text-align:left;font-size:7.5px;}
   td{padding:4px 6px;border-bottom:1px solid #EEECE8;}
   tr:nth-child(even) td{background:#FAFAF8;}
   .qty{font-weight:700;color:#B8872A;text-align:right;}
-  .presta-cat{margin-bottom:6px;}
-  .pcat-t{font-size:7.5px;color:#B8872A;font-weight:600;margin-bottom:2px;}
-  .pcat-row{font-size:8px;color:#3D3A35;padding:1px 0;}
-  .equipe-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:6px;}
-  .eq-item{background:#fff;border:1px solid #EEECE8;border-radius:3px;padding:5px;text-align:center;}
-  .eq-num{font-size:14px;font-weight:700;color:#B8872A;}
+  .presta-cat{padding:3px 6px;border-bottom:1px solid #EEECE8;}
+  .pcat-t{font-size:7.5px;color:#B8872A;font-weight:600;margin-bottom:1px;}
+  .pcat-row{font-size:8px;color:#3D3A35;}
+  .equipe-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:5px;}
+  .eq-item{background:#FAFAF8;border:1px solid #EEECE8;border-radius:3px;padding:4px;text-align:center;}
+  .eq-num{font-size:13px;font-weight:700;color:#B8872A;}
   .eq-lbl{font-size:7px;color:#A09A93;}
-  .footer{text-align:center;font-size:7.5px;color:#A09A93;padding-top:6px;border-top:1px solid #EEECE8;margin-top:8px;}
-  .couleurs{display:flex;gap:5px;align-items:center;}
-  .csw{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);}
+  .footer{text-align:center;font-size:7.5px;color:#A09A93;padding-top:5px;border-top:1px solid #EEECE8;margin-top:7px;}
   </style></head><body><div class="wrap">
+
   <div class="header">
-    <div><div class="logo">CRÉATIVE PLANNER</div><div style="font-size:7.5px;color:#A09A93;font-style:italic;">Nous créons, vous vivez!</div></div>
+    <div><div class="logo">CRÉATIVE PLANNER</div><div style="font-size:7px;color:#A09A93;font-style:italic;">Nous créons, vous vivez!</div></div>
     <div><div class="event-name">${c.nom}</div><div class="event-meta">${c.type} · ${date} · ${c.lieu||''} · ${c.package||''} · ${c.offre}</div></div>
-    <div class="couleurs">${couleurs.map(col=>`<div class="csw" style="background:${col};"></div>`).join('')}${couleurs.length?`<span style="font-size:7px;color:#A09A93;margin-left:3px;">Couleurs</span>`:''}</div>
+    <div>${couleursHtml}</div>
   </div>
 
-  <!-- PLAN DE SALLE EN HAUT -->
-  <div class="section" style="margin-bottom:10px;">
+  <div class="plan-section">
     <div class="stitle">🗺️ Plan de la salle — ${c.salleConfig?.longueur||20}m × ${c.salleConfig?.largeur||15}m</div>
-    <div class="plan-box">
-      <div class="tables-mini">
-        ${mat.find(m=>m.id==='tables')?`
-          <div class="t-mini maries">💍</div>
-          ${Array(Math.max(0,Math.ceil((parseInt(c.package)||100)/8))).fill(0).map((_, i)=>`<div class="t-mini">${i+1}</div>`).join('')}
-        `:'<div class="plan-lbl">Plan de salle non généré</div>'}
-      </div>
-      <div class="plan-info">${c.package||''} · ${mat.find(m=>m.id==='tables')?.qty||Math.ceil((parseInt(c.package)||100)/8)} tables + table des mariés</div>
-      <div class="plan-lbl">Ouvrir Plan de Salle pour le détail complet</div>
-    </div>
+    <div class="plan-box">${planSection}</div>
   </div>
 
   <div class="cols">
-    <!-- MATÉRIEL -->
     <div class="section">
       <div class="stitle">🪑 Inventaire matériel</div>
-      <table><thead><tr><th>Élément</th><th style="text-align:right;">Quantité</th></tr></thead>
-      <tbody>${mat.map(m=>`<tr><td>${m.icon} ${m.name}</td><td class="qty">${m.qty||0}</td></tr>`).join('')}</tbody></table>
+      <table><thead><tr><th>Élément</th><th style="text-align:right;">Quantité</th></tr></thead><tbody>${matRows}</tbody></table>
     </div>
-
-    <!-- PRESTATAIRES -->
     <div class="section">
       <div class="stitle">👥 Prestataires & Équipe</div>
-      ${Object.entries(cats).map(([k,l])=>{
-        const ps=(pr[k]||[]).filter(p=>p&&p.nom);
-        if(!ps.length)return`<div class="presta-cat"><div class="pcat-t">${l}</div><div class="pcat-row" style="color:#A09A93;">—</div></div>`;
-        return`<div class="presta-cat"><div class="pcat-t">${l}</div>${ps.map(p=>`<div class="pcat-row">${p.nom}${p.tel?' · '+p.tel:''}</div>`).join('')}</div>`;
-      }).join('')}
+      ${prestaHtml}
       <div class="equipe-box">
         <div class="eq-item"><div class="eq-num">${c.nb_hotesses||0}</div><div class="eq-lbl">👗 Hôtesses</div></div>
         <div class="eq-item"><div class="eq-num">${c.nb_traiteur||0}</div><div class="eq-lbl">🍽️ Traiteur</div></div>
@@ -1824,10 +1821,14 @@ function printFicheMateriel(clientId){
     </div>
   </div>
 
-  <div class="footer">Créative Planner · creativeplanner03@gmail.com · +225 07 78 16 01 69 · Abidjan, Côte d'Ivoire — ${new Date().toLocaleDateString('fr-FR')}</div>
-  </div><script>window.print();<\/script></body></html>`);
+  <div class="footer">Créative Planner · creativeplanner03@gmail.com · +225 07 78 16 01 69 · Abidjan · ${new Date().toLocaleDateString('fr-FR')}</div>
+  </div><script>window.print();<\/script></body></html>`;
+
+  const w=window.open('','_blank');
+  w.document.write(html);
   toast('Fiche PDF générée','ok');
 }
+
 
 // ===== PIPELINE =====
 function renderPipeline(){
