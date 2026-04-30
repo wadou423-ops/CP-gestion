@@ -737,18 +737,18 @@ async function deleteClientSB(id){
 // ===== MATERIEL AUTO =====
 function defaultMateriel(){
   return [
-    {id:'tables',icon:'🪑',name:'Tables',qty:0,ratio:0.125},
+    {id:'tables',icon:'🪑',name:'Tables',qty:0,ratio:0},// calculé séparément
     {id:'chaises',icon:'🪑',name:'Chaises',qty:0,ratio:1},
-    {id:'couverts',icon:'🍽️',name:'Couverts (sets)',qty:0,ratio:1.1},
+    {id:'couverts',icon:'🍽️',name:'Couverts (sets)',qty:0,ratio:1},
     {id:'verres',icon:'🥂',name:'Verres',qty:0,ratio:2},
-    {id:'fourchettes',icon:'🍴',name:'Fourchettes',qty:0,ratio:1.1},
-    {id:'couteaux',icon:'🔪',name:'Couteaux',qty:0,ratio:1.1},
-    {id:'cuilleres',icon:'🥄',name:'Cuillères',qty:0,ratio:1.1},
-    {id:'assiettes',icon:'🍽️',name:'Assiettes',qty:0,ratio:1.1},
-    {id:'nappes',icon:'🧺',name:'Nappes (tables)',qty:0,ratio:0.125},
-    {id:'serviettes',icon:'🧻',name:'Serviettes',qty:0,ratio:1.2},
-    {id:'centres',icon:'🌸',name:'Centres de table',qty:0,ratio:0.125},
-    {id:'bougies',icon:'🕯️',name:'Bougies',qty:0,ratio:0.5},
+    {id:'fourchettes',icon:'🍴',name:'Fourchettes',qty:0,ratio:1},
+    {id:'couteaux',icon:'🔪',name:'Couteaux',qty:0,ratio:1},
+    {id:'cuilleres',icon:'🥄',name:'Cuillères',qty:0,ratio:1},
+    {id:'assiettes',icon:'🍽️',name:'Assiettes',qty:0,ratio:1},
+    {id:'nappes',icon:'🧺',name:'Nappes (tables)',qty:0,ratio:0},// calculé avec tables
+    {id:'serviettes',icon:'🧻',name:'Serviettes',qty:0,ratio:1},
+    {id:'centres',icon:'🌸',name:'Centres de table',qty:0,ratio:0},// calculé avec tables
+    {id:'bougies',icon:'🕯️',name:'Bougies',qty:0,ratio:0},
     {id:'podium',icon:'🎤',name:'Podium / Scène',qty:0,ratio:0},
     {id:'sono',icon:'🔊',name:'Sono / Micros',qty:0,ratio:0},
   ];
@@ -756,8 +756,19 @@ function defaultMateriel(){
 
 function autoCalcMateriel(c){
   const inv=parseInt(c.package)||100;
+  const placesParTable=8;
+  const nbTables=Math.ceil(inv/placesParTable)+1;// +1 table des mariés
   if(!c.materiel)c.materiel=defaultMateriel();
   c.materiel=c.materiel.map(m=>{
+    // Égal au nombre d'invités
+    if(['chaises','couverts','fourchettes','couteaux','cuilleres','assiettes','serviettes'].includes(m.id))
+      return{...m,qty:inv};
+    // Calculé selon les tables
+    if(['tables','nappes','centres'].includes(m.id))
+      return{...m,qty:nbTables};
+    // Double les invités (2 verres par personne)
+    if(m.id==='verres')return{...m,qty:inv*2};
+    // Ratio libre
     if(m.ratio>0)return{...m,qty:Math.ceil(inv*m.ratio)};
     return m;
   });
@@ -1196,27 +1207,38 @@ async function addMat(clientId){
 function renderPrestataires(c){
   const pr=c.prestataires||{};
   const cats=[
-    {k:'photo',l:'📸 Photo / Vidéo'},{k:'dj',l:'🎵 DJ / Animation'},
-    {k:'traiteur',l:'🍽️ Traiteur'},{k:'deco',l:'🌸 Décoration / Fleurs'},
-    {k:'effets',l:'✨ Effets spéciaux'},{k:'lieu',l:'🏛️ Lieu / Salle'},
-    {k:'mc',l:'🎤 Maître de cérémonie'},{k:'orchestre',l:'🎻 Orchestre'},
-    {k:'chanteur',l:'🎤 Chanteur / Chorale'},{k:'voiture',l:'🚗 Location de voiture'},
+    {k:'photo',l:'📸 Photo / Vidéo'},
+    {k:'dj',l:'🎵 DJ / Animation'},
+    {k:'traiteur',l:'🍽️ Traiteur'},
+    {k:'mignardises',l:'🍬 Traiteur Mignardises'},
+    {k:'deco',l:'🌸 Décoration / Fleurs'},
+    {k:'effets',l:'✨ Effets spéciaux'},
+    {k:'lieu',l:'🏛️ Lieu / Salle'},
+    {k:'mc',l:'🎤 Maître de cérémonie'},
+    {k:'orchestre',l:'🎻 Orchestre'},
+    {k:'chanteur',l:'🎤 Chanteur'},
+    {k:'chorale',l:'🎵 Chorale'},
+    {k:'voiture',l:'🚗 Location de voiture'},
   ];
   return `<div class="card">
-    <div class="card-hdr"><div class="card-title">Prestataires</div>
+    <div class="card-hdr"><div class="card-title">Prestataires de l'événement</div>
       <button class="btn btn-gold btn-sm" onclick="savePresta('${c.id}')">💾 Sauvegarder</button>
     </div>
-    ${cats.map(cat=>`
-      <div class="presta-sec">
-        <div class="presta-sec-title">${cat.l}</div>
-        ${(pr[cat.k]||[{nom:'',tel:'',email:''}]).map((p,pi)=>`
+    <p style="font-size:12px;color:var(--ink4);margin-bottom:16px;">Renseignez les coordonnées de chaque prestataire retenu.</p>
+    ${cats.map(cat=>{
+      const items=pr[cat.k]||[{nom:'',tel:'',email:''}];
+      const hasData=items.some(p=>p.nom);
+      return `<div class="presta-sec">
+        <div class="presta-sec-title">${cat.l}${hasData?` <span style="color:var(--success);font-size:10px;">✓ Renseigné</span>`:'<span style="color:var(--ink4);font-size:10px;">— Non renseigné</span>'}</div>
+        ${items.map((p,pi)=>`
           <div class="presta-row">
-            <input type="text" placeholder="Nom" value="${p.nom||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'nom',this.value)">
+            <input type="text" placeholder="Nom / Société" value="${p.nom||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'nom',this.value)">
             <input type="tel" placeholder="Téléphone" value="${p.tel||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'tel',this.value)">
             <input type="email" placeholder="Email" value="${p.email||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'email',this.value)">
           </div>`).join('')}
-        <div class="presta-add" onclick="addPrestaLine('${c.id}','${cat.k}')">+ Ajouter</div>
-      </div>`).join('')}
+        <div class="presta-add" onclick="addPrestaLine('${c.id}','${cat.k}')">+ Ajouter un contact</div>
+      </div>`;
+    }).join('')}
   </div>`;
 }
 
