@@ -122,11 +122,17 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
 
 /* TAPIS ROUGE */
 .tapis-el{position:absolute;cursor:move;user-select:none;z-index:3;}
-.tapis-inner{background:linear-gradient(135deg,#8B0000,#CC0000,#8B0000);border:3px solid #FFD700;border-radius:3px;display:flex;align-items:center;justify-content:center;}
+.tapis-inner{border-radius:3px;display:flex;align-items:center;justify-content:center;}
 .tapis-lbl{font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:2px;writing-mode:vertical-rl;text-orientation:mixed;}
-.tapis-resize{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;background:#FFD700;border-radius:50%;cursor:se-resize;z-index:10;opacity:0;}
+.tapis-resize{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;border-radius:50%;cursor:se-resize;z-index:10;opacity:0;}
 .tapis-el.selected .tapis-resize{opacity:1;}
-.tapis-el.selected .tapis-inner{box-shadow:0 0 0 2px rgba(255,215,0,0.5);}
+.tapis-el.selected .tapis-inner{outline:2px solid rgba(255,215,0,0.6);}
+
+/* GRILLE & REPÈRES */
+#gridOverlay{position:absolute;inset:0;pointer-events:none;z-index:2;display:none;}
+#centerOverlay{position:absolute;inset:0;pointer-events:none;z-index:2;display:none;}
+#rulerH{position:absolute;top:-18px;left:0;right:0;height:18px;background:rgba(26,26,26,0.85);pointer-events:none;z-index:8;display:none;overflow:hidden;}
+#rulerV{position:absolute;left:-18px;top:0;bottom:0;width:18px;background:rgba(26,26,26,0.85);pointer-events:none;z-index:8;display:none;overflow:hidden;}
 
 /* TOOLTIP */
 .ttip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid var(--gold);border-radius:6px;padding:8px 10px;min-width:130px;z-index:100;display:none;pointer-events:none;}
@@ -155,8 +161,12 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
 .modal textarea{width:100%;height:100px;padding:8px 10px;background:var(--dark3);border:1px solid var(--dark4);border-radius:5px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;margin-bottom:10px;}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
 
-/* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--dark2);border:1px solid var(--gold);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--text);z-index:9999;letter-spacing:0.5px;animation:toastIn 0.3s;}
+/* REPÈRES DE CENTRAGE */
+.guide-h{position:absolute;left:0;right:0;height:1px;background:rgba(52,152,219,0.5);pointer-events:none;z-index:20;display:none;}
+.guide-v{position:absolute;top:0;bottom:0;width:1px;background:rgba(52,152,219,0.5);pointer-events:none;z-index:20;display:none;}
+.guide-h.visible,.guide-v.visible{display:block;}
+.snap-label{position:absolute;background:rgba(52,152,219,0.85);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:21;display:none;letter-spacing:1px;}
+.snap-label.visible{display:block;}background:var(--dark2);border:1px solid var(--gold);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--text);z-index:9999;letter-spacing:0.5px;animation:toastIn 0.3s;}
 @keyframes toastIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 </style>
 </head>
@@ -171,7 +181,7 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
   <div class="topbar-actions" style="flex-wrap:wrap;">
     <button class="tbtn tbtn-maries" onclick="addTableMaries()">💍 Table des Mariés</button>
     <button class="tbtn tbtn-ghost" onclick="genererTablesAuto()">⚡ Générer tables</button>
-    <button class="tbtn tbtn-ghost" onclick="previewCalc()">🔢 Calculer</button>
+    <button class="tbtn tbtn-ghost" onclick="switchTab('calc');previewCalc()">🔢 Calculer</button>
     <button class="tbtn tbtn-ghost" onclick="printPlan()">🖨️ Imprimer</button>
     <button class="tbtn tbtn-ghost" onclick="saveData()">💾 Sauvegarder</button>
     <button class="tbtn tbtn-ghost" onclick="clearAll()">🗑️ Effacer tout</button>
@@ -212,10 +222,32 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
 
       <div class="slabel">TAPIS & DÉCO</div>
       <div class="el-grid">
-        <div class="el-btn special" onclick="addTapisRouge()"><div class="el-btn-icon">🟥</div><div class="el-btn-label">TAPIS ROUGE</div></div>
         <div class="el-btn" onclick="addDeco('🌸','FLEURS',50,50,true)"><div class="el-btn-icon">🌸</div><div class="el-btn-label">FLEURS</div></div>
         <div class="el-btn" onclick="addDeco('🕯️','BOUGIES',40,40,true)"><div class="el-btn-icon">🕯️</div><div class="el-btn-label">BOUGIES</div></div>
         <div class="el-btn" onclick="addDeco('🌿','VERDURE',50,50,true)"><div class="el-btn-icon">🌿</div><div class="el-btn-label">VERDURE</div></div>
+      </div>
+      <div style="margin-top:6px;margin-bottom:8px;">
+        <div style="font-size:9px;color:var(--text-muted);letter-spacing:1px;margin-bottom:6px;">🟥 TAPIS — COULEUR</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+          <label style="font-size:9px;color:var(--text-dim);width:50px;">Tapis</label>
+          <input type="color" id="tapisColor" value="#CC0000" style="width:28px;height:26px;border:none;border-radius:4px;cursor:pointer;">
+          <label style="font-size:9px;color:var(--text-dim);width:50px;">Bordure</label>
+          <input type="color" id="tapisBorder" value="#FFD700" style="width:28px;height:26px;border:none;border-radius:4px;cursor:pointer;">
+        </div>
+        <button onclick="addTapisRouge()" style="width:100%;padding:7px;background:linear-gradient(135deg,#8B0000,#CC0000);color:#FFD700;border:2px solid #FFD700;border-radius:4px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:1px;">🟥 AJOUTER TAPIS</button>
+      </div>
+
+      <div class="slabel">REPÈRES</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text-dim);cursor:pointer;">
+          <input type="checkbox" id="showGrid" style="accent-color:var(--gold);" onchange="toggleGrid()"> Grille de repères
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text-dim);cursor:pointer;">
+          <input type="checkbox" id="showCenter" style="accent-color:var(--gold);" onchange="toggleCenter()"> Axes centraux
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text-dim);cursor:pointer;">
+          <input type="checkbox" id="showRuler" style="accent-color:var(--gold);" onchange="toggleRuler()"> Règle (mètres)
+        </label>
       </div>
 
       <div class="slabel">ENTRÉES & SERVICES</div>
@@ -224,14 +256,6 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
         <div class="el-btn" onclick="addDeco('🚻','WC',40,40,false)"><div class="el-btn-icon">🚻</div><div class="el-btn-label">TOILETTES</div></div>
         <div class="el-btn" onclick="addDeco('🅿️','PARKING',60,40,false)"><div class="el-btn-icon">🅿️</div><div class="el-btn-label">PARKING</div></div>
         <div class="el-btn" onclick="addDeco('🛋️','LOUNGE',70,50,true)"><div class="el-btn-icon">🛋️</div><div class="el-btn-label">LOUNGE</div></div>
-      </div>
-
-      <div class="slabel">PRESTATAIRES</div>
-      <div class="el-grid">
-        <div class="el-btn" onclick="addDeco('🎻','ORCHESTRE',100,60,true)"><div class="el-btn-icon">🎻</div><div class="el-btn-label">ORCHESTRE</div></div>
-        <div class="el-btn" onclick="addDeco('🎤','CHANTEUR',60,50,true)"><div class="el-btn-icon">🎤</div><div class="el-btn-label">CHANTEUR</div></div>
-        <div class="el-btn" onclick="addDeco('🎵','CHORALE',80,50,true)"><div class="el-btn-icon">🎵</div><div class="el-btn-label">CHORALE</div></div>
-        <div class="el-btn" onclick="addDeco('🚗','VOITURE',80,50,true)"><div class="el-btn-icon">🚗</div><div class="el-btn-label">LOCATION VOITURE</div></div>
       </div>
 
       <div class="slabel">CONFIG TABLES</div>
@@ -333,7 +357,19 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
       <div class="cc-btn" onclick="centerView()" title="Centrer">⊕</div>
     </div>
     <div id="viewport">
-      <div id="canvas" style="width:1400px;height:860px;background:#FFFEF9;"></div>
+      <div id="canvas" style="width:1400px;height:860px;background:#FFFEF9;position:relative;">
+        <div class="guide-h" id="guideH"></div>
+        <div class="guide-v" id="guideV"></div>
+        <div class="snap-label" id="snapLabel"></div>
+        <canvas id="gridCanvas" style="position:absolute;inset:0;pointer-events:none;z-index:2;display:none;"></canvas>
+        <div id="centerLines" style="position:absolute;inset:0;pointer-events:none;z-index:2;display:none;">
+          <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(201,150,58,0.4);border-top:1px dashed rgba(201,150,58,0.5);"></div>
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(201,150,58,0.4);border-left:1px dashed rgba(201,150,58,0.5);"></div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border:2px solid var(--gold);border-radius:50%;background:rgba(201,150,58,0.15);"></div>
+          <div style="position:absolute;top:calc(50% + 10px);left:50%;transform:translateX(-50%);font-size:9px;color:rgba(201,150,58,0.7);letter-spacing:1px;white-space:nowrap;">CENTRE</div>
+        </div>
+        <div id="rulerOverlay" style="position:absolute;inset:0;pointer-events:none;z-index:3;display:none;"></div>
+      </div>
     </div>
     <div class="room-label" id="roomLabel">20m × 15m</div>
   </div>
@@ -442,6 +478,9 @@ function updateSalleDimensions(){
   cv.style.height=Math.max(500,w*SCALE)+'px';
   document.getElementById('roomLabel').textContent=l+'m × '+w+'m';
   applyShapeStyle();
+  // Redessiner la grille si active
+  if(document.getElementById('showGrid')?.checked)toggleGrid();
+  if(document.getElementById('showRuler')?.checked)toggleRuler();
 }
 
 function selectShape(s){
@@ -732,12 +771,14 @@ function renderDeco(d){
   document.getElementById('canvas').appendChild(el);
 }
 
-// ===== TAPIS ROUGE =====
+// ===== TAPIS ROUGE (avec couleur personnalisable) =====
 function addTapisRouge(){
+  const color=document.getElementById('tapisColor')?.value||'#CC0000';
+  const border=document.getElementById('tapisBorder')?.value||'#FFD700';
   const id='TAPIS_'+Date.now();
-  const t={id,x:200,y:400,w:80,h:300};
+  const t={id,x:200,y:400,w:80,h:300,color,border};
   tapis.push(t);renderTapis(t);
-  showToast('🟥 Tapis rouge ajouté — redimensionnez avec les poignées !');
+  showToast('🟥 Tapis ajouté — redimensionnez avec les poignées !');
 }
 
 function renderTapis(t){
@@ -745,14 +786,17 @@ function renderTapis(t){
   const el=document.createElement('div');
   el.className='tapis-el';el.id=t.id;
   el.style.cssText=`left:${t.x}px;top:${t.y}px;`;
+  const col=t.color||'#CC0000';
+  const brd=t.border||'#FFD700';
 
   const inner=document.createElement('div');
   inner.className='tapis-inner';
-  inner.style.cssText=`width:${t.w}px;height:${t.h}px;`;
-  const lbl=document.createElement('div');lbl.className='tapis-lbl';lbl.textContent='TAPIS ROUGE';
+  inner.style.cssText=`width:${t.w}px;height:${t.h}px;background:linear-gradient(135deg,${col}cc,${col},${col}cc);border:3px solid ${brd};`;
+  const lbl=document.createElement('div');lbl.className='tapis-lbl';lbl.style.color=brd;lbl.textContent='TAPIS';
   inner.appendChild(lbl);
 
   const rh=document.createElement('div');rh.className='tapis-resize';
+  rh.style.cssText=`background:${brd};`;
   rh.addEventListener('mousedown',e=>startResize(e,t.id,'se-tapis'));
   inner.appendChild(rh);
 
@@ -762,6 +806,66 @@ function renderTapis(t){
   el.addEventListener('dblclick',()=>{if(confirm('Supprimer le tapis ?')){tapis=tapis.filter(x=>x.id!==t.id);el.remove();}});
   document.getElementById('canvas').appendChild(el);
 }
+
+// ===== GRILLE & REPÈRES =====
+function toggleGrid(){
+  const show=document.getElementById('showGrid').checked;
+  const cv=document.getElementById('canvas');
+  const cnv=document.getElementById('gridCanvas');
+  if(show){
+    cnv.style.display='block';
+    const w=parseInt(cv.style.width)||1400;
+    const h=parseInt(cv.style.height)||860;
+    cnv.width=w;cnv.height=h;
+    cnv.style.width=w+'px';cnv.style.height=h+'px';
+    const ctx=cnv.getContext('2d');
+    ctx.clearRect(0,0,w,h);
+    // Grille tous les 60px (= 1m)
+    ctx.strokeStyle='rgba(201,150,58,0.15)';
+    ctx.lineWidth=1;
+    for(let x=0;x<=w;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for(let y=0;y<=h;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    // Grille principale tous les 300px (= 5m)
+    ctx.strokeStyle='rgba(201,150,58,0.3)';
+    ctx.lineWidth=1;
+    for(let x=0;x<=w;x+=300){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for(let y=0;y<=h;y+=300){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    cnv.style.display='block';
+  } else {
+    cnv.style.display='none';
+  }
+}
+
+function toggleCenter(){
+  const show=document.getElementById('showCenter').checked;
+  document.getElementById('centerLines').style.display=show?'block':'none';
+}
+
+function toggleRuler(){
+  const show=document.getElementById('showRuler').checked;
+  const ruler=document.getElementById('rulerOverlay');
+  if(show){
+    ruler.style.display='block';
+    const cv=document.getElementById('canvas');
+    const w=parseInt(cv.style.width)||1400;
+    const h=parseInt(cv.style.height)||860;
+    const SCALE=60;
+    let html='';
+    // Règle horizontale
+    for(let m=0;m*SCALE<=w;m++){
+      html+=`<div style="position:absolute;left:${m*SCALE}px;top:0;font-size:8px;color:rgba(201,150,58,0.6);transform:translateX(-50%);white-space:nowrap;background:rgba(255,255,255,0.8);padding:1px 2px;border-radius:2px;">${m}m</div>`;
+      if(m>0)html+=`<div style="position:absolute;left:${m*SCALE}px;top:0;bottom:0;width:1px;background:rgba(201,150,58,0.05);"></div>`;
+    }
+    // Règle verticale
+    for(let m=1;m*SCALE<=h;m++){
+      html+=`<div style="position:absolute;top:${m*SCALE}px;left:0;font-size:8px;color:rgba(201,150,58,0.6);transform:translateY(-50%);white-space:nowrap;background:rgba(255,255,255,0.8);padding:1px 2px;border-radius:2px;">${m}m</div>`;
+    }
+    ruler.innerHTML=html;
+  } else {
+    ruler.style.display='none';ruler.innerHTML='';
+  }
+}
+
 
 // ===== SELECT =====
 function selectTable(id){
@@ -924,14 +1028,54 @@ function makeDraggable(el,id,type){
 function onMouseMove(e){
   if(dragEl){
     const cvRect=document.getElementById('canvas').getBoundingClientRect();
-    const x=(e.clientX-cvRect.left)/zoomLevel-dragOffX;
-    const y=(e.clientY-cvRect.top)/zoomLevel-dragOffY;
-    dragEl.el.style.left=Math.max(0,x)+'px';
-    dragEl.el.style.top=Math.max(0,y)+'px';
-    // Update data
-    if(dragEl.type==='table'){const t=tables.find(x=>x.id===dragEl.id);if(t){t.x=Math.max(0,x);t.y=Math.max(0,y);}}
-    else if(dragEl.type==='deco'){const d=decos.find(x=>x.id===dragEl.id);if(d){d.x=Math.max(0,x);d.y=Math.max(0,y);}}
-    else if(dragEl.type==='tapis'){const t=tapis.find(x=>x.id===dragEl.id);if(t){t.x=Math.max(0,x);t.y=Math.max(0,y);}}
+    const cv=document.getElementById('canvas');
+    const cw=parseInt(cv.style.width)||1400;
+    const ch=parseInt(cv.style.height)||860;
+    let x=(e.clientX-cvRect.left)/zoomLevel-dragOffX;
+    let y=(e.clientY-cvRect.top)/zoomLevel-dragOffY;
+
+    // Récupérer dimensions de l'élément
+    let elW=60,elH=60;
+    if(dragEl.type==='table'){const t=tables.find(x=>x.id===dragEl.id);if(t){elW=t.w;elH=t.h;}}
+    else if(dragEl.type==='deco'){const d=decos.find(x=>x.id===dragEl.id);if(d){elW=d.w;elH=d.h;}}
+
+    // Centre de l'élément
+    const elCX=x+elW/2;
+    const elCY=y+elH/2;
+    const SNAP=8;
+
+    // Snap au centre de la salle
+    const guides={h:null,v:null};
+    if(Math.abs(elCY-ch/2)<SNAP){y=ch/2-elH/2;guides.h=ch/2;}
+    if(Math.abs(elCX-cw/2)<SNAP){x=cw/2-elW/2;guides.v=cw/2;}
+
+    // Afficher guides
+    const guideH=document.getElementById('guideH');
+    const guideV=document.getElementById('guideV');
+    const snapLbl=document.getElementById('snapLabel');
+    if(guideH){
+      if(guides.h!==null){guideH.style.top=guides.h+'px';guideH.classList.add('visible');}
+      else guideH.classList.remove('visible');
+    }
+    if(guideV){
+      if(guides.v!==null){guideV.style.left=guides.v+'px';guideV.classList.add('visible');}
+      else guideV.classList.remove('visible');
+    }
+    if(snapLbl){
+      if(guides.h!==null||guides.v!==null){
+        snapLbl.textContent=guides.h!==null&&guides.v!==null?'⊕ CENTRÉ':'◎ '+(guides.h!==null?'CENTRE H':'CENTRE V');
+        snapLbl.style.left=(x+elW/2-30)+'px';
+        snapLbl.style.top=(y-22)+'px';
+        snapLbl.classList.add('visible');
+      } else snapLbl.classList.remove('visible');
+    }
+
+    x=Math.max(0,x);y=Math.max(0,y);
+    dragEl.el.style.left=x+'px';
+    dragEl.el.style.top=y+'px';
+    if(dragEl.type==='table'){const t=tables.find(x=>x.id===dragEl.id);if(t){t.x=x;t.y=y;}}
+    else if(dragEl.type==='deco'){const d=decos.find(x=>x.id===dragEl.id);if(d){d.x=x;d.y=y;}}
+    else if(dragEl.type==='tapis'){const t=tapis.find(x=>x.id===dragEl.id);if(t){t.x=x;t.y=y;}}
     return;
   }
   if(resizingEl){
@@ -940,8 +1084,6 @@ function onMouseMove(e){
     if(resizingEl.rtype==='se'||resizingEl.rtype==='se-deco'||resizingEl.rtype==='se-tapis'){
       const newW=Math.max(40,resizeStartW+dx);
       const newH=Math.max(40,resizeStartH+dy);
-      resizingEl.el.style.width=newW+'px';
-      // Update shape inside
       if(resizingEl.rtype==='se'){
         const t=tables.find(x=>x.id===resizingEl.id);
         if(t){t.w=newW;t.h=newH;updateTableEl(t);}
@@ -957,7 +1099,13 @@ function onMouseMove(e){
 }
 
 function onMouseUp(e){
-  if(dragEl){dragEl.el.style.zIndex='';dragEl=null;}
+  if(dragEl){
+    dragEl.el.style.zIndex='';dragEl=null;
+    // Cacher les guides
+    document.getElementById('guideH')?.classList.remove('visible');
+    document.getElementById('guideV')?.classList.remove('visible');
+    document.getElementById('snapLabel')?.classList.remove('visible');
+  }
   if(resizingEl){resizingEl=null;}
 }
 
