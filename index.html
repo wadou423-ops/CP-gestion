@@ -942,6 +942,17 @@ function renderMaterielTab(c){
         </div>`).join('')}
     </div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--bg2);">
+      <div style="font-size:11px;color:var(--ink4);letter-spacing:0.5px;font-weight:500;margin-bottom:12px;">ÉQUIPE ÉVÉNEMENT</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        ${[['nb_hotesses','👗','Hôtesses'],['nb_traiteur','🍽️','Personnel traiteur'],['nb_securite','🛡️','Agents sécurité']].map(([key,icon,label])=>`
+        <div style="background:var(--off);border:1px solid var(--bg2);border-radius:var(--radius-sm);padding:12px;">
+          <div style="font-size:20px;margin-bottom:6px;">${icon}</div>
+          <div style="font-size:11px;font-weight:500;color:var(--ink);margin-bottom:6px;">${label}</div>
+          <input type="number" value="${c[key]||0}" min="0" placeholder="0" oninput="updateEquipe('${c.id}','${key}',this.value)" style="width:100%;padding:7px 10px;background:var(--white);border:1.5px solid var(--bg2);border-radius:var(--radius-sm);font-size:14px;font-weight:600;color:var(--gold);text-align:center;font-family:'DM Sans',sans-serif;outline:none;">
+        </div>`).join('')}
+      </div>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--bg2);">
       <div style="font-size:11px;color:var(--ink4);letter-spacing:0.5px;font-weight:500;margin-bottom:10px;">AJOUTER UN ÉLÉMENT</div>
       <div style="display:flex;gap:8px;">
         <input type="text" id="newMatName" placeholder="Nom de l'élément" style="flex:1;padding:9px 12px;background:var(--off);border:1.5px solid var(--bg2);border-radius:var(--radius-sm);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;">
@@ -958,6 +969,12 @@ async function updateMateriel(clientId,idx,delta){
   await updateClientDB(c);
   // Refresh juste l'onglet matériel
   document.getElementById('etab-materiel').innerHTML=renderMaterielTab(c);
+}
+
+async function updateEquipe(clientId,key,value){
+  const c=data.clients.find(x=>x.id===clientId);if(!c)return;
+  c[key]=parseInt(value)||0;
+  await updateClientDB(c);
 }
 
 async function addMateriel(clientId){
@@ -1200,85 +1217,133 @@ function printFicheMateriel(clientId){
   const couleurs=c.couleurs||[];
   const date=c.date?formatDate(c.date):'/';
   const w=window.open('','_blank');
-  const cats={photo:'📸 Photo / Vidéo',dj:'🎵 DJ / Animation',traiteur:'🍽️ Traiteur',deco:'🌸 Décoration',effets:'✨ Effets spéciaux',lieu:'🏛️ Lieu / Salle',mc:'🎤 Maître de cérémonie'};
+  const cats={photo:'📸 Photo / Vidéo',dj:'🎵 DJ / Animation',traiteur:'🍽️ Traiteur',deco:'🌸 Décoration',effets:'✨ Effets spéciaux',lieu:'🏛️ Lieu / Salle',mc:'🎤 Maître de cérémonie',hotesses:'👗 Hôtesses',securite:'🛡️ Sécurité'};
 
-  w.document.write(`<!DOCTYPE html><html><head><title>Fiche Matériel — ${c.nom}</title>
+  w.document.write(`<!DOCTYPE html><html><head><title>Fiche — ${c.nom}</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
-  @page{size:A4 landscape;margin:12mm;}
+  @page{size:A4 landscape;margin:10mm;}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'DM Sans',sans-serif;color:#1C1A17;background:#fff;font-size:11px;}
-  .page{width:100%;height:100%;display:grid;grid-template-rows:auto 1fr;gap:10px;}
-  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:2px solid #B8872A;}
-  .logo{font-family:'Playfair Display',serif;font-size:18px;color:#B8872A;letter-spacing:3px;}
+  body{font-family:'DM Sans',sans-serif;color:#1C1A17;background:#fff;font-size:10px;}
+
+  /* HEADER */
+  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:2px solid #B8872A;margin-bottom:10px;}
+  .logo{font-family:'Playfair Display',serif;font-size:16px;color:#B8872A;letter-spacing:3px;}
+  .logo-sub{font-size:8px;color:#A09A93;font-style:italic;margin-top:2px;}
   .event-info{text-align:center;}
-  .event-name{font-family:'Playfair Display',serif;font-size:16px;color:#1C1A17;}
-  .event-meta{font-size:10px;color:#A09A93;margin-top:2px;}
-  .couleurs{display:flex;gap:6px;align-items:center;}
-  .col-swatch{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);}
-  .body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-  .section-title{font-size:9px;color:#B8872A;letter-spacing:2px;font-weight:600;margin-bottom:8px;padding-bottom:4px;border-bottom:1.5px solid #B8872A;text-transform:uppercase;}
-  table{width:100%;border-collapse:collapse;font-size:10px;}
-  th{background:#1C1A17;color:#fff;padding:5px 8px;text-align:left;font-size:9px;letter-spacing:0.5px;}
-  td{padding:5px 8px;border-bottom:1px solid #EEECE8;}
+  .event-name{font-family:'Playfair Display',serif;font-size:14px;color:#1C1A17;}
+  .event-meta{font-size:9px;color:#A09A93;margin-top:2px;}
+  .couleurs-row{display:flex;gap:5px;align-items:center;}
+  .cswatch{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);}
+
+  /* PLAN DE SALLE */
+  .plan-section{background:#FAFAF8;border:1px solid #EEECE8;border-radius:8px;padding:10px;margin-bottom:10px;}
+  .section-title{font-size:9px;color:#B8872A;letter-spacing:2px;font-weight:600;margin-bottom:8px;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+  .plan-box{background:#fff;border:1px solid #EEECE8;border-radius:6px;height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .plan-note{font-size:9px;color:#A09A93;text-align:center;}
+  .plan-tables-preview{display:flex;flex-wrap:wrap;gap:4px;padding:8px;align-content:flex-start;}
+  .plan-table-mini{background:transparent;border:1.5px solid #B8872A;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#B8872A;font-weight:600;}
+
+  /* COLONNES */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+  /* MATÉRIEL */
+  .mat-section{background:#FAFAF8;border:1px solid #EEECE8;border-radius:8px;padding:10px;}
+  table{width:100%;border-collapse:collapse;font-size:9px;}
+  th{background:#1C1A17;color:#fff;padding:4px 7px;text-align:left;font-size:8px;letter-spacing:0.5px;}
+  td{padding:4px 7px;border-bottom:1px solid #EEECE8;}
   tr:nth-child(even) td{background:#FAFAF8;}
-  .qty-val{font-weight:600;color:#B8872A;text-align:right;}
-  .footer{text-align:center;font-size:9px;color:#A09A93;padding-top:8px;border-top:1px solid #EEECE8;margin-top:8px;}
+  .qty{font-weight:600;color:#B8872A;text-align:right;}
+
+  /* PRESTATAIRES */
+  .presta-section{background:#FAFAF8;border:1px solid #EEECE8;border-radius:8px;padding:10px;}
+  .presta-cat{margin-bottom:8px;}
+  .presta-cat-title{font-size:8px;color:#B8872A;font-weight:600;letter-spacing:1px;margin-bottom:4px;padding-bottom:2px;border-bottom:1px solid rgba(184,135,42,0.2);}
+  .presta-item{font-size:9px;color:#3D3A35;padding:2px 0;}
+
+  /* FOOTER */
+  .footer{text-align:center;font-size:8px;color:#A09A93;padding-top:6px;border-top:1px solid #EEECE8;margin-top:8px;}
   </style>
   </head><body>
-  <div class="page">
-    <div class="header">
-      <div><div class="logo">CRÉATIVE PLANNER</div><div style="font-size:9px;color:#A09A93;font-style:italic;">Nous créons, vous vivez!</div></div>
-      <div class="event-info">
-        <div class="event-name">${c.nom}</div>
-        <div class="event-meta">${c.type} · ${date} · ${c.lieu||''} · ${c.package||''} · Offre ${c.offre}</div>
-      </div>
-      <div class="couleurs">
-        ${couleurs.map(col=>`<div class="col-swatch" style="background:${col};"></div>`).join('')}
-        <span style="font-size:9px;color:#A09A93;margin-left:4px;">Couleurs</span>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div><div class="logo">CRÉATIVE PLANNER</div><div class="logo-sub">Nous créons, vous vivez!</div></div>
+    <div class="event-info">
+      <div class="event-name">${c.nom}</div>
+      <div class="event-meta">${c.type} · ${date} · ${c.lieu||''} · ${c.package||''} · Offre ${c.offre}</div>
+    </div>
+    <div class="couleurs-row">
+      ${couleurs.map(col=>`<div class="cswatch" style="background:${col};"></div>`).join('')}
+      ${couleurs.length?`<span style="font-size:8px;color:#A09A93;margin-left:3px;">Couleurs</span>`:''}
+    </div>
+  </div>
+
+  <!-- PLAN DE SALLE EN HAUT -->
+  <div class="plan-section">
+    <div class="section-title">🗺️ Plan de salle</div>
+    <div class="plan-box">
+      <div class="plan-tables-preview" id="planPreviewPrint">
+        <!-- Tables générées dynamiquement -->
+        <div style="width:100%;text-align:center;color:#A09A93;font-size:9px;padding:20px;">
+          Plan de salle — ${c.package||'N invités'}<br>
+          <span style="font-size:8px;">Ouvrir le Plan de Salle pour voir la disposition complète</span>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="body">
-      <!-- COLONNE 1 : MATÉRIEL -->
-      <div>
-        <div class="section-title">🪑 Inventaire matériel</div>
+  <!-- MATÉRIEL + PRESTATAIRES CÔTE À CÔTE -->
+  <div class="two-col">
+
+    <!-- INVENTAIRE MATÉRIEL -->
+    <div class="mat-section">
+      <div class="section-title">🪑 Inventaire matériel</div>
+      <table>
+        <thead><tr><th>Élément</th><th style="text-align:right;">Quantité</th></tr></thead>
+        <tbody>
+          ${mat.map(m=>`<tr><td>${m.icon} ${m.name}</td><td class="qty">${m.qty||0}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PRESTATAIRES -->
+    <div class="presta-section">
+      <div class="section-title">👥 Prestataires & Équipe</div>
+
+      ${Object.entries({
+        ...cats,
+        hotesses:'👗 Hôtesses',
+        traiteur:'🍽️ Traiteur',
+        securite:'🛡️ Sécurité'
+      }).map(([key,label])=>{
+        const ps=(presta[key]||[]).filter(p=>p&&p.nom);
+        // Pour hôtesses, traiteur, sécurité — afficher nombre si pas de contact
+        const extraInfo=c[key+'_nb']?`(${c[key+'_nb']} personnes)`:'';
+        if(!ps.length)return`<div class="presta-cat"><div class="presta-cat-title">${label} ${extraInfo}</div><div class="presta-item" style="color:#A09A93;">—</div></div>`;
+        return`<div class="presta-cat"><div class="presta-cat-title">${label}</div>${ps.map(p=>`<div class="presta-item">${p.nom}${p.tel?' · '+p.tel:''}</div>`).join('')}</div>`;
+      }).join('')}
+
+      <!-- Sections spéciales nombre -->
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid #EEECE8;">
         <table>
-          <thead><tr><th>Élément</th><th style="text-align:right;">Quantité</th></tr></thead>
+          <thead><tr><th>Équipe</th><th style="text-align:right;">Nombre</th></tr></thead>
           <tbody>
-            ${mat.map(m=>`<tr><td>${m.icon} ${m.name}</td><td class="qty-val">${m.qty||0}</td></tr>`).join('')}
+            <tr><td>👗 Hôtesses</td><td class="qty">${c.nb_hotesses||'—'}</td></tr>
+            <tr><td>🍽️ Personnel traiteur</td><td class="qty">${c.nb_traiteur||'—'}</td></tr>
+            <tr><td>🛡️ Agents de sécurité</td><td class="qty">${c.nb_securite||'—'}</td></tr>
           </tbody>
         </table>
       </div>
-
-      <!-- COLONNE 2 : PRESTATAIRES -->
-      <div>
-        <div class="section-title">👥 Prestataires</div>
-        ${Object.entries(cats).map(([key,label])=>{
-          const ps=presta[key]||[];
-          const active=ps.filter(p=>p.nom);
-          if(!active.length)return`<div style="font-size:10px;color:#A09A93;margin-bottom:4px;">${label} : —</div>`;
-          return`<div style="margin-bottom:8px;"><div style="font-size:9px;color:#B8872A;font-weight:600;margin-bottom:3px;">${label}</div>${active.map(p=>`<div style="font-size:10px;color:#3D3A35;padding:2px 0;">${p.nom}${p.tel?' · '+p.tel:''}</div>`).join('')}</div>`;
-        }).join('')}
-      </div>
-
-      <!-- COLONNE 3 : PLAN DE TABLE -->
-      <div>
-        <div class="section-title">🗺️ Plan de table</div>
-        <div style="border:1px solid #EEECE8;border-radius:6px;height:200px;display:flex;align-items:center;justify-content:center;color:#A09A93;font-size:10px;text-align:center;padding:12px;background:#FAFAF8;">
-          Plan de table<br><span style="font-size:9px;">Généré depuis le Plan de Salle</span>
-        </div>
-        <div style="margin-top:10px;">
-          <div class="section-title" style="margin-top:8px;">Notes générales</div>
-          <div style="border:1px solid #EEECE8;border-radius:4px;height:80px;background:#FAFAF8;"></div>
-        </div>
-      </div>
     </div>
 
-    <div class="footer">
-      Créative Planner · creativeplanner03@gmail.com · +225 07 78 16 01 69 · Abidjan, Côte d'Ivoire — Document généré le ${new Date().toLocaleDateString('fr-FR')}
-    </div>
   </div>
+
+  <div class="footer">
+    Créative Planner · creativeplanner03@gmail.com · +225 07 78 16 01 69 · Abidjan, Côte d'Ivoire — Document généré le ${new Date().toLocaleDateString('fr-FR')}
+  </div>
+
   <script>window.print();<\/script>
   </body></html>`);
   showToast('Fiche PDF générée','success');
