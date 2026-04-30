@@ -3,1058 +3,1080 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Créative Planner — Plan de Salle 3D</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<title>Plan de Salle — Créative Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --gold:#C9963A;--gold-light:#e8b84b;--gold-dim:rgba(201,150,58,0.12);
-  --dark:#1a1a1a;--dark2:#222;--dark3:#2e2e2e;
-  --text:#e8e0d0;--text-dim:#888;
-  --success:#4CAF50;--danger:#e74c3c;
+  --gold:#C9963A;--gold2:#e8b84b;--gold-dim:rgba(201,150,58,0.1);
+  --dark:#1a1a1a;--dark2:#222;--dark3:#2a2a2a;--dark4:#333;
+  --text:#e8e0d0;--text-dim:#888;--text-muted:#555;
+  --terra:#C0624A;--success:#4CAF50;--danger:#e74c3c;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Montserrat',sans-serif;background:#1a1a1a;color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
 
-header{background:#111;border-bottom:1px solid #2e2e2e;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.brand{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);letter-spacing:3px;}
-.htools{display:flex;gap:8px;align-items:center;}
-.btn{padding:6px 14px;border-radius:4px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:'Montserrat',sans-serif;border:none;transition:all 0.2s;}
-.btn-ghost{background:transparent;color:#aaa;border:1px solid #333;}
-.btn-ghost:hover,.btn-ghost.active{border-color:var(--gold);color:var(--gold);}
-.btn-gold{background:var(--gold);color:#fff;}
-.view-toggle{display:flex;gap:3px;background:#1a1a1a;border:1px solid #333;border-radius:5px;padding:3px;}
-.view-btn{padding:4px 12px;border-radius:3px;font-size:10px;letter-spacing:1px;cursor:pointer;color:#555;border:none;background:transparent;transition:all 0.2s;}
-.view-btn.active{background:var(--gold);color:#fff;}
+/* TOPBAR */
+.topbar{height:52px;background:var(--dark2);border-bottom:1px solid var(--dark4);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;gap:8px;}
+.topbar-logo{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);letter-spacing:3px;white-space:nowrap;}
+.topbar-event{font-size:11px;color:var(--text-dim);letter-spacing:1px;}
+.topbar-actions{display:flex;gap:6px;align-items:center;}
+.tbtn{padding:6px 12px;border-radius:5px;font-size:10px;letter-spacing:1px;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all 0.2s;white-space:nowrap;}
+.tbtn-gold{background:var(--gold);color:#fff;}
+.tbtn-gold:hover{background:var(--gold2);}
+.tbtn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--dark4);}
+.tbtn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.tbtn-maries{background:linear-gradient(135deg,rgba(201,150,58,0.2),rgba(201,150,58,0.05));color:var(--gold);border:1px solid rgba(201,150,58,0.4);}
+.tbtn-maries:hover{background:rgba(201,150,58,0.25);}
 
-.app{display:flex;flex:1;overflow:hidden;}
+/* WORKSPACE */
+.workspace{flex:1;display:flex;overflow:hidden;}
 
-.sidebar{width:240px;min-width:240px;background:#111;border-right:1px solid #2e2e2e;display:flex;flex-direction:column;overflow:hidden;}
-.stabs{display:flex;border-bottom:1px solid #2e2e2e;}
-.stab{flex:1;padding:9px 3px;text-align:center;font-size:9px;letter-spacing:1px;color:#444;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+/* SIDEBAR */
+.sidebar{width:200px;background:var(--dark2);border-right:1px solid var(--dark4);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--dark4);}
+
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--dark4);}
+.stab{flex:1;padding:9px 4px;text-align:center;font-size:9px;letter-spacing:1px;cursor:pointer;color:var(--text-muted);transition:all 0.2s;border-bottom:2px solid transparent;}
 .stab.active{color:var(--gold);border-bottom-color:var(--gold);}
-.scontent{flex:1;overflow-y:auto;padding:12px;}
-.scontent::-webkit-scrollbar{width:3px;}
-.scontent::-webkit-scrollbar-thumb{background:#333;}
-.slabel{font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:7px;margin-top:12px;}
-.slabel:first-child{margin-top:0;}
-.panel{display:none;}
+
+.panel{padding:12px;display:none;}
 .panel.active{display:block;}
 
-.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px;}
-.tbtn{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:5px;padding:9px 5px;text-align:center;cursor:pointer;transition:all 0.2s;}
-.tbtn:hover{border-color:var(--gold);background:var(--gold-dim);}
-.tbtn-icon{font-size:17px;margin-bottom:2px;}
-.tbtn-label{font-size:9px;color:#555;letter-spacing:1px;}
+.slabel{font-size:9px;color:var(--text-muted);letter-spacing:2px;margin:10px 0 6px;text-transform:uppercase;}
+.slabel:first-child{margin-top:0;}
 
-.fg{margin-bottom:9px;}
-.fg label{font-size:9px;color:#555;letter-spacing:1px;display:block;margin-bottom:3px;}
-.fg input,.fg select,.fg textarea{width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;}
-.fg input:focus,.fg select:focus{border-color:var(--gold);}
-.fg select option{background:#1a1a1a;}
-.cfg{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
-.cfg label{font-size:10px;color:#555;}
-.cfg input[type=number]{width:55px;padding:4px 6px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;text-align:center;font-family:'Montserrat',sans-serif;outline:none;}
+/* ELEMENT BUTTONS */
+.el-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px;}
+.el-btn{padding:7px 4px;background:var(--dark3);border:1px solid var(--dark4);border-radius:5px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.el-btn:hover{border-color:var(--gold);background:var(--gold-dim);}
+.el-btn.special{grid-column:1/-1;border-color:rgba(201,150,58,0.4);background:rgba(201,150,58,0.06);}
+.el-btn-icon{font-size:16px;margin-bottom:2px;}
+.el-btn-label{font-size:8px;color:var(--text-dim);letter-spacing:0.5px;}
+.el-btn.special .el-btn-label{color:var(--gold);}
 
-/* COLOR CONTROLS */
-.color-section{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:6px;padding:12px;margin-bottom:10px;}
-.color-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.color-row:last-child{margin-bottom:0;}
-.color-row label{font-size:9px;color:#666;letter-spacing:1px;}
-.color-row input[type=color]{width:34px;height:26px;border:1px solid #2e2e2e;border-radius:3px;cursor:pointer;background:none;padding:1px;}
-.presets-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
-.preset-theme{display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:4px;cursor:pointer;border:1px solid #2e2e2e;background:#1a1a1a;transition:all 0.2s;font-size:9px;color:#555;letter-spacing:1px;}
-.preset-theme:hover,.preset-theme.active{border-color:var(--gold);color:var(--gold);}
-.preset-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+/* CONFIG INPUTS */
+.cfg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;}
+.cfg-row label{font-size:10px;color:var(--text-dim);flex:1;}
+.cfg-input{padding:4px 7px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:11px;width:64px;text-align:center;font-family:'DM Sans',sans-serif;outline:none;}
+.cfg-input:focus{border-color:var(--gold);}
+.cfg-select{padding:4px 6px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:10px;font-family:'DM Sans',sans-serif;outline:none;width:100%;}
 
-.ginput{display:flex;gap:5px;margin-bottom:9px;}
-.ginput input{flex:1;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;}
-.ginput button{padding:7px 10px;background:var(--gold);border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:13px;}
-.glist{display:flex;flex-direction:column;gap:3px;max-height:240px;overflow-y:auto;}
-.gitem{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:#1a1a1a;border-radius:4px;border-left:3px solid #2e2e2e;font-size:10px;cursor:grab;}
-.gitem.assigned{border-left-color:var(--gold);color:#555;}
-.gdel{color:var(--danger);cursor:pointer;font-size:12px;}
-.gtable{font-size:9px;color:var(--gold);margin-right:5px;}
+/* CALCUL AUTO */
+.calc-box{background:var(--dark3);border:1px solid var(--dark4);border-radius:6px;padding:10px;margin-bottom:8px;}
+.calc-result{background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.25);border-radius:5px;padding:7px 9px;font-size:10px;color:var(--gold);margin-top:8px;display:none;line-height:1.5;}
 
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.sbox{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:5px;padding:9px;text-align:center;}
-.snum{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);}
-.slbl2{font-size:8px;color:#444;letter-spacing:1px;margin-top:1px;}
+/* COULEURS THEME */
+.color-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.color-row label{font-size:10px;color:var(--text-dim);}
+input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:pointer;background:none;}
+.theme-presets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.theme-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.2s;}
+.theme-dot:hover,.theme-dot.active{border-color:var(--gold);}
 
-.canvas-area{flex:1;position:relative;overflow:hidden;background:#0f0f0f;}
+/* STATS */
+.stat-box{background:var(--dark3);border:1px solid var(--dark4);border-radius:5px;padding:9px;text-align:center;margin-bottom:4px;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);}
+.stat-lbl{font-size:9px;color:var(--text-muted);letter-spacing:1px;}
+.stat-grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;}
 
-.toolbar{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#111;border:1px solid #2e2e2e;border-radius:7px;padding:5px 10px;display:flex;gap:6px;align-items:center;z-index:100;}
-.toolbar button{padding:5px 10px;border-radius:3px;font-size:10px;cursor:pointer;font-family:'Montserrat',sans-serif;border:1px solid #2e2e2e;background:#1a1a1a;color:#555;transition:all 0.2s;letter-spacing:1px;}
-.toolbar button:hover,.toolbar button.active{border-color:var(--gold);color:var(--gold);}
-.toolbar .sep{width:1px;height:16px;background:#2e2e2e;}
+/* CANVAS AREA */
+.canvas-area{flex:1;overflow:hidden;position:relative;background:#f0ede8;}
+.canvas-controls{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:20;}
+.cc-btn{width:32px;height:32px;background:rgba(26,26,26,0.85);border:1px solid var(--dark4);border-radius:5px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;}
+.cc-btn:hover{border-color:var(--gold);color:var(--gold);}
+.room-label{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(26,26,26,0.75);border:1px solid var(--dark4);border-radius:5px;padding:5px 14px;font-size:10px;color:var(--text-dim);letter-spacing:1px;pointer-events:none;z-index:10;}
 
-.table-el{position:absolute;cursor:move;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.table-el:hover{z-index:50;}
-.table-el.selected .tshape{box-shadow:0 0 0 3px var(--gold),0 0 20px rgba(201,150,58,0.4);}
-.tshape{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;transition:all 0.2s;border-width:3px;border-style:solid;}
+/* CANVAS */
+#viewport{width:100%;height:100%;overflow:hidden;position:relative;}
+#canvas{position:absolute;background:#fff;box-shadow:0 4px 32px rgba(0,0,0,0.2);transition:border-radius 0.3s;}
+
+/* TABLE ELEMENTS */
+.table-el{position:absolute;cursor:move;user-select:none;z-index:5;}
+.tshape{position:relative;display:flex;align-items:center;justify-content:center;border:2px solid #C9963A;transition:box-shadow 0.2s;}
 .tshape.round{border-radius:50%;}
 .tshape.rect{border-radius:6px;}
-.tnum{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;}
-.tcap{font-size:8px;color:#888;letter-spacing:1px;margin-top:1px;}
-.tcount{font-size:8px;margin-top:2px;padding:1px 6px;border-radius:8px;background:rgba(0,0,0,0.15);color:#fff;font-weight:500;}
-.tlabel{font-size:9px;color:#aaa;margin-top:6px;letter-spacing:1px;text-align:center;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.table-el.selected .tshape{box-shadow:0 0 0 3px rgba(201,150,58,0.5);}
+.tnum{font-size:13px;font-weight:600;z-index:2;pointer-events:none;}
+.tlabel{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;white-space:nowrap;pointer-events:none;}
+.tcount{position:absolute;top:-10px;right:-10px;background:var(--gold);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:600;pointer-events:none;z-index:3;}
+.chairs-container{position:absolute;inset:-14px;border-radius:inherit;pointer-events:none;z-index:1;}
+.chair{position:absolute;font-size:12px;line-height:1;}
 
-.chair-2d{position:absolute;border-radius:50%;opacity:0.9;}
+/* TABLE MARIÉS */
+.tshape.maries{background:linear-gradient(135deg,#fff9f0,#fff);border-width:3px;}
 
-.deco-el{position:absolute;cursor:move;user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:26px;width:58px;height:58px;border:1.5px dashed rgba(192,98,74,0.4);border-radius:6px;background:rgba(26,26,26,0.85);}
-.deco-lbl{font-size:8px;color:#C0624A;letter-spacing:1px;}
+/* RESIZE HANDLE */
+.resize-handle{position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;background:var(--gold);border-radius:50%;cursor:se-resize;z-index:10;opacity:0;transition:opacity 0.2s;}
+.table-el.selected .resize-handle{opacity:1;}
+.resize-handle-w{position:absolute;bottom:-4px;left:-4px;width:14px;height:14px;background:var(--gold);border-radius:50%;cursor:sw-resize;z-index:10;opacity:0;transition:opacity 0.2s;}
+.table-el.selected .resize-handle-w{opacity:1;}
 
-.ttip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#111;border:1px solid var(--gold);border-radius:6px;padding:8px 12px;min-width:140px;z-index:200;pointer-events:none;opacity:0;transition:opacity 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.6);}
-.table-el:hover .ttip{opacity:1;}
-.ttip-title{font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #2e2e2e;padding-bottom:3px;}
-.ttip-g{font-size:10px;color:var(--text);padding:1px 0;}
-.ttip-empty{font-size:9px;color:#444;font-style:italic;}
+/* DECO ELEMENTS */
+.deco-el{position:absolute;cursor:move;user-select:none;z-index:4;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;border:1px solid rgba(201,150,58,0.3);border-radius:6px;background:rgba(255,255,255,0.9);}
+.deco-el.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,150,58,0.4);}
+.deco-icon{font-size:20px;line-height:1;}
+.deco-lbl{font-size:8px;font-weight:600;letter-spacing:1px;text-align:center;}
+.deco-resize{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;background:var(--gold);border-radius:50%;cursor:se-resize;z-index:10;opacity:0;}
+.deco-el.selected .deco-resize{opacity:1;}
 
-.detail{position:absolute;right:0;top:0;bottom:0;width:230px;background:#111;border-left:1px solid #2e2e2e;padding:14px;z-index:200;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;}
-.detail.open{transform:translateX(0);}
-.detail-title{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);margin-bottom:12px;letter-spacing:2px;}
-.dg-item{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:#1a1a1a;border-radius:4px;margin-bottom:3px;font-size:10px;}
-.dg-remove{color:var(--danger);cursor:pointer;font-size:12px;}
+/* TAPIS ROUGE */
+.tapis-el{position:absolute;cursor:move;user-select:none;z-index:3;}
+.tapis-inner{background:linear-gradient(135deg,#8B0000,#CC0000,#8B0000);border:3px solid #FFD700;border-radius:3px;display:flex;align-items:center;justify-content:center;}
+.tapis-lbl{font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:2px;writing-mode:vertical-rl;text-orientation:mixed;}
+.tapis-resize{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;background:#FFD700;border-radius:50%;cursor:se-resize;z-index:10;opacity:0;}
+.tapis-el.selected .tapis-resize{opacity:1;}
+.tapis-el.selected .tapis-inner{box-shadow:0 0 0 2px rgba(255,215,0,0.5);}
 
-.moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:2000;display:none;align-items:center;justify-content:center;}
-.moverlay.open{display:flex;}
-.modal{background:#111;border:1px solid #2e2e2e;border-radius:9px;padding:22px;width:360px;max-width:90vw;}
-.mtitle{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);margin-bottom:14px;letter-spacing:2px;}
-.mactions{display:flex;gap:7px;margin-top:14px;justify-content:flex-end;}
+/* TOOLTIP */
+.ttip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid var(--gold);border-radius:6px;padding:8px 10px;min-width:130px;z-index:100;display:none;pointer-events:none;}
+.table-el:hover .ttip,.deco-el:hover .ttip{display:block;}
+.ttip-title{font-size:10px;color:var(--gold);font-weight:600;margin-bottom:4px;letter-spacing:1px;}
+.ttip-g{font-size:10px;color:var(--text-dim);}
+
+/* DETAIL PANEL */
+.detail-panel{position:absolute;top:10px;left:10px;width:180px;background:rgba(26,26,26,0.95);border:1px solid var(--dark4);border-radius:8px;padding:12px;z-index:50;display:none;}
+.detail-panel.open{display:block;}
+.detail-title{font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;display:flex;justify-content:space-between;}
+.detail-input{width:100%;padding:6px 9px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:6px;}
+.detail-input:focus{border-color:var(--gold);}
+.detail-label{font-size:9px;color:var(--text-dim);margin-bottom:3px;letter-spacing:0.5px;}
+.guest-list{max-height:120px;overflow-y:auto;margin-bottom:6px;}
+.guest-tag{display:flex;align-items:center;gap:4px;padding:3px 6px;background:var(--dark3);border-radius:3px;margin-bottom:3px;font-size:10px;}
+.guest-remove{color:var(--danger);cursor:pointer;margin-left:auto;}
+.guest-select{width:100%;padding:5px 8px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:10px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:4px;}
+.detail-btn{width:100%;padding:6px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;margin-bottom:3px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--dark2);border:1px solid var(--dark4);border-radius:10px;padding:24px;width:100%;max-width:480px;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:16px;}
+.modal textarea{width:100%;height:100px;padding:8px 10px;background:var(--dark3);border:1px solid var(--dark4);border-radius:5px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;margin-bottom:10px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--dark2);border:1px solid var(--gold);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--text);z-index:9999;letter-spacing:0.5px;animation:toastIn 0.3s;}
+@keyframes toastIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 </style>
 </head>
 <body>
 
-<header>
-  <div style="display:flex;align-items:center;gap:14px;">
-    <div class="brand">CRÉATIVE PLANNER</div>
-    <div style="width:1px;height:18px;background:#2e2e2e;"></div>
-    <span style="font-size:10px;color:#444;letter-spacing:1px;" id="hEventName">Plan de Salle</span>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="topbar-logo">CP</div>
+    <div class="topbar-event" id="topbarEvent">Plan de Salle</div>
   </div>
-  <div class="htools">
-    <div class="view-toggle">
-      <div class="view-btn active" id="btn2d" onclick="setView('2d')">2D</div>
-      <div class="view-btn" id="btn3d" onclick="setView('3d')">3D ISO</div>
-    </div>
-    <button class="btn btn-ghost" onclick="saveData()">💾 Sauvegarder</button>
-    <button class="btn btn-gold" onclick="window.print()">🖨️ Imprimer</button>
-  </div>
-</header>
-
-<div class="app">
-  <div class="sidebar">
-    <div class="stabs">
-      <div class="stab active" onclick="stab('info')">INFOS</div>
-      <div class="stab" onclick="stab('tables')">TABLES</div>
-      <div class="stab" onclick="stab('guests')">INVITÉS</div>
-      <div class="stab" onclick="stab('stats')">STATS</div>
-    </div>
-    <div class="scontent">
-
-      <!-- INFO -->
-      <div class="panel active" id="panel-info">
-        <div class="slabel">ÉVÉNEMENT</div>
-        <div class="fg"><label>Nom</label><input type="text" id="evName" placeholder="Ex: Mariage Koné" oninput="updateEvName()"></div>
-        <div class="fg"><label>Type</label><select id="evType"><option>Mariage</option><option>Anniversaire</option><option>Corporate</option><option>Baptême</option></select></div>
-        <div class="fg"><label>Date</label><input type="date" id="evDate"></div>
-        <div class="fg"><label>Lieu</label><input type="text" id="evLieu" placeholder="Ex: Sofitel Abidjan"></div>
-        <div class="fg"><label>Offre</label><select id="evOffre"><option>Savane</option><option>Lagune</option><option>Ivoire</option><option>Sur-mesure</option></select></div>
-        <div class="fg"><label>Thème</label><input type="text" id="evTheme" placeholder="Ex: Or & Blanc"></div>
-        <div class="fg"><label>Menu</label><textarea id="evMenu" style="height:55px;resize:vertical;" placeholder="Entrée, plat, dessert..."></textarea></div>
-        <div class="fg"><label>Notes</label><textarea id="evNotes" style="height:50px;resize:vertical;" placeholder="Notes..."></textarea></div>
-
-        <div class="slabel">COULEURS DU PLAN</div>
-        <div class="color-section">
-          <div class="color-row">
-            <label>TABLES</label>
-            <input type="color" id="colorTable" value="#C0624A" oninput="applyColors()">
-          </div>
-          <div class="color-row">
-            <label>CHAISES</label>
-            <input type="color" id="colorChair" value="#8B3A2A" oninput="applyColors()">
-          </div>
-          <div class="color-row">
-            <label>SOL</label>
-            <input type="color" id="colorFloor" value="#f5f0e8" oninput="applyColors()">
-          </div>
-          <div class="color-row">
-            <label>ACCENT</label>
-            <input type="color" id="colorAccent" value="#C9963A" oninput="applyColors()">
-          </div>
-        </div>
-
-        <div class="slabel">THÈMES PRÉDÉFINIS</div>
-        <div class="presets-row">
-          <div class="preset-theme active" onclick="applyTheme('terra')" id="theme-terra">
-            <div class="preset-dot" style="background:#C0624A;"></div>TERRA
-          </div>
-          <div class="preset-theme" onclick="applyTheme('gold')" id="theme-gold">
-            <div class="preset-dot" style="background:#C9963A;"></div>OR
-          </div>
-          <div class="preset-theme" onclick="applyTheme('navy')" id="theme-navy">
-            <div class="preset-dot" style="background:#1B3A6B;"></div>MARINE
-          </div>
-          <div class="preset-theme" onclick="applyTheme('rose')" id="theme-rose">
-            <div class="preset-dot" style="background:#D4537E;"></div>ROSE
-          </div>
-          <div class="preset-theme" onclick="applyTheme('emerald')" id="theme-emerald">
-            <div class="preset-dot" style="background:#1D9E75;"></div>ÉMERAUDE
-          </div>
-          <div class="preset-theme" onclick="applyTheme('black')" id="theme-black">
-            <div class="preset-dot" style="background:#333;border:1px solid #555;"></div>NOIR
-          </div>
-        </div>
-      </div>
-
-      <!-- TABLES -->
-      <div class="panel" id="panel-tables">
-        <div class="slabel">AJOUTER TABLE</div>
-        <div class="tgrid">
-          <div class="tbtn" onclick="addTable('round')"><div class="tbtn-icon">⭕</div><div class="tbtn-label">RONDE</div></div>
-          <div class="tbtn" onclick="addTable('rect')"><div class="tbtn-icon">▬</div><div class="tbtn-label">RECT.</div></div>
-        </div>
-        <div class="slabel">MOBILIER</div>
-        <div class="tgrid">
-          <div class="tbtn" onclick="addDeco('🪑','CHAISE')"><div class="tbtn-icon">🪑</div><div class="tbtn-label">CHAISE</div></div>
-          <div class="tbtn" onclick="addDeco('🛋️','CANAPÉ')"><div class="tbtn-icon">🛋️</div><div class="tbtn-label">CANAPÉ</div></div>
-          <div class="tbtn" onclick="addDeco('🍽️','COUVERTS')"><div class="tbtn-icon">🍽️</div><div class="tbtn-label">COUVERTS</div></div>
-          <div class="tbtn" onclick="addDeco('🥂','VERRES')"><div class="tbtn-icon">🥂</div><div class="tbtn-label">VERRES</div></div>
-        </div>
-        <div class="slabel">ESPACES</div>
-        <div class="tgrid">
-          <div class="tbtn" onclick="addDeco('🎤','SCÈNE')"><div class="tbtn-icon">🎤</div><div class="tbtn-label">SCÈNE</div></div>
-          <div class="tbtn" onclick="addDeco('🍸','BAR')"><div class="tbtn-icon">🍸</div><div class="tbtn-label">BAR</div></div>
-          <div class="tbtn" onclick="addDeco('📷','PHOTO')"><div class="tbtn-icon">📷</div><div class="tbtn-label">PHOTO SPOT</div></div>
-          <div class="tbtn" onclick="addDeco('🎂','GÂTEAU')"><div class="tbtn-icon">🎂</div><div class="tbtn-label">GÂTEAU</div></div>
-          <div class="tbtn" onclick="addDeco('🎵','DJ')"><div class="tbtn-icon">🎵</div><div class="tbtn-label">DJ/SONO</div></div>
-          <div class="tbtn" onclick="addDeco('🍽️','BUFFET')"><div class="tbtn-icon">🍽️</div><div class="tbtn-label">BUFFET</div></div>
-        </div>
-        <div class="slabel">DÉCORATION</div>
-        <div class="tgrid">
-          <div class="tbtn" onclick="addDeco('🌸','FLEURS')"><div class="tbtn-icon">🌸</div><div class="tbtn-label">FLEURS</div></div>
-          <div class="tbtn" onclick="addDeco('🕯️','BOUGIES')"><div class="tbtn-icon">🕯️</div><div class="tbtn-label">BOUGIES</div></div>
-          <div class="tbtn" onclick="addDeco('🌿','VERDURE')"><div class="tbtn-icon">🌿</div><div class="tbtn-label">VERDURE</div></div>
-          <div class="tbtn" onclick="addDeco('🚪','ENTRÉE')"><div class="tbtn-icon">🚪</div><div class="tbtn-label">ENTRÉE</div></div>
-          <div class="tbtn" onclick="addDeco('🚻','WC')"><div class="tbtn-icon">🚻</div><div class="tbtn-label">TOILETTES</div></div>
-          <div class="tbtn" onclick="addDeco('🅿️','PARKING')"><div class="tbtn-icon">🅿️</div><div class="tbtn-label">PARKING</div></div>
-        </div>
-        <div class="slabel">CONFIG TABLES</div>
-        <div class="cfg"><label>Capacité défaut</label><input type="number" id="defCap" value="8" min="1" max="30"></div>
-        <div class="cfg"><label>Prochaine table N°</label><input type="number" id="tCounter" value="1" min="1"></div>
-
-        <div class="slabel">CHAISES</div>
-        <div class="color-section">
-          <div class="color-row">
-            <label>TAILLE <span id="chairSizeVal" style="color:var(--gold);">13px</span></label>
-          </div>
-          <input type="range" id="chairSize" min="6" max="24" value="13" step="1" style="width:100%;margin-bottom:10px;accent-color:#C0624A;" oninput="updateChairSize()">
-          <div class="color-row">
-            <label>ESPACEMENT <span id="chairGapVal" style="color:var(--gold);">10px</span></label>
-          </div>
-          <input type="range" id="chairGap" min="2" max="30" value="10" step="1" style="width:100%;accent-color:#C0624A;" oninput="updateChairGap()">
-        </div>
-
-        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px;">
-          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="deleteSelected()">🗑 Supprimer sélection</button>
-          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="clearAll()">⚠️ Tout effacer</button>
-          <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="toggleStage()">🎙️ Scène/Estrade</button>
-        </div>
-      </div>
-
-      <!-- GUESTS -->
-      <div class="panel" id="panel-guests">
-        <div class="slabel">AJOUTER INVITÉ</div>
-        <div class="ginput">
-          <input type="text" id="gInput" placeholder="Nom..." onkeydown="if(event.key==='Enter')addGuest()">
-          <button onclick="addGuest()">+</button>
-        </div>
-        <button class="btn btn-ghost" style="width:100%;font-size:10px;margin-bottom:10px;" onclick="document.getElementById('importModal').classList.add('open')">📋 Importer liste</button>
-        <div class="slabel">LISTE</div>
-        <div class="glist" id="guestList"></div>
-      </div>
-
-      <!-- STATS -->
-      <div class="panel" id="panel-stats">
-        <div class="slabel">RÉSUMÉ</div>
-        <div class="sgrid" style="margin-bottom:12px;">
-          <div class="sbox"><div class="snum" id="stTables">0</div><div class="slbl2">TABLES</div></div>
-          <div class="sbox"><div class="snum" id="stPlaces">0</div><div class="slbl2">PLACES</div></div>
-          <div class="sbox"><div class="snum" id="stInvites">0</div><div class="slbl2">INVITÉS</div></div>
-          <div class="sbox"><div class="snum" id="stPlaces2">0</div><div class="slbl2">PLACÉS</div></div>
-        </div>
-        <div class="slabel">PAR TABLE</div>
-        <div id="tableStats" style="display:flex;flex-direction:column;gap:3px;"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="canvas-area" id="canvasArea">
-    <div class="toolbar">
-      <button onclick="doZoom(0.1)">＋</button>
-      <button onclick="doZoom(-0.1)">－</button>
-      <button onclick="resetZoom()">100%</button>
-      <div class="sep"></div>
-      <button onclick="toggleGrid()" id="gridBtn" class="active">Grille</button>
-      <button onclick="toggleStage()" id="stageBtn">Scène</button>
-      <div class="sep"></div>
-      <span style="font-size:9px;color:#333;letter-spacing:1px;">Double-clic pour supprimer un élément</span>
-    </div>
-
-    <!-- 2D -->
-    <div id="canvas2d" style="position:absolute;inset:48px 0 0 0;overflow:auto;display:flex;align-items:flex-start;">
-      <div id="canvas" style="position:relative;width:1400px;height:860px;background:#fff;background-image:linear-gradient(rgba(192,98,74,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(192,98,74,0.07) 1px,transparent 1px);background-size:40px 40px;margin:20px;flex-shrink:0;box-shadow:0 4px 28px rgba(0,0,0,0.4);">
-        <div id="roomLabel" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(192,98,74,0.2);letter-spacing:5px;pointer-events:none;white-space:nowrap;">PLAN DE SALLE</div>
-        <div id="stageEl" style="display:none;position:absolute;background:rgba(192,98,74,0.1);border:1.5px solid rgba(192,98,74,0.4);border-radius:4px;align-items:center;justify-content:center;font-size:10px;color:#C0624A;letter-spacing:2px;cursor:move;user-select:none;width:280px;height:55px;left:560px;top:28px;">🎙️ &nbsp; SCÈNE / ESTRADE</div>
-      </div>
-    </div>
-
-    <!-- 3D -->
-    <div id="canvas3d" style="position:absolute;inset:48px 0 0 0;overflow:auto;display:none;background:#0a0a0a;">
-      <canvas id="isoCanvas" style="display:block;margin:20px auto;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,0.7);"></canvas>
-      <div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(10,10,10,0.9);border:1px solid #2e2e2e;border-radius:5px;padding:6px 14px;font-size:9px;color:#444;letter-spacing:1px;">VUE 3D ISOMÉTRIQUE — Revenez en 2D pour modifier le plan</div>
-    </div>
-
-    <!-- DETAIL -->
-    <div class="detail" id="detailPanel">
-      <div class="detail-title" id="detailTitle">Table</div>
-      <div style="margin-bottom:10px;">
-        <div style="font-size:9px;color:#444;letter-spacing:1px;margin-bottom:4px;">NOM</div>
-        <input type="text" id="detailName" style="width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;" placeholder="Ex: Table des mariés" oninput="updateTName()">
-      </div>
-      <div style="margin-bottom:10px;">
-        <div style="font-size:9px;color:#444;letter-spacing:1px;margin-bottom:4px;">CAPACITÉ</div>
-        <input type="number" id="detailCap" min="1" max="30" style="width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;" oninput="updateTCap()">
-      </div>
-      <div style="margin-bottom:10px;">
-        <div style="font-size:9px;color:#444;letter-spacing:1px;margin-bottom:5px;">INVITÉS ASSIGNÉS</div>
-        <div id="detailGuests" style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px;"></div>
-        <select id="detailAddG" style="width:100%;padding:7px 9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;margin-bottom:5px;"><option value="">— Ajouter invité —</option></select>
-        <button class="btn btn-gold" style="width:100%;font-size:10px;" onclick="assignFromSelect()">Assigner</button>
-      </div>
-      <button class="btn btn-ghost" style="width:100%;font-size:10px;color:var(--danger);border-color:var(--danger);margin-bottom:5px;" onclick="deleteSelected()">🗑 Supprimer</button>
-      <button class="btn btn-ghost" style="width:100%;font-size:10px;" onclick="closeDetail()">← Fermer</button>
-    </div>
+  <div class="topbar-actions" style="flex-wrap:wrap;">
+    <button class="tbtn tbtn-maries" onclick="addTableMaries()">💍 Table des Mariés</button>
+    <button class="tbtn tbtn-ghost" onclick="genererTablesAuto()">⚡ Générer tables</button>
+    <button class="tbtn tbtn-ghost" onclick="previewCalc()">🔢 Calculer</button>
+    <button class="tbtn tbtn-ghost" onclick="printPlan()">🖨️ Imprimer</button>
+    <button class="tbtn tbtn-ghost" onclick="saveData()">💾 Sauvegarder</button>
+    <button class="tbtn tbtn-ghost" onclick="clearAll()">🗑️ Effacer tout</button>
   </div>
 </div>
 
-<!-- IMPORT MODAL -->
-<div class="moverlay" id="importModal">
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <div class="stab active" onclick="switchTab('tables')">🪑</div>
+      <div class="stab" onclick="switchTab('salle')">◻</div>
+      <div class="stab" onclick="switchTab('calc')">🔢</div>
+      <div class="stab" onclick="switchTab('invites')">👥</div>
+      <div class="stab" onclick="switchTab('stats')">📊</div>
+    </div>
+
+    <!-- TABLES -->
+    <div class="panel active" id="panel-tables">
+      <div class="slabel">TABLES</div>
+      <div class="el-grid">
+        <div class="el-btn" onclick="addTable('round')"><div class="el-btn-icon">⭕</div><div class="el-btn-label">RONDE</div></div>
+        <div class="el-btn" onclick="addTable('rect')"><div class="el-btn-icon">▬</div><div class="el-btn-label">RECT.</div></div>
+        <div class="el-btn special" onclick="addTableMaries()"><div class="el-btn-icon">💍</div><div class="el-btn-label">TABLE DES MARIÉS</div></div>
+      </div>
+
+      <div class="slabel">ESPACES</div>
+      <div class="el-grid">
+        <div class="el-btn" onclick="addDeco('🎤','SCÈNE',120,60,true)"><div class="el-btn-icon">🎤</div><div class="el-btn-label">SCÈNE</div></div>
+        <div class="el-btn" onclick="addDeco('🍸','BAR',80,50,true)"><div class="el-btn-icon">🍸</div><div class="el-btn-label">BAR</div></div>
+        <div class="el-btn" onclick="addDeco('🍽️','BUFFET',100,50,true)"><div class="el-btn-icon">🍽️</div><div class="el-btn-label">BUFFET</div></div>
+        <div class="el-btn" onclick="addDeco('🎵','DJ / SONO',80,50,true)"><div class="el-btn-icon">🎵</div><div class="el-btn-label">DJ / SONO</div></div>
+        <div class="el-btn" onclick="addDeco('🎂','GÂTEAU',60,60,true)"><div class="el-btn-icon">🎂</div><div class="el-btn-label">GÂTEAU</div></div>
+        <div class="el-btn" onclick="addDeco('📷','PHOTO SPOT',80,60,true)"><div class="el-btn-icon">📷</div><div class="el-btn-label">PHOTO SPOT</div></div>
+      </div>
+
+      <div class="slabel">TAPIS & DÉCO</div>
+      <div class="el-grid">
+        <div class="el-btn special" onclick="addTapisRouge()"><div class="el-btn-icon">🟥</div><div class="el-btn-label">TAPIS ROUGE</div></div>
+        <div class="el-btn" onclick="addDeco('🌸','FLEURS',50,50,true)"><div class="el-btn-icon">🌸</div><div class="el-btn-label">FLEURS</div></div>
+        <div class="el-btn" onclick="addDeco('🕯️','BOUGIES',40,40,true)"><div class="el-btn-icon">🕯️</div><div class="el-btn-label">BOUGIES</div></div>
+        <div class="el-btn" onclick="addDeco('🌿','VERDURE',50,50,true)"><div class="el-btn-icon">🌿</div><div class="el-btn-label">VERDURE</div></div>
+      </div>
+
+      <div class="slabel">ENTRÉES & SERVICES</div>
+      <div class="el-grid">
+        <div class="el-btn" onclick="addDeco('🚪','ENTRÉE',40,40,false)"><div class="el-btn-icon">🚪</div><div class="el-btn-label">ENTRÉE</div></div>
+        <div class="el-btn" onclick="addDeco('🚻','WC',40,40,false)"><div class="el-btn-icon">🚻</div><div class="el-btn-label">TOILETTES</div></div>
+        <div class="el-btn" onclick="addDeco('🅿️','PARKING',60,40,false)"><div class="el-btn-icon">🅿️</div><div class="el-btn-label">PARKING</div></div>
+        <div class="el-btn" onclick="addDeco('🛋️','LOUNGE',70,50,true)"><div class="el-btn-icon">🛋️</div><div class="el-btn-label">LOUNGE</div></div>
+      </div>
+
+      <div class="slabel">PRESTATAIRES</div>
+      <div class="el-grid">
+        <div class="el-btn" onclick="addDeco('🎻','ORCHESTRE',100,60,true)"><div class="el-btn-icon">🎻</div><div class="el-btn-label">ORCHESTRE</div></div>
+        <div class="el-btn" onclick="addDeco('🎤','CHANTEUR',60,50,true)"><div class="el-btn-icon">🎤</div><div class="el-btn-label">CHANTEUR</div></div>
+        <div class="el-btn" onclick="addDeco('🎵','CHORALE',80,50,true)"><div class="el-btn-icon">🎵</div><div class="el-btn-label">CHORALE</div></div>
+        <div class="el-btn" onclick="addDeco('🚗','VOITURE',80,50,true)"><div class="el-btn-icon">🚗</div><div class="el-btn-label">LOCATION VOITURE</div></div>
+      </div>
+
+      <div class="slabel">CONFIG TABLES</div>
+      <div class="cfg-row"><label>Capacité défaut</label><input class="cfg-input" type="number" id="defCap" value="8" min="1" max="50" oninput="updateDefCap()"></div>
+      <div class="cfg-row"><label>N° prochain</label><input class="cfg-input" type="number" id="tCounter" value="1" min="1"></div>
+
+      <div class="slabel">CHAISES</div>
+      <div class="cfg-row"><label>Taille <span id="chairSzVal" style="color:var(--gold);">13px</span></label></div>
+      <input type="range" id="chairSize" min="6" max="24" value="13" style="width:100%;accent-color:var(--gold);margin-bottom:8px;" oninput="updateChairSize()">
+      <div class="cfg-row"><label>Espacement <span id="chairGapVal" style="color:var(--gold);">10px</span></label></div>
+      <input type="range" id="chairGap" min="2" max="30" value="10" style="width:100%;accent-color:var(--gold);margin-bottom:10px;" oninput="updateChairGap()">
+
+      <button class="detail-btn" style="background:var(--dark3);border:1px solid var(--dark4);color:var(--text-dim);" onclick="deleteSelected()">🗑 Supprimer sélection</button>
+    </div>
+
+    <!-- SALLE -->
+    <div class="panel" id="panel-salle">
+      <div class="slabel">DIMENSIONS DE LA SALLE</div>
+      <div class="cfg-row"><label>Longueur (m)</label><input class="cfg-input" type="number" id="salleL" value="20" min="5" max="200" oninput="updateSalleDimensions()"></div>
+      <div class="cfg-row"><label>Largeur (m)</label><input class="cfg-input" type="number" id="salleW" value="15" min="5" max="200" oninput="updateSalleDimensions()"></div>
+
+      <div class="slabel">FORME DE LA SALLE</div>
+      <div class="el-grid">
+        <div class="el-btn active" id="sh-rect" onclick="selectShape('rect')"><div class="el-btn-icon">⬛</div><div class="el-btn-label">RECT.</div></div>
+        <div class="el-btn" id="sh-square" onclick="selectShape('square')"><div class="el-btn-icon">🟫</div><div class="el-btn-label">CARRÉ</div></div>
+        <div class="el-btn" id="sh-round" onclick="selectShape('round')"><div class="el-btn-icon">⭕</div><div class="el-btn-label">RONDE</div></div>
+        <div class="el-btn" id="sh-L" onclick="selectShape('L')"><div class="el-btn-icon">📐</div><div class="el-btn-label">EN L</div></div>
+        <div class="el-btn" id="sh-U" onclick="selectShape('U')"><div class="el-btn-icon">🔷</div><div class="el-btn-label">EN U</div></div>
+        <div class="el-btn" id="sh-tent" onclick="selectShape('tent')"><div class="el-btn-icon">⛺</div><div class="el-btn-label">TENTE</div></div>
+      </div>
+
+      <div class="slabel">COULEURS</div>
+      <div class="theme-presets">
+        <div class="theme-dot active" id="th-terra" style="background:#C9963A;" onclick="applyTheme('terra')" title="Terra"></div>
+        <div class="theme-dot" id="th-gold" style="background:#D4AF37;" onclick="applyTheme('gold')" title="Or"></div>
+        <div class="theme-dot" id="th-rose" style="background:#E91E63;" onclick="applyTheme('rose')" title="Rose"></div>
+        <div class="theme-dot" id="th-bleu" style="background:#1565C0;" onclick="applyTheme('bleu')" title="Bleu"></div>
+        <div class="theme-dot" id="th-vert" style="background:#2E7D32;" onclick="applyTheme('vert')" title="Vert"></div>
+        <div class="theme-dot" id="th-noir" style="background:#212121;" onclick="applyTheme('noir')" title="Noir"></div>
+      </div>
+      <div class="color-row"><label>Couleur tables</label><input type="color" id="colTable" value="#C9963A" oninput="applyColors()"></div>
+      <div class="color-row"><label>Couleur chaises</label><input type="color" id="colChair" value="#8B6914" oninput="applyColors()"></div>
+      <div class="color-row"><label>Fond de salle</label><input type="color" id="colFloor" value="#FFFEF9" oninput="applyColors()"></div>
+    </div>
+
+    <!-- CALCUL AUTO -->
+    <div class="panel" id="panel-calc">
+      <div class="slabel">CALCUL AUTOMATIQUE</div>
+      <div class="calc-box">
+        <div class="cfg-row"><label>Nombre d'invités</label><input class="cfg-input" type="number" id="nbInvites" value="100" min="1" max="2000" oninput="previewCalc()"></div>
+        <div class="cfg-row"><label>Places / table</label><input class="cfg-input" type="number" id="placesParTable" value="8" min="2" max="50" oninput="previewCalc()"></div>
+        <div class="cfg-row"><label>Type de tables</label></div>
+        <select class="cfg-select" id="autoType" style="margin-bottom:8px;">
+          <option value="round">Rondes</option>
+          <option value="rect">Rectangulaires</option>
+        </select>
+        <div id="calcResult" class="calc-result"></div>
+      </div>
+      <button class="tbtn tbtn-gold" style="width:100%;margin-bottom:6px;" onclick="genererTablesAuto()">⚡ Générer les tables</button>
+      <button class="tbtn tbtn-ghost" style="width:100%;" onclick="previewCalc()">🔢 Calculer seulement</button>
+
+      <div class="slabel" style="margin-top:12px;">TABLE DES MARIÉS</div>
+      <button class="tbtn tbtn-maries" style="width:100%;" onclick="addTableMaries()">💍 Ajouter table des mariés</button>
+      <p style="font-size:9px;color:var(--text-muted);margin-top:6px;line-height:1.4;">La table des mariés (2 personnes) est placée automatiquement en haut au centre de la salle.</p>
+    </div>
+
+    <!-- INVITÉS -->
+    <div class="panel" id="panel-invites">
+      <div class="slabel">AJOUTER INVITÉ</div>
+      <div style="display:flex;gap:4px;margin-bottom:6px;">
+        <input type="text" id="gInput" placeholder="Nom..." style="flex:1;padding:7px 9px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;" onkeydown="if(event.key==='Enter')addGuest()">
+        <button onclick="addGuest()" style="padding:7px 10px;background:var(--gold);border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:14px;">+</button>
+      </div>
+      <button class="detail-btn" style="background:var(--dark3);border:1px solid var(--dark4);color:var(--text-dim);margin-bottom:10px;" onclick="openImport()">📋 Importer liste</button>
+      <div class="slabel">LISTE</div>
+      <div id="guestList" style="max-height:400px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="panel" id="panel-stats">
+      <div class="slabel">RÉSUMÉ</div>
+      <div class="stat-grid2">
+        <div class="stat-box"><div class="stat-num" id="stTables">0</div><div class="stat-lbl">TABLES</div></div>
+        <div class="stat-box"><div class="stat-num" id="stPlaces">0</div><div class="stat-lbl">PLACES</div></div>
+        <div class="stat-box"><div class="stat-num" id="stInvites">0</div><div class="stat-lbl">INVITÉS</div></div>
+        <div class="stat-box"><div class="stat-num" id="stPlaced">0</div><div class="stat-lbl">PLACÉS</div></div>
+      </div>
+      <div class="slabel">PAR TABLE</div>
+      <div id="tableStats"></div>
+    </div>
+  </div>
+
+  <!-- CANVAS AREA -->
+  <div class="canvas-area" id="canvasArea">
+    <div class="canvas-controls">
+      <div class="cc-btn" onclick="zoom(0.1)" title="Zoom +">+</div>
+      <div class="cc-btn" onclick="zoom(-0.1)" title="Zoom -">−</div>
+      <div class="cc-btn" onclick="resetZoom()" title="Reset">⌂</div>
+      <div class="cc-btn" onclick="centerView()" title="Centrer">⊕</div>
+    </div>
+    <div id="viewport">
+      <div id="canvas" style="width:1400px;height:860px;background:#FFFEF9;"></div>
+    </div>
+    <div class="room-label" id="roomLabel">20m × 15m</div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title"><span id="detailPanelTitle">TABLE</span><span style="cursor:pointer;color:var(--text-dim);" onclick="closeDetail()">✕</span></div>
+    <div class="detail-label">NOM / LABEL</div>
+    <input class="detail-input" type="text" id="detailName" placeholder="Nom de la table..." oninput="updateTName()">
+    <div class="detail-label">CAPACITÉ</div>
+    <input class="detail-input" type="number" id="detailCap" value="8" min="1" max="50" oninput="updateTCap()">
+    <div class="detail-label">INVITÉS ASSIGNÉS</div>
+    <div class="guest-list" id="detailGuests"></div>
+    <select class="guest-select" id="detailGuestSelect" onchange="assignGuest(this.value)"><option value="">+ Assigner un invité...</option></select>
+    <button class="detail-btn" style="background:var(--gold);color:#fff;" onclick="autoFillTable()">⚡ Remplissage auto</button>
+    <button class="detail-btn" style="background:var(--dark3);border:1px solid var(--danger);color:var(--danger);margin-top:4px;" onclick="deleteSelected()">🗑 Supprimer</button>
+  </div>
+
+</div>
+
+<!-- MODAL IMPORT -->
+<div class="modal-overlay" id="importModal">
   <div class="modal">
-    <div class="mtitle">Importer une liste</div>
-    <div class="fg"><label>Un nom par ligne</label><textarea id="importTxt" style="width:100%;height:160px;padding:9px;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:4px;color:var(--text);font-size:11px;font-family:'Montserrat',sans-serif;outline:none;resize:vertical;" placeholder="Koné Adjoua&#10;Traoré Mamadou&#10;..."></textarea></div>
-    <div class="mactions">
-      <button class="btn btn-ghost" onclick="document.getElementById('importModal').classList.remove('open')">Annuler</button>
-      <button class="btn btn-gold" onclick="doImport()">Importer</button>
+    <div class="modal-title">Importer une liste d'invités</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">Un nom par ligne</p>
+    <textarea id="importText" placeholder="Jean Koné&#10;Marie Traoré&#10;Paul Akré&#10;..."></textarea>
+    <div class="modal-actions">
+      <button class="tbtn tbtn-ghost" onclick="document.getElementById('importModal').classList.remove('open')">Annuler</button>
+      <button class="tbtn tbtn-gold" onclick="importGuests()">Importer</button>
     </div>
   </div>
 </div>
 
 <script>
-let tables=[],guests=[],selectedTable=null,zoomLevel=1,gridOn=true,stageOn=false,tIdCounter=1;
-let colors={table:'#C0624A',chair:'#8B3A2A',floor:'#f5f0e8',accent:'#C9963A'};
-let chairSize=13, chairGap=10;
+// ===== STATE =====
+let tables=[],guests=[],decos=[],tapis=[];
+let selectedEl=null,selectedType=null;
+let zoomLevel=1,panX=0,panY=0;
+let isPanning=false,panStart={x:0,y:0};
+let chairSize=13,chairGap=10;
+let colors={table:'#C9963A',chair:'#8B6914',floor:'#FFFEF9'};
+let salleShape='rect';
+let dragEl=null,dragOffX=0,dragOffY=0;
+let resizingEl=null,resizeStartW=0,resizeStartH=0,resizeStartX=0,resizeStartY=0;
+let tableCounter=1;
 
-function updateChairSize(){
-  chairSize=parseInt(document.getElementById('chairSize').value);
-  document.getElementById('chairSizeVal').textContent=chairSize+'px';
-  redrawAllChairs();
-}
-function updateChairGap(){
-  chairGap=parseInt(document.getElementById('chairGap').value);
-  document.getElementById('chairGapVal').textContent=chairGap+'px';
-  redrawAllChairs();
-}
-function redrawAllChairs(){
-  tables.forEach(t=>{
-    const el=document.getElementById(t.id); if(!el)return;
-    const shape=el.querySelector('.tshape');
-    const container=shape.querySelector('.chairs-container');
-    if(container) container.remove();
-    shape.insertBefore(buildChairs(t),shape.firstChild);
-  });
-}
-
-const THEMES={
-  terra:{table:'#C0624A',chair:'#8B3A2A',floor:'#f5f0e8',accent:'#C9963A'},
-  gold:{table:'#C9963A',chair:'#8B6914',floor:'#fdfaf5',accent:'#C0624A'},
-  navy:{table:'#1B3A6B',chair:'#0f2347',floor:'#eef2f8',accent:'#C9963A'},
-  rose:{table:'#D4537E',chair:'#993556',floor:'#fdf0f5',accent:'#C9963A'},
-  emerald:{table:'#1D9E75',chair:'#0F6E56',floor:'#f0faf6',accent:'#C9963A'},
-  black:{table:'#333',chair:'#111',floor:'#f5f0e8',accent:'#C9963A'}
-};
-
-function applyTheme(name){
-  colors={...THEMES[name]};
-  document.getElementById('colorTable').value=colors.table;
-  document.getElementById('colorChair').value=colors.chair;
-  document.getElementById('colorFloor').value=colors.floor;
-  document.getElementById('colorAccent').value=colors.accent;
-  document.querySelectorAll('.preset-theme').forEach(p=>p.classList.remove('active'));
-  document.getElementById('theme-'+name).classList.add('active');
-  applyColors();
-}
-
-function applyColors(){
-  colors.table=document.getElementById('colorTable').value;
-  colors.chair=document.getElementById('colorChair').value;
-  colors.floor=document.getElementById('colorFloor').value;
-  colors.accent=document.getElementById('colorAccent').value;
-  // Update 2D tables
-  document.querySelectorAll('.tshape').forEach(s=>{
-    s.style.borderColor=colors.table;
-    s.style.background='#fff';
-  });
-  document.querySelectorAll('.tnum').forEach(n=>n.style.color=colors.table);
-  document.querySelectorAll('.chair-2d').forEach(c=>c.style.background=colors.chair);
-  document.querySelectorAll('.deco-lbl').forEach(l=>l.style.color=colors.table);
-  redrawAllChairs();
-  // Update canvas grid color
+// ===== INIT =====
+function init(){
   const cv=document.getElementById('canvas');
-  cv.style.backgroundImage=gridOn?`linear-gradient(${colors.table}18 1px,transparent 1px),linear-gradient(90deg,${colors.table}18 1px,transparent 1px)`:'none';
-  cv.style.backgroundColor=colors.floor;
-  document.getElementById('roomLabel').style.color=colors.table+'44';
-  document.getElementById('stageEl').style.background=colors.table+'18';
-  document.getElementById('stageEl').style.borderColor=colors.table+'66';
-  document.getElementById('stageEl').style.color=colors.table;
-  if(currentView==='3d') render3D();
-}
+  const area=document.getElementById('canvasArea');
 
-let currentView='2d';
-function setView(v){
-  currentView=v;
-  document.getElementById('btn2d').classList.toggle('active',v==='2d');
-  document.getElementById('btn3d').classList.toggle('active',v==='3d');
-  document.getElementById('canvas2d').style.display=v==='2d'?'flex':'none';
-  document.getElementById('canvas3d').style.display=v==='3d'?'block':'none';
-  if(v==='3d')render3D();
-}
+  // PAN with middle mouse or space+drag
+  area.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(e.ctrlKey){zoom(e.deltaY>0?-0.05:0.05);}
+    else{panX-=e.deltaX;panY-=e.deltaY;applyTransform();}
+  },{passive:false});
 
-function stab(t){
-  document.querySelectorAll('.stab').forEach((s,i)=>s.classList.toggle('active',['info','tables','guests','stats'][i]===t));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+t).classList.add('active');
-  if(t==='stats')updateStats();
-}
+  cv.addEventListener('click',e=>{
+    if(e.target===cv){deselectAll();}
+  });
 
-function updateEvName(){
-  const n=document.getElementById('evName').value;
-  document.getElementById('hEventName').textContent=n||'Plan de Salle';
-  document.getElementById('roomLabel').textContent=n?n.toUpperCase():'PLAN DE SALLE';
-}
+  // Global mouse events for drag/resize
+  document.addEventListener('mousemove',onMouseMove);
+  document.addEventListener('mouseup',onMouseUp);
 
-function doZoom(d){zoomLevel=Math.max(0.3,Math.min(2,zoomLevel+d));const c=document.getElementById('canvas');c.style.transform=`scale(${zoomLevel})`;c.style.transformOrigin='top left';}
-function resetZoom(){zoomLevel=1;const c=document.getElementById('canvas');c.style.transform='scale(1)';}
-
-function toggleGrid(){
-  gridOn=!gridOn;
-  document.getElementById('gridBtn').classList.toggle('active',gridOn);
-  applyColors();
-}
-
-function toggleStage(){
-  stageOn=!stageOn;
-  const s=document.getElementById('stageEl');
-  s.style.display=stageOn?'flex':'none';
-  document.getElementById('stageBtn').classList.toggle('active',stageOn);
-  if(stageOn){let pos={x:560,y:28};makeDraggableEl(s,pos);}
-}
-
-function makeDraggableEl(el,pos){
-  let dr=false,sx,sy,ox,oy;
-  el.onmousedown=e=>{dr=true;sx=e.clientX;sy=e.clientY;ox=pos.x;oy=pos.y;e.preventDefault();};
-  document.addEventListener('mousemove',e=>{if(!dr)return;pos.x=ox+(e.clientX-sx)/zoomLevel;pos.y=oy+(e.clientY-sy)/zoomLevel;el.style.left=pos.x+'px';el.style.top=pos.y+'px';});
-  document.addEventListener('mouseup',()=>dr=false);
-}
-
-function addTable(type){
-  const cap=parseInt(document.getElementById('defCap').value)||8;
-  const num=parseInt(document.getElementById('tCounter').value)||tIdCounter;
-  const sz=type==='round'?Math.max(90,cap*11):null;
-  const w=type==='round'?sz:Math.max(120,cap*14);
-  const h=type==='round'?sz:68;
-  const t={id:'T'+Date.now(),type,number:num,name:'',capacity:cap,guests:[],x:180+Math.random()*500,y:130+Math.random()*300,w,h};
-  tables.push(t);
-  document.getElementById('tCounter').value=num+1;
-  tIdCounter=num+1;
-  renderTable(t);
+  loadData();
+  updateSalleDimensions();
+  previewCalc();
+  renderGuestList();
   updateStats();
 }
 
-function buildChairs(t){
-  const chairsContainer=document.createElement('div');
-  chairsContainer.className='chairs-container';
-  chairsContainer.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;';
-  const n=Math.min(t.capacity,20);
-  const cs=chairSize, cg=chairGap;
-
-  function makeChair(left,top,isRound){
-    const ch=document.createElement('div');
-    ch.className='chair-2d';
-    ch.style.cssText=`width:${cs}px;height:${isRound?cs:Math.round(cs*0.85)}px;background:${colors.chair};position:absolute;left:${left}px;top:${top}px;border-radius:${isRound?'50%':'3px'};cursor:move;pointer-events:all;transition:box-shadow 0.15s;`;
-    ch.title='Déplacer cette chaise';
-
-    // Drag individuel
-    let dr=false,sx,sy,ox=left,oy=top;
-    ch.addEventListener('mousedown',e=>{
-      e.stopPropagation();
-      dr=true;sx=e.clientX;sy=e.clientY;ox=parseFloat(ch.style.left);oy=parseFloat(ch.style.top);
-      ch.style.boxShadow=`0 0 0 2px ${colors.table},0 0 8px rgba(0,0,0,0.3)`;
-      ch.style.zIndex='999';
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove',e=>{
-      if(!dr)return;
-      ch.style.left=(ox+(e.clientX-sx)/zoomLevel)+'px';
-      ch.style.top=(oy+(e.clientY-sy)/zoomLevel)+'px';
-    });
-    document.addEventListener('mouseup',()=>{
-      if(!dr)return;
-      dr=false;
-      ch.style.boxShadow='none';
-      ch.style.zIndex='';
-    });
-    // Double clic pour supprimer une chaise
-    ch.addEventListener('dblclick',e=>{e.stopPropagation();ch.remove();});
-    return ch;
-  }
-
-  if(t.type==='round'){
-    const r=t.w/2;
-    for(let i=0;i<n;i++){
-      const angle=(i/n)*2*Math.PI-Math.PI/2;
-      const left=r+Math.cos(angle)*(r+cg)-cs/2;
-      const top=r+Math.sin(angle)*(r+cg)-cs/2;
-      chairsContainer.appendChild(makeChair(left,top,true));
-    }
-  } else {
-    const perSide=Math.ceil(n/2);
-    for(let i=0;i<Math.min(perSide,n);i++){
-      const left=(i+1)*(t.w/(perSide+1))-cs/2;
-      const top=-(Math.round(cs*0.85)+cg);
-      chairsContainer.appendChild(makeChair(left,top,false));
-    }
-    for(let i=0;i<Math.min(perSide,n-perSide);i++){
-      const left=(i+1)*(t.w/(perSide+1))-cs/2;
-      const top=t.h+cg;
-      chairsContainer.appendChild(makeChair(left,top,false));
-    }
-  }
-  return chairsContainer;
+// ===== TABS =====
+function switchTab(tab){
+  document.querySelectorAll('.stab').forEach((t,i)=>{
+    const tabs=['tables','salle','calc','invites','stats'];
+    t.classList.toggle('active',tabs[i]===tab);
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
 }
 
+// ===== ZOOM & PAN =====
+function zoom(delta){zoomLevel=Math.max(0.3,Math.min(2.5,zoomLevel+delta));applyTransform();}
+function resetZoom(){zoomLevel=1;panX=0;panY=0;applyTransform();}
+function centerView(){
+  const area=document.getElementById('canvasArea');
+  const cv=document.getElementById('canvas');
+  panX=(area.clientWidth-cv.offsetWidth*zoomLevel)/2;
+  panY=(area.clientHeight-cv.offsetHeight*zoomLevel)/2;
+  applyTransform();
+}
+function applyTransform(){
+  document.getElementById('canvas').style.transform=`translate(${panX}px,${panY}px) scale(${zoomLevel})`;
+  document.getElementById('canvas').style.transformOrigin='0 0';
+}
+
+// ===== SALLE =====
+function updateSalleDimensions(){
+  const SCALE=60;
+  const l=parseInt(document.getElementById('salleL').value)||20;
+  const w=parseInt(document.getElementById('salleW').value)||15;
+  const cv=document.getElementById('canvas');
+  cv.style.width=Math.max(800,l*SCALE)+'px';
+  cv.style.height=Math.max(500,w*SCALE)+'px';
+  document.getElementById('roomLabel').textContent=l+'m × '+w+'m';
+  applyShapeStyle();
+}
+
+function selectShape(s){
+  salleShape=s;
+  document.querySelectorAll('[id^="sh-"]').forEach(el=>el.classList.remove('active'));
+  document.getElementById('sh-'+s)?.classList.add('active');
+  applyShapeStyle();
+}
+
+function applyShapeStyle(){
+  const cv=document.getElementById('canvas');
+  const shapes={
+    rect:'none',square:'none',round:'50%',
+    L:`polygon(0 0,100% 0,100% 40%,60% 40%,60% 100%,0 100%)`,
+    U:`polygon(0 0,20% 0,20% 60%,80% 60%,80% 0,100% 0,100% 100%,0 100%)`,
+    tent:'40% 40% 0 0'
+  };
+  cv.style.borderRadius=shapes[salleShape]||'none';
+  if(['L','U'].includes(salleShape)){cv.style.clipPath=shapes[salleShape];cv.style.borderRadius='none';}
+  else{cv.style.clipPath='none';cv.style.borderRadius=shapes[salleShape]||'none';}
+}
+
+// ===== THEMES =====
+const THEMES={
+  terra:{table:'#C9963A',chair:'#8B6914',floor:'#FFFEF9'},
+  gold:{table:'#D4AF37',chair:'#B8860B',floor:'#FFFBF0'},
+  rose:{table:'#E91E63',chair:'#C2185B',floor:'#FFF0F5'},
+  bleu:{table:'#1565C0',chair:'#0D47A1',floor:'#F0F4FF'},
+  vert:{table:'#2E7D32',chair:'#1B5E20',floor:'#F0FFF0'},
+  noir:{table:'#424242',chair:'#212121',floor:'#FAFAFA'},
+};
+function applyTheme(name){
+  const t=THEMES[name];if(!t)return;
+  colors={...t};
+  document.getElementById('colTable').value=t.table;
+  document.getElementById('colChair').value=t.chair;
+  document.getElementById('colFloor').value=t.floor;
+  document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('active'));
+  document.getElementById('th-'+name)?.classList.add('active');
+  applyColors();
+}
+function applyColors(){
+  colors.table=document.getElementById('colTable').value;
+  colors.chair=document.getElementById('colChair').value;
+  colors.floor=document.getElementById('colFloor').value;
+  document.getElementById('canvas').style.background=colors.floor;
+  tables.forEach(t=>{
+    const el=document.getElementById(t.id);if(!el)return;
+    const shape=el.querySelector('.tshape');
+    if(shape){shape.style.borderColor=colors.table;}
+    const chairs=el.querySelectorAll('.chair');
+    chairs.forEach(c=>{c.style.color=colors.chair;});
+    const num=el.querySelector('.tnum');
+    if(num)num.style.color=colors.table;
+  });
+}
+
+// ===== CALCUL AUTO =====
+function previewCalc(){
+  const inv=parseInt(document.getElementById('nbInvites').value)||100;
+  const ppt=parseInt(document.getElementById('placesParTable').value)||8;
+  const nb=Math.ceil(inv/ppt);
+  const div=document.getElementById('calcResult');
+  div.style.display='block';
+  div.innerHTML=`${inv} invités ÷ ${ppt} places = <strong>${nb} tables</strong><br>+ 1 table des mariés (2 places)<br><strong>Total : ${nb+1} tables · ${inv+2} places</strong>`;
+}
+
+function genererTablesAuto(){
+  if(tables.length>0&&!confirm('Effacer les tables existantes et regénérer ?'))return;
+  const inv=parseInt(document.getElementById('nbInvites').value)||100;
+  const ppt=parseInt(document.getElementById('placesParTable').value)||8;
+  const type=document.getElementById('autoType').value;
+  const nb=Math.ceil(inv/ppt);
+
+  // Effacer
+  tables.forEach(t=>{
+    t.guests.forEach(gid=>{const g=guests.find(x=>x.id===gid);if(g)g.tableId=null;});
+    const el=document.getElementById(t.id);if(el)el.remove();
+  });
+  tables=[];decos.forEach(d=>{const el=document.getElementById(d.id);if(el)el.remove();});decos=[];
+  tapis.forEach(t=>{const el=document.getElementById(t.id);if(el)el.remove();});tapis=[];
+  tableCounter=1;
+
+  const cv=document.getElementById('canvas');
+  const cw=parseInt(cv.style.width)||1400;
+  const ch=parseInt(cv.style.height)||860;
+  const COLS=Math.min(nb,Math.ceil(Math.sqrt(nb*1.5)));
+  const ROWS=Math.ceil(nb/COLS);
+  const margin=60;
+  const cellW=(cw-margin*2)/COLS;
+  const cellH=(ch-200-margin)/ROWS;
+
+  // Table des mariés
+  const maries={id:'TM_'+Date.now(),type:'rect',number:'M',name:'',capacity:2,guests:[],x:cw/2-110,y:30,w:220,h:70,isMaries:true};
+  tables.push(maries);renderTable(maries);
+
+  // Tables invités
+  for(let i=0;i<nb;i++){
+    const col=i%COLS,row=Math.floor(i/COLS);
+    const sz=type==='round'?Math.max(80,ppt*10):null;
+    const w=type==='round'?sz:Math.max(110,ppt*12);
+    const h=type==='round'?sz:65;
+    const t={
+      id:'T'+Date.now()+'_'+i,type,number:tableCounter++,name:'',
+      capacity:ppt,guests:[],
+      x:margin+cellW*col+(cellW-w)/2,
+      y:160+cellH*row+(cellH-h)/2,
+      w,h
+    };
+    tables.push(t);renderTable(t);
+  }
+
+  document.getElementById('tCounter').value=tableCounter;
+  previewCalc();updateStats();
+  showToast('✅ '+nb+' tables + table des mariés générées !');
+}
+
+// ===== TABLE DES MARIÉS =====
+function addTableMaries(){
+  const cv=document.getElementById('canvas');
+  const cw=parseInt(cv.style.width)||1400;
+  // Supprimer ancienne table mariés si existe
+  const old=tables.find(t=>t.isMaries);
+  if(old){const el=document.getElementById(old.id);if(el)el.remove();tables=tables.filter(t=>!t.isMaries);}
+  const t={id:'TM_'+Date.now(),type:'rect',number:'M',name:'',capacity:2,guests:[],x:cw/2-110,y:30,w:220,h:70,isMaries:true};
+  tables.push(t);renderTable(t);updateStats();
+  showToast('💍 Table des mariés ajoutée !');
+}
+
+// ===== RENDER TABLE =====
 function renderTable(t){
+  const existing=document.getElementById(t.id);if(existing)existing.remove();
   const el=document.createElement('div');
   el.className='table-el';el.id=t.id;
-  el.style.cssText=`left:${t.x}px;top:${t.y}px;width:${t.w}px;`;
+  el.style.cssText=`left:${t.x}px;top:${t.y}px;`;
 
   const shape=document.createElement('div');
-  shape.className='tshape '+t.type;
-  shape.style.cssText=`width:${t.w}px;height:${t.h}px;background:#fff;border-color:${colors.table};`;
+  shape.className=`tshape ${t.type}${t.isMaries?' maries':''}`;
+  shape.style.cssText=`width:${t.w}px;height:${t.h}px;border-color:${colors.table};background:${t.isMaries?'linear-gradient(135deg,#fff9f0,#fff)':'#fff'};`;
+  if(t.type==='rect'&&t.isMaries)shape.style.borderWidth='3px';
 
-  // Chairs
-  const chairsContainer=buildChairs(t);
-  shape.appendChild(chairsContainer);
+  // Chaises
+  shape.insertBefore(buildChairs(t),shape.firstChild);
 
-  const num=document.createElement('div');num.className='tnum';num.textContent=t.number;num.style.color=colors.table;
-  const cap=document.createElement('div');cap.className='tcap';cap.textContent=t.capacity+' places';
-  const gc=document.createElement('div');gc.className='tcount';gc.textContent='0/'+t.capacity;gc.style.color='#fff';gc.style.background=colors.table+'aa';
+  // Numéro
+  const num=document.createElement('div');
+  num.className='tnum';num.style.color=colors.table;
+  num.textContent=t.isMaries?'💍':t.number;
+  shape.appendChild(num);
+
+  // Label
+  const lbl=document.createElement('div');
+  lbl.className='tlabel';
+  lbl.textContent=t.isMaries?'Table des Mariés':t.name||'';
+  lbl.style.cssText=`color:${t.isMaries?colors.table:'#aaa'};font-weight:${t.isMaries?'600':'400'};`;
+  shape.appendChild(lbl);
+
+  // Count badge
+  const cnt=document.createElement('div');
+  cnt.className='tcount';cnt.textContent=`${t.guests.length}/${t.capacity}`;
+  cnt.style.background=colors.table;
+  shape.appendChild(cnt);
+
+  // Tooltip
   const tip=document.createElement('div');tip.className='ttip';
-  tip.innerHTML=`<div class="ttip-title">TABLE ${t.number}</div><div class="ttip-empty">Aucun invité</div>`;
+  tip.innerHTML=`<div class="ttip-title">${t.isMaries?'💍 TABLE DES MARIÉS':'TABLE '+t.number}${t.name&&!t.isMaries?' — '+t.name:''}</div>`;
+  shape.appendChild(tip);
 
-  shape.appendChild(num);shape.appendChild(cap);shape.appendChild(gc);shape.appendChild(tip);
+  // Resize handles
+  const rh=document.createElement('div');rh.className='resize-handle';
+  rh.addEventListener('mousedown',e=>startResize(e,t.id,'se'));shape.appendChild(rh);
+  const rl=document.createElement('div');rl.className='resize-handle-w';
+  rl.addEventListener('mousedown',e=>startResize(e,t.id,'sw'));shape.appendChild(rl);
 
-  const lbl=document.createElement('div');lbl.className='tlabel';lbl.textContent=t.name||'';
-  el.appendChild(shape);el.appendChild(lbl);
-
-  let dr=false,sx,sy,ox,oy;
-  el.addEventListener('mousedown',e=>{if(e.target.closest('.ttip')||e.target.classList.contains('dg-remove'))return;dr=true;sx=e.clientX;sy=e.clientY;ox=t.x;oy=t.y;e.preventDefault();});
-  document.addEventListener('mousemove',e=>{if(!dr)return;t.x=Math.max(0,ox+(e.clientX-sx)/zoomLevel);t.y=Math.max(0,oy+(e.clientY-sy)/zoomLevel);el.style.left=t.x+'px';el.style.top=t.y+'px';});
-  document.addEventListener('mouseup',()=>dr=false);
-
-  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('selected');});
-  el.addEventListener('dragleave',()=>el.classList.remove('selected'));
-  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('selected');assignGuest(e.dataTransfer.getData('gid'),t.id);});
+  el.appendChild(shape);
+  makeDraggable(el,t.id,'table');
   el.addEventListener('click',e=>{e.stopPropagation();selectTable(t.id);});
+
   document.getElementById('canvas').appendChild(el);
-  updateTableEl(t);
+}
+
+function buildChairs(t){
+  const container=document.createElement('div');
+  container.className='chairs-container';
+  const cap=t.capacity||8;
+  const sz=chairSize;
+  const gap=chairGap;
+  const isRound=t.type==='round';
+  const w=t.w,h=t.h;
+
+  if(isRound){
+    const R=Math.min(w,h)/2+gap+sz/2;
+    for(let i=0;i<cap;i++){
+      const angle=(i/cap)*Math.PI*2-Math.PI/2;
+      const cx=w/2+gap+sz/2+R*Math.cos(angle)-sz/2;
+      const cy=h/2+gap+sz/2+R*Math.sin(angle)-sz/2;
+      const c=document.createElement('div');
+      c.className='chair';c.textContent='●';c.style.cssText=`position:absolute;left:${cx}px;top:${cy}px;font-size:${sz}px;color:${colors.chair};transform:rotate(${angle+Math.PI/2}rad);`;
+      container.appendChild(c);
+    }
+  } else {
+    // Top & bottom
+    const perSide=Math.max(1,Math.floor(cap/4));
+    const sideW=Math.floor((cap-perSide*2)/2);
+    const sideE=cap-perSide*2-sideW;
+    const topCount=perSide,botCount=perSide,leftCount=sideW,rightCount=sideE;
+    const place=(count,startX,startY,dx,dy,rot)=>{
+      for(let i=0;i<count;i++){
+        const c=document.createElement('div');c.className='chair';c.textContent='●';
+        c.style.cssText=`position:absolute;left:${startX+dx*i}px;top:${startY+dy*i}px;font-size:${sz}px;color:${colors.chair};transform:rotate(${rot}deg);`;
+        container.appendChild(c);
+      }
+    };
+    const step=Math.min((w-sz)/(topCount||1),(w-sz)/(botCount||1));
+    const stepV=Math.min((h-sz)/(leftCount||1),(h-sz)/(rightCount||1));
+    if(topCount>0)place(topCount,(w-step*(topCount-1)-sz)/2,-gap-sz,step,0,0);
+    if(botCount>0)place(botCount,(w-step*(botCount-1)-sz)/2,h+gap,step,0,180);
+    if(leftCount>0)place(leftCount,-gap-sz,(h-stepV*(leftCount-1)-sz)/2,0,stepV,270);
+    if(rightCount>0)place(rightCount,w+gap,(h-stepV*(rightCount-1)-sz)/2,0,stepV,90);
+  }
+  return container;
 }
 
 function updateTableEl(t){
   const el=document.getElementById(t.id);if(!el)return;
-  const gc=el.querySelector('.tcount');
+  const shape=el.querySelector('.tshape');
+  if(!shape)return;
+  shape.style.width=t.w+'px';shape.style.height=t.h+'px';
+  shape.style.borderColor=colors.table;
+  const cnt=el.querySelector('.tcount');
+  if(cnt){cnt.textContent=`${t.guests.length}/${t.capacity}`;cnt.style.background=colors.table;}
   const lbl=el.querySelector('.tlabel');
+  if(lbl){lbl.textContent=t.isMaries?'Table des Mariés':t.name||'';}
   const tip=el.querySelector('.ttip');
-  const num=el.querySelector('.tnum');
-  num.textContent=t.number;num.style.color=colors.table;
-  gc.textContent=t.guests.length+'/'+t.capacity;
-  gc.style.background=(t.guests.length>=t.capacity?colors.table:colors.table+'99');
-  lbl.textContent=t.name||'';
-  const gs=t.guests.map(gid=>{const g=guests.find(x=>x.id===gid);return g?`<div class="ttip-g">• ${g.name}</div>`:''}).join('');
-  tip.innerHTML=`<div class="ttip-title">TABLE ${t.number}${t.name?' — '+t.name:''}</div>${gs||'<div class="ttip-empty">Aucun invité</div>'}`;
-}
-
-function selectTable(id){
-  document.querySelectorAll('.table-el').forEach(e=>e.classList.remove('selected'));
-  selectedTable=tables.find(t=>t.id===id);
-  if(!selectedTable)return;
-  document.getElementById(id).classList.add('selected');
-  openDetail(selectedTable);
-}
-
-function openDetail(t){
-  document.getElementById('detailPanel').classList.add('open');
-  document.getElementById('detailTitle').textContent='Table '+t.number;
-  document.getElementById('detailName').value=t.name||'';
-  document.getElementById('detailCap').value=t.capacity;
-  renderDetailGuests(t);renderDetailSelect(t);
-}
-
-function closeDetail(){
-  document.getElementById('detailPanel').classList.remove('open');
-  document.querySelectorAll('.table-el').forEach(e=>e.classList.remove('selected'));
-  selectedTable=null;
-}
-
-function renderDetailGuests(t){
-  const list=document.getElementById('detailGuests');list.innerHTML='';
-  t.guests.forEach(gid=>{
-    const g=guests.find(x=>x.id===gid);if(!g)return;
-    const d=document.createElement('div');d.className='dg-item';
-    d.innerHTML=`<span>${g.name}</span><span class="dg-remove" onclick="removeGuestFromTable('${gid}','${t.id}')">✕</span>`;
-    list.appendChild(d);
-  });
-}
-
-function renderDetailSelect(t){
-  const sel=document.getElementById('detailAddG');
-  sel.innerHTML='<option value="">— Ajouter invité —</option>'+guests.filter(g=>!g.tableId).map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
-}
-
-function assignFromSelect(){
-  if(!selectedTable)return;
-  const gid=document.getElementById('detailAddG').value;
-  if(gid)assignGuest(gid,selectedTable.id);
-}
-
-function assignGuest(gid,tid){
-  const g=guests.find(x=>x.id===gid);
-  const t=tables.find(x=>x.id===tid);
-  if(!g||!t)return;
-  if(t.guests.length>=t.capacity){alert('Table complète !');return;}
-  if(g.tableId){const ot=tables.find(x=>x.id===g.tableId);if(ot){ot.guests=ot.guests.filter(id=>id!==gid);updateTableEl(ot);}}
-  g.tableId=tid;
-  if(!t.guests.includes(gid))t.guests.push(gid);
-  updateTableEl(t);renderGuestList();updateStats();
-  if(selectedTable&&selectedTable.id===tid){renderDetailGuests(t);renderDetailSelect(t);}
-}
-
-function removeGuestFromTable(gid,tid){
-  const g=guests.find(x=>x.id===gid);
-  const t=tables.find(x=>x.id===tid);
-  if(g)g.tableId=null;
-  if(t){t.guests=t.guests.filter(id=>id!==gid);updateTableEl(t);}
-  renderGuestList();updateStats();
-  if(selectedTable){renderDetailGuests(selectedTable);renderDetailSelect(selectedTable);}
-}
-
-function updateTName(){if(!selectedTable)return;selectedTable.name=document.getElementById('detailName').value;updateTableEl(selectedTable);}
-function updateTCap(){
-  if(!selectedTable)return;
-  selectedTable.capacity=parseInt(document.getElementById('detailCap').value)||8;
-  // Redraw chairs
-  const el=document.getElementById(selectedTable.id);
-  if(el){
-    const shape=el.querySelector('.tshape');
-    const old=shape.querySelector('.chairs-container');
-    if(old)old.remove();
-    shape.insertBefore(buildChairs(selectedTable),shape.firstChild);
+  if(tip){
+    const gs=t.guests.map(gid=>{const g=guests.find(x=>x.id===gid);return g?`<div class="ttip-g">• ${g.name}</div>`:''}).join('');
+    tip.innerHTML=`<div class="ttip-title">${t.isMaries?'💍 TABLE DES MARIÉS':'TABLE '+t.number}${t.name&&!t.isMaries?' — '+t.name:''}</div>${gs||'<div class="ttip-g" style="color:var(--text-muted);">Aucun invité</div>'}`;
   }
-  updateTableEl(selectedTable);updateStats();
+  // Rebuild chairs
+  const old=shape.querySelector('.chairs-container');if(old)old.remove();
+  shape.insertBefore(buildChairs(t),shape.firstChild);
 }
 
-function deleteSelected(){
-  if(!selectedTable)return;
-  selectedTable.guests.forEach(gid=>{const g=guests.find(x=>x.id===gid);if(g)g.tableId=null;});
-  tables=tables.filter(t=>t.id!==selectedTable.id);
-  const el=document.getElementById(selectedTable.id);if(el)el.remove();
-  closeDetail();renderGuestList();updateStats();
+// ===== ADD TABLE =====
+function addTable(type){
+  const cap=parseInt(document.getElementById('defCap').value)||8;
+  const n=parseInt(document.getElementById('tCounter').value)||tableCounter;
+  const sz=type==='round'?Math.max(80,cap*10):null;
+  const w=type==='round'?sz:Math.max(110,cap*12);
+  const h=type==='round'?sz:65;
+  const t={id:'T'+Date.now(),type,number:n,name:'',capacity:cap,guests:[],x:200+Math.random()*300,y:200+Math.random()*200,w,h};
+  tables.push(t);renderTable(t);
+  document.getElementById('tCounter').value=n+1;
+  tableCounter=n+1;
+  updateStats();
 }
 
-function clearAll(){
-  if(!confirm('Tout effacer ?'))return;
-  tables.forEach(t=>{t.guests.forEach(gid=>{const g=guests.find(x=>x.id===gid);if(g)g.tableId=null;});const el=document.getElementById(t.id);if(el)el.remove();});
-  tables=[];closeDetail();renderGuestList();updateStats();
+function updateDefCap(){
+  // Ne change pas les tables existantes, juste la valeur par défaut
 }
 
-function addDeco(emoji,label){
-  const el=document.createElement('div');el.className='deco-el';
-  el.innerHTML=`<span>${emoji}</span><span class="deco-lbl" style="color:${colors.table}">${label}</span>`;
-  let x=250+Math.random()*300,y=200+Math.random()*250;
-  el.style.left=x+'px';el.style.top=y+'px';
-  el.style.borderColor=colors.table+'66';
-  let dr=false,sx,sy,ox,oy;
-  el.addEventListener('mousedown',e=>{dr=true;sx=e.clientX;sy=e.clientY;ox=x;oy=y;e.preventDefault();});
-  document.addEventListener('mousemove',e=>{if(!dr)return;x=ox+(e.clientX-sx)/zoomLevel;y=oy+(e.clientY-sy)/zoomLevel;el.style.left=x+'px';el.style.top=y+'px';});
-  document.addEventListener('mouseup',()=>dr=false);
-  el.addEventListener('dblclick',()=>el.remove());
+// ===== DECO ELEMENTS =====
+function addDeco(emoji,label,w=60,h=60,resizable=false){
+  const id='D'+Date.now();
+  const d={id,emoji,label,x:300+Math.random()*200,y:200+Math.random()*200,w,h,resizable};
+  decos.push(d);renderDeco(d);
+}
+
+function renderDeco(d){
+  const existing=document.getElementById(d.id);if(existing)existing.remove();
+  const el=document.createElement('div');
+  el.className='deco-el';el.id=d.id;
+  el.style.cssText=`left:${d.x}px;top:${d.y}px;width:${d.w}px;height:${d.h}px;`;
+
+  const icon=document.createElement('div');icon.className='deco-icon';icon.textContent=d.emoji;
+  const lbl=document.createElement('div');lbl.className='deco-lbl';lbl.style.color=colors.table;lbl.textContent=d.label;
+  el.appendChild(icon);el.appendChild(lbl);
+
+  if(d.resizable){
+    const rh=document.createElement('div');rh.className='deco-resize';
+    rh.addEventListener('mousedown',e=>startResize(e,d.id,'se-deco'));
+    el.appendChild(rh);
+  }
+
+  makeDraggable(el,d.id,'deco');
+  el.addEventListener('click',e=>{e.stopPropagation();selectDeco(d.id);});
+  el.addEventListener('dblclick',()=>{if(confirm('Supprimer cet élément ?')){decos=decos.filter(x=>x.id!==d.id);el.remove();updateStats();}});
   document.getElementById('canvas').appendChild(el);
 }
 
+// ===== TAPIS ROUGE =====
+function addTapisRouge(){
+  const id='TAPIS_'+Date.now();
+  const t={id,x:200,y:400,w:80,h:300};
+  tapis.push(t);renderTapis(t);
+  showToast('🟥 Tapis rouge ajouté — redimensionnez avec les poignées !');
+}
+
+function renderTapis(t){
+  const existing=document.getElementById(t.id);if(existing)existing.remove();
+  const el=document.createElement('div');
+  el.className='tapis-el';el.id=t.id;
+  el.style.cssText=`left:${t.x}px;top:${t.y}px;`;
+
+  const inner=document.createElement('div');
+  inner.className='tapis-inner';
+  inner.style.cssText=`width:${t.w}px;height:${t.h}px;`;
+  const lbl=document.createElement('div');lbl.className='tapis-lbl';lbl.textContent='TAPIS ROUGE';
+  inner.appendChild(lbl);
+
+  const rh=document.createElement('div');rh.className='tapis-resize';
+  rh.addEventListener('mousedown',e=>startResize(e,t.id,'se-tapis'));
+  inner.appendChild(rh);
+
+  el.appendChild(inner);
+  makeDraggable(el,t.id,'tapis');
+  el.addEventListener('click',e=>{e.stopPropagation();selectTapis(t.id);});
+  el.addEventListener('dblclick',()=>{if(confirm('Supprimer le tapis ?')){tapis=tapis.filter(x=>x.id!==t.id);el.remove();}});
+  document.getElementById('canvas').appendChild(el);
+}
+
+// ===== SELECT =====
+function selectTable(id){
+  deselectAll();
+  const t=tables.find(x=>x.id===id);if(!t)return;
+  selectedEl=t;selectedType='table';
+  const el=document.getElementById(id);if(el)el.classList.add('selected');
+  openDetailPanel(t);
+}
+
+function selectDeco(id){
+  deselectAll();
+  const d=decos.find(x=>x.id===id);if(!d)return;
+  selectedEl=d;selectedType='deco';
+  const el=document.getElementById(id);if(el)el.classList.add('selected');
+  closeDetail();
+}
+
+function selectTapis(id){
+  deselectAll();
+  const t=tapis.find(x=>x.id===id);if(!t)return;
+  selectedEl=t;selectedType='tapis';
+  const el=document.getElementById(id);if(el)el.classList.add('selected');
+  closeDetail();
+}
+
+function deselectAll(){
+  document.querySelectorAll('.selected').forEach(el=>el.classList.remove('selected'));
+  selectedEl=null;selectedType=null;
+}
+
+function deleteSelected(){
+  if(!selectedEl)return;
+  if(selectedType==='table'){
+    selectedEl.guests.forEach(gid=>{const g=guests.find(x=>x.id===gid);if(g)g.tableId=null;});
+    tables=tables.filter(t=>t.id!==selectedEl.id);
+  } else if(selectedType==='deco'){
+    decos=decos.filter(d=>d.id!==selectedEl.id);
+  } else if(selectedType==='tapis'){
+    tapis=tapis.filter(t=>t.id!==selectedEl.id);
+  }
+  const el=document.getElementById(selectedEl.id);if(el)el.remove();
+  deselectAll();closeDetail();renderGuestList();updateStats();
+}
+
+// ===== DETAIL PANEL =====
+function openDetailPanel(t){
+  const dp=document.getElementById('detailPanel');
+  dp.classList.add('open');
+  document.getElementById('detailPanelTitle').textContent=t.isMaries?'💍 TABLE DES MARIÉS':'TABLE '+t.number;
+  document.getElementById('detailName').value=t.name||'';
+  document.getElementById('detailCap').value=t.capacity||8;
+  renderDetailGuests(t);renderDetailSelect(t);
+}
+
+function closeDetail(){document.getElementById('detailPanel').classList.remove('open');}
+
+function renderDetailGuests(t){
+  document.getElementById('detailGuests').innerHTML=t.guests.map(gid=>{
+    const g=guests.find(x=>x.id===gid);
+    return g?`<div class="guest-tag">${g.name}<span class="guest-remove" onclick="removeGuest('${t.id}','${gid}')">✕</span></div>`:'';
+  }).join('');
+}
+
+function renderDetailSelect(t){
+  const sel=document.getElementById('detailGuestSelect');
+  const unassigned=guests.filter(g=>!g.tableId||g.tableId===t.id);
+  sel.innerHTML='<option value="">+ Assigner un invité...</option>'+
+    unassigned.filter(g=>!g.tableId).map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+}
+
+function assignGuest(gid){
+  if(!gid||!selectedEl||selectedType!=='table')return;
+  const t=selectedEl;
+  if(t.guests.length>=t.capacity){showToast('Table pleine !');return;}
+  const g=guests.find(x=>x.id===gid);if(!g)return;
+  g.tableId=t.id;t.guests.push(gid);
+  updateTableEl(t);renderDetailGuests(t);renderDetailSelect(t);renderGuestList();updateStats();
+  document.getElementById('detailGuestSelect').value='';
+}
+
+function removeGuest(tableId,gid){
+  const t=tables.find(x=>x.id===tableId);const g=guests.find(x=>x.id===gid);
+  if(!t||!g)return;
+  g.tableId=null;t.guests=t.guests.filter(id=>id!==gid);
+  updateTableEl(t);renderDetailGuests(t);renderDetailSelect(t);renderGuestList();updateStats();
+}
+
+function updateTName(){if(!selectedEl||selectedType!=='table')return;selectedEl.name=document.getElementById('detailName').value;updateTableEl(selectedEl);}
+function updateTCap(){
+  if(!selectedEl||selectedType!=='table')return;
+  selectedEl.capacity=parseInt(document.getElementById('detailCap').value)||8;
+  updateTableEl(selectedEl);updateStats();
+}
+
+function autoFillTable(){
+  if(!selectedEl||selectedType!=='table')return;
+  const t=selectedEl;
+  const unassigned=guests.filter(g=>!g.tableId);
+  const available=t.capacity-t.guests.length;
+  const toAdd=unassigned.slice(0,available);
+  toAdd.forEach(g=>{g.tableId=t.id;t.guests.push(g.id);});
+  updateTableEl(t);renderDetailGuests(t);renderDetailSelect(t);renderGuestList();updateStats();
+  showToast(`✅ ${toAdd.length} invités assignés`);
+}
+
+// ===== GUESTS =====
 function addGuest(){
   const inp=document.getElementById('gInput');
   const name=inp.value.trim();if(!name)return;
-  guests.push({id:'G'+Date.now()+'_'+Math.random(),name,tableId:null});
-  inp.value='';renderGuestList();updateStats();
-  if(selectedTable)renderDetailSelect(selectedTable);
+  const g={id:'G'+Date.now(),name,tableId:null};
+  guests.push(g);inp.value='';
+  renderGuestList();updateStats();
 }
 
 function renderGuestList(){
-  const list=document.getElementById('guestList');list.innerHTML='';
-  guests.forEach(g=>{
-    const item=document.createElement('div');item.className='gitem'+(g.tableId?' assigned':'');
-    item.draggable=true;item.dataset.gid=g.id;
+  const div=document.getElementById('guestList');
+  div.innerHTML=guests.map(g=>{
     const t=g.tableId?tables.find(x=>x.id===g.tableId):null;
-    item.innerHTML=`<span class="gtable">${t?'T'+t.number:''}</span><span style="flex:1;">${g.name}</span><span class="gdel" onclick="removeGuest('${g.id}')">✕</span>`;
-    item.addEventListener('dragstart',e=>{e.dataTransfer.setData('gid',g.id);});
-    list.appendChild(item);
-  });
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--dark3);font-size:11px;">
+      <span style="color:${g.tableId?'var(--success)':'var(--text-dim)'};">${g.name}</span>
+      <span style="font-size:9px;color:var(--text-muted);">${t?'T'+t.number:'—'}</span>
+      <span onclick="removeGuestGlobal('${g.id}')" style="color:var(--danger);cursor:pointer;font-size:12px;padding:0 4px;">✕</span>
+    </div>`;
+  }).join('');
 }
 
-function removeGuest(gid){
-  const g=guests.find(x=>x.id===gid);
-  if(g&&g.tableId){const t=tables.find(x=>x.id===g.tableId);if(t){t.guests=t.guests.filter(id=>id!==gid);updateTableEl(t);}}
-  guests=guests.filter(x=>x.id!==gid);
-  renderGuestList();updateStats();
-  if(selectedTable){renderDetailGuests(selectedTable);renderDetailSelect(selectedTable);}
+function removeGuestGlobal(gid){
+  const g=guests.find(x=>x.id===gid);if(!g)return;
+  if(g.tableId){const t=tables.find(x=>x.id===g.tableId);if(t){t.guests=t.guests.filter(id=>id!==gid);updateTableEl(t);}}
+  guests=guests.filter(x=>x.id!==gid);renderGuestList();updateStats();
 }
 
-function doImport(){
-  const txt=document.getElementById('importTxt').value;
-  txt.split('\n').map(n=>n.trim()).filter(n=>n).forEach(name=>{
-    if(!guests.find(g=>g.name===name))guests.push({id:'G'+Date.now()+'_'+Math.random(),name,tableId:null});
-  });
-  document.getElementById('importTxt').value='';
+function openImport(){document.getElementById('importModal').classList.add('open');}
+function importGuests(){
+  const text=document.getElementById('importText').value;
+  const names=text.split('\n').map(n=>n.trim()).filter(n=>n);
+  names.forEach(name=>{if(!guests.find(g=>g.name===name))guests.push({id:'G'+Date.now()+'_'+Math.random(),name,tableId:null});});
+  document.getElementById('importText').value='';
   document.getElementById('importModal').classList.remove('open');
   renderGuestList();updateStats();
+  showToast('✅ '+names.length+' invités importés');
 }
 
+// ===== DRAG & DROP =====
+function makeDraggable(el,id,type){
+  el.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('resize-handle')||e.target.classList.contains('resize-handle-w')||e.target.classList.contains('deco-resize')||e.target.classList.contains('tapis-resize'))return;
+    if(e.button!==0)return;
+    e.preventDefault();
+    dragEl={el,id,type};
+    const rect=el.getBoundingClientRect();
+    const cvRect=document.getElementById('canvas').getBoundingClientRect();
+    dragOffX=(e.clientX-rect.left)/zoomLevel;
+    dragOffY=(e.clientY-rect.top)/zoomLevel;
+    el.style.zIndex=99;
+  });
+}
+
+function onMouseMove(e){
+  if(dragEl){
+    const cvRect=document.getElementById('canvas').getBoundingClientRect();
+    const x=(e.clientX-cvRect.left)/zoomLevel-dragOffX;
+    const y=(e.clientY-cvRect.top)/zoomLevel-dragOffY;
+    dragEl.el.style.left=Math.max(0,x)+'px';
+    dragEl.el.style.top=Math.max(0,y)+'px';
+    // Update data
+    if(dragEl.type==='table'){const t=tables.find(x=>x.id===dragEl.id);if(t){t.x=Math.max(0,x);t.y=Math.max(0,y);}}
+    else if(dragEl.type==='deco'){const d=decos.find(x=>x.id===dragEl.id);if(d){d.x=Math.max(0,x);d.y=Math.max(0,y);}}
+    else if(dragEl.type==='tapis'){const t=tapis.find(x=>x.id===dragEl.id);if(t){t.x=Math.max(0,x);t.y=Math.max(0,y);}}
+    return;
+  }
+  if(resizingEl){
+    const dx=(e.clientX-resizeStartX)/zoomLevel;
+    const dy=(e.clientY-resizeStartY)/zoomLevel;
+    if(resizingEl.rtype==='se'||resizingEl.rtype==='se-deco'||resizingEl.rtype==='se-tapis'){
+      const newW=Math.max(40,resizeStartW+dx);
+      const newH=Math.max(40,resizeStartH+dy);
+      resizingEl.el.style.width=newW+'px';
+      // Update shape inside
+      if(resizingEl.rtype==='se'){
+        const t=tables.find(x=>x.id===resizingEl.id);
+        if(t){t.w=newW;t.h=newH;updateTableEl(t);}
+      } else if(resizingEl.rtype==='se-deco'){
+        const d=decos.find(x=>x.id===resizingEl.id);
+        if(d){d.w=newW;d.h=newH;resizingEl.el.style.width=newW+'px';resizingEl.el.style.height=newH+'px';}
+      } else if(resizingEl.rtype==='se-tapis'){
+        const t=tapis.find(x=>x.id===resizingEl.id);
+        if(t){t.w=newW;t.h=newH;const inner=resizingEl.el.querySelector('.tapis-inner');if(inner){inner.style.width=newW+'px';inner.style.height=newH+'px';}}
+      }
+    }
+  }
+}
+
+function onMouseUp(e){
+  if(dragEl){dragEl.el.style.zIndex='';dragEl=null;}
+  if(resizingEl){resizingEl=null;}
+}
+
+function startResize(e,id,rtype){
+  e.preventDefault();e.stopPropagation();
+  const el=document.getElementById(id);
+  resizingEl={el,id,rtype};
+  resizeStartX=e.clientX;resizeStartY=e.clientY;
+  if(rtype==='se'){const t=tables.find(x=>x.id===id);if(t){resizeStartW=t.w;resizeStartH=t.h;}}
+  else if(rtype==='se-deco'){const d=decos.find(x=>x.id===id);if(d){resizeStartW=d.w;resizeStartH=d.h;}}
+  else if(rtype==='se-tapis'){const t=tapis.find(x=>x.id===id);if(t){resizeStartW=t.w;resizeStartH=t.h;}}
+}
+
+// ===== CHAIR SIZE =====
+function updateChairSize(){
+  chairSize=parseInt(document.getElementById('chairSize').value);
+  document.getElementById('chairSzVal').textContent=chairSize+'px';
+  tables.forEach(t=>{updateTableEl(t);});
+}
+function updateChairGap(){
+  chairGap=parseInt(document.getElementById('chairGap').value);
+  document.getElementById('chairGapVal').textContent=chairGap+'px';
+  tables.forEach(t=>{updateTableEl(t);});
+}
+
+// ===== STATS =====
 function updateStats(){
-  const tc=tables.reduce((s,t)=>s+t.capacity,0);
-  const as=guests.filter(g=>g.tableId).length;
-  document.getElementById('stTables').textContent=tables.length;
-  document.getElementById('stPlaces').textContent=tc;
+  const total=tables.length;
+  const places=tables.reduce((s,t)=>s+t.capacity,0);
+  const placed=guests.filter(g=>g.tableId).length;
+  document.getElementById('stTables').textContent=total;
+  document.getElementById('stPlaces').textContent=places;
   document.getElementById('stInvites').textContent=guests.length;
-  document.getElementById('stPlaces2').textContent=as;
-  const list=document.getElementById('tableStats');list.innerHTML='';
-  tables.forEach(t=>{
-    const d=document.createElement('div');
-    d.style.cssText='display:flex;justify-content:space-between;padding:5px 8px;background:#1a1a1a;border-radius:4px;font-size:10px;cursor:pointer;margin-bottom:3px;';
-    d.innerHTML=`<span style="color:#555;">T${t.number}${t.name?' — '+t.name:''}</span><span style="color:${colors.table};">${t.guests.length}/${t.capacity}</span>`;
-    d.onclick=()=>selectTable(t.id);
-    list.appendChild(d);
-  });
+  document.getElementById('stPlaced').textContent=placed;
+  document.getElementById('tableStats').innerHTML=tables.map(t=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;background:var(--dark3);border-radius:4px;margin-bottom:3px;font-size:10px;">
+      <span style="color:var(--text-dim);">${t.isMaries?'💍 Mariés':'T'+t.number}${t.name?' — '+t.name:''}</span>
+      <span style="color:${t.guests.length>=t.capacity?'var(--gold)':'var(--text-muted)'};">${t.guests.length}/${t.capacity}</span>
+    </div>`).join('');
 }
 
-// ===== 3D RENDER =====
-function render3D(){
-  const canvas=document.getElementById('isoCanvas');
-  const W=1100,H=680;
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  const IX=0.866,IY=0.5,SC=0.52,OX=W/2,OY=110;
-
-  function iso(x,y){return{sx:OX+(x-y)*IX*SC,sy:OY+(x+y)*IY*SC};}
-
-  ctx.fillStyle='#0a0a0a';
-  ctx.fillRect(0,0,W,H);
-
-  const FW=1400,FH=860;
-  const fc=[iso(0,0),iso(FW,0),iso(FW,FH),iso(0,FH)];
-
-  // Floor
-  ctx.beginPath();ctx.moveTo(fc[0].sx,fc[0].sy);fc.forEach(c=>ctx.lineTo(c.sx,c.sy));ctx.closePath();
-  ctx.fillStyle=colors.floor;ctx.fill();
-  ctx.strokeStyle=colors.table+'55';ctx.lineWidth=2;ctx.stroke();
-
-  // Grid
-  ctx.strokeStyle=colors.table+'22';ctx.lineWidth=0.5;
-  for(let gx=0;gx<=FW;gx+=80){const a=iso(gx,0),b=iso(gx,FH);ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.stroke();}
-  for(let gy=0;gy<=FH;gy+=80){const a=iso(0,gy),b=iso(FW,gy);ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);ctx.stroke();}
-
-  // Back walls
-  const WH=90;
-  ctx.beginPath();ctx.moveTo(fc[0].sx,fc[0].sy);ctx.lineTo(fc[0].sx,fc[0].sy-WH*SC);ctx.lineTo(fc[1].sx,fc[1].sy-WH*SC);ctx.lineTo(fc[1].sx,fc[1].sy);ctx.closePath();
-  ctx.fillStyle=colors.table+'22';ctx.fill();ctx.strokeStyle=colors.table+'33';ctx.lineWidth=1;ctx.stroke();
-
-  ctx.beginPath();ctx.moveTo(fc[0].sx,fc[0].sy);ctx.lineTo(fc[0].sx,fc[0].sy-WH*SC);ctx.lineTo(fc[3].sx,fc[3].sy-WH*SC);ctx.lineTo(fc[3].sx,fc[3].sy);ctx.closePath();
-  ctx.fillStyle=colors.table+'18';ctx.fill();ctx.stroke();
-
-  // Room name
-  const evName=document.getElementById('evName').value||'PLAN DE SALLE';
-  ctx.font=`${16}px Cormorant Garamond`;ctx.fillStyle=colors.table+'55';ctx.textAlign='center';
-  const mid=iso(FW/2,80);ctx.fillText(evName.toUpperCase(),mid.sx,mid.sy);
-
-  // TABLES 3D
-  tables.forEach(t=>{
-    const cx=t.x+t.w/2,cy=t.y+t.h/2;
-    const TH=32,LH=30;
-
-    if(t.type==='round'){
-      const r=t.w/2;
-      // Shadow
-      ctx.save();ctx.globalAlpha=0.2;
-      const sc2=iso(cx,cy);
-      ctx.beginPath();ctx.ellipse(sc2.sx+5,sc2.sy+5,r*IX*SC*1.15,r*IY*SC*0.75,0,0,Math.PI*2);
-      ctx.fillStyle='#000';ctx.fill();ctx.restore();
-
-      // Legs
-      [{dx:-r*0.3,dy:-r*0.3},{dx:r*0.3,dy:-r*0.3},{dx:0,dy:r*0.38}].forEach(lp=>{
-        const lb=iso(cx+lp.dx,cy+lp.dy);
-        ctx.beginPath();ctx.rect(lb.sx-4,lb.sy,8,LH*SC*0.85);
-        ctx.fillStyle=colors.chair+'cc';ctx.fill();
-      });
-
-      // Top
-      const tc=iso(cx,cy);
-      ctx.beginPath();ctx.ellipse(tc.sx,tc.sy,r*IX*SC*1.05,r*IY*SC*0.9,0,0,Math.PI*2);
-      ctx.fillStyle='#fff';ctx.fill();
-      ctx.strokeStyle=colors.table;ctx.lineWidth=3;ctx.stroke();
-
-      // Center cloth
-      ctx.beginPath();ctx.ellipse(tc.sx,tc.sy,r*IX*SC*0.55,r*IY*SC*0.45,0,0,Math.PI*2);
-      ctx.fillStyle=colors.table+'22';ctx.fill();
-
-      // Number
-      ctx.font=`600 ${18}px Cormorant Garamond`;ctx.fillStyle=colors.table;ctx.textAlign='center';
-      ctx.fillText(t.number,tc.sx,tc.sy+6);
-
-      // Guest badge
-      if(t.guests.length>0){
-        ctx.beginPath();ctx.arc(tc.sx+r*IX*SC*0.65,tc.sy-r*IY*SC*0.55,12,0,Math.PI*2);
-        ctx.fillStyle=colors.table;ctx.fill();
-        ctx.font=`600 ${11}px Montserrat`;ctx.fillStyle='#fff';ctx.textAlign='center';
-        ctx.fillText(t.guests.length,tc.sx+r*IX*SC*0.65,tc.sy-r*IY*SC*0.55+4);
-      }
-
-      // Chairs
-      const cn=Math.min(t.capacity,12);
-      for(let i=0;i<cn;i++){
-        const angle=(i/cn)*2*Math.PI-Math.PI/2;
-        const cr=r+26;
-        const chp=iso(cx+Math.cos(angle)*cr,cy+Math.sin(angle)*cr);
-        drawChair3D(ctx,chp.sx,chp.sy,SC,colors.chair,colors.table);
-      }
-
-    } else {
-      const hw=t.w/2,hh=t.h/2;
-      const tl=iso(cx-hw,cy-hh),tr=iso(cx+hw,cy-hh);
-      const br=iso(cx+hw,cy+hh),bl=iso(cx-hw,cy+hh);
-
-      // Shadow
-      ctx.save();ctx.globalAlpha=0.15;
-      ctx.beginPath();ctx.moveTo(tl.sx+5,tl.sy+5);ctx.lineTo(tr.sx+5,tr.sy+5);ctx.lineTo(br.sx+5,br.sy+5);ctx.lineTo(bl.sx+5,bl.sy+5);ctx.closePath();
-      ctx.fillStyle='#000';ctx.fill();ctx.restore();
-
-      // Legs
-      [[cx-hw+10,cy-hh+10],[cx+hw-10,cy-hh+10],[cx+hw-10,cy+hh-10],[cx-hw+10,cy+hh-10]].forEach(([lx,ly])=>{
-        const lb=iso(lx,ly);ctx.beginPath();ctx.rect(lb.sx-3,lb.sy,6,LH*SC*0.85);
-        ctx.fillStyle=colors.chair+'cc';ctx.fill();
-      });
-
-      // Right face
-      ctx.beginPath();ctx.moveTo(tr.sx,tr.sy);ctx.lineTo(br.sx,br.sy);ctx.lineTo(br.sx,br.sy+TH*SC*0.45);ctx.lineTo(tr.sx,tr.sy+TH*SC*0.45);ctx.closePath();
-      ctx.fillStyle=colors.table+'88';ctx.fill();ctx.strokeStyle=colors.table;ctx.lineWidth=1;ctx.stroke();
-
-      // Front face
-      ctx.beginPath();ctx.moveTo(bl.sx,bl.sy);ctx.lineTo(br.sx,br.sy);ctx.lineTo(br.sx,br.sy+TH*SC*0.45);ctx.lineTo(bl.sx,bl.sy+TH*SC*0.45);ctx.closePath();
-      ctx.fillStyle=colors.table+'66';ctx.fill();ctx.stroke();
-
-      // Top surface
-      ctx.beginPath();ctx.moveTo(tl.sx,tl.sy);ctx.lineTo(tr.sx,tr.sy);ctx.lineTo(br.sx,br.sy);ctx.lineTo(bl.sx,bl.sy);ctx.closePath();
-      ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=colors.table;ctx.lineWidth=3;ctx.stroke();
-
-      // Center cloth
-      const cl=iso(cx-hw*0.5,cy-hh*0.5),cr2=iso(cx+hw*0.5,cy-hh*0.5);
-      const cbr=iso(cx+hw*0.5,cy+hh*0.5),cbl=iso(cx-hw*0.5,cy+hh*0.5);
-      ctx.beginPath();ctx.moveTo(cl.sx,cl.sy);ctx.lineTo(cr2.sx,cr2.sy);ctx.lineTo(cbr.sx,cbr.sy);ctx.lineTo(cbl.sx,cbl.sy);ctx.closePath();
-      ctx.fillStyle=colors.table+'18';ctx.fill();
-
-      // Number
-      const mc=iso(cx,cy);
-      ctx.font=`600 ${16}px Cormorant Garamond`;ctx.fillStyle=colors.table;ctx.textAlign='center';
-      ctx.fillText(t.number,mc.sx,mc.sy+5);
-
-      // Chairs top/bottom
-      const cps=Math.ceil(Math.min(t.capacity,12)/2);
-      for(let i=0;i<cps;i++){
-        const chx=cx-hw+(i+1)*(t.w/(cps+1));
-        const ch=iso(chx,cy-hh-24);
-        drawChair3D(ctx,ch.sx,ch.sy,SC,colors.chair,colors.table);
-      }
-      for(let i=0;i<Math.min(cps,t.capacity-cps);i++){
-        const chx=cx-hw+(i+1)*(t.w/(cps+1));
-        const ch=iso(chx,cy+hh+24);
-        drawChair3D(ctx,ch.sx,ch.sy,SC,colors.chair,colors.table);
-      }
-
-      // Guest badge
-      if(t.guests.length>0){
-        const mc2=iso(cx+hw*0.65,cy-hh*0.65);
-        ctx.beginPath();ctx.arc(mc2.sx,mc2.sy,12,0,Math.PI*2);
-        ctx.fillStyle=colors.table;ctx.fill();
-        ctx.font=`600 ${11}px Montserrat`;ctx.fillStyle='#fff';ctx.textAlign='center';
-        ctx.fillText(t.guests.length,mc2.sx,mc2.sy+4);
-      }
-    }
-
-    // Name label
-    if(t.name){
-      const lp=iso(cx,cy+t.h/2+40);
-      ctx.font=`${10}px Montserrat`;ctx.fillStyle=colors.table+'99';ctx.textAlign='center';
-      ctx.fillText(t.name.toUpperCase(),lp.sx,lp.sy);
-    }
-  });
-
-  // Watermark
-  ctx.font=`${10}px Montserrat`;ctx.fillStyle=colors.table+'55';ctx.textAlign='left';
-  ctx.fillText('CRÉATIVE PLANNER — PLAN DE SALLE 3D',20,H-16);
+// ===== PRINT =====
+function printPlan(){
+  window.print();
 }
 
-function drawChair3D(ctx,sx,sy,scale,chairColor,accentColor){
-  const s=16*scale;
-  ctx.save();ctx.translate(sx,sy);
-  // Seat
-  ctx.beginPath();ctx.roundRect(-s/2,-s/2,s,s,2);
-  ctx.fillStyle=chairColor;ctx.globalAlpha=0.9;ctx.fill();
-  ctx.strokeStyle=accentColor+'66';ctx.lineWidth=0.5;ctx.stroke();
-  // Back
-  ctx.beginPath();ctx.roundRect(-s/2,-s/2-s*0.45,s,s*0.32,2);
-  ctx.fillStyle=chairColor+'cc';ctx.fill();
-  ctx.globalAlpha=1;ctx.restore();
-}
-
-function getURLParams(){
-  const params=new URLSearchParams(window.location.search);
-  return {
-    eventId:params.get('event')||'',
-    forme:params.get('forme')||'rect',
-    longueur:parseInt(params.get('longueur'))||20,
-    largeur:parseInt(params.get('largeur'))||15,
-    nom:params.get('nom')||''
-  };
-}
-
-function appliquerFormeSalle(forme, longueur, largeur){
-  const SCALE=60;
-  const canvas=document.getElementById('canvas');
-  const W=Math.max(800, longueur*SCALE);
-  const H=Math.max(500, largeur*SCALE);
-  canvas.style.width=W+'px';
-  canvas.style.height=H+'px';
-  canvas.style.minWidth=W+'px';
-  canvas.style.minHeight=H+'px';
-
-  // Appliquer la forme via clip-path ou border-radius
-  if(forme==='round'||forme==='round'){
-    canvas.style.borderRadius='50%';
-  } else if(forme==='square'){
-    const size=Math.max(W,H);
-    canvas.style.width=size+'px';canvas.style.height=size+'px';
-    canvas.style.borderRadius='0';
-  } else if(forme==='L'){
-    canvas.style.borderRadius='0';
-    canvas.style.clipPath=`polygon(0 0, 100% 0, 100% 40%, 60% 40%, 60% 100%, 0 100%)`;
-  } else if(forme==='U'){
-    canvas.style.borderRadius='0';
-    canvas.style.clipPath=`polygon(0 0, 20% 0, 20% 60%, 80% 60%, 80% 0, 100% 0, 100% 100%, 0 100%)`;
-  } else if(forme==='tent'){
-    canvas.style.borderRadius='40% 40% 0 0';
-  } else {
-    canvas.style.borderRadius='0';
-    canvas.style.clipPath='none';
-  }
-
-  // Afficher les dimensions dans le label
-  const label=document.getElementById('roomLabel');
-  const nom=document.getElementById('evName').value;
-  label.textContent=(nom?nom.toUpperCase()+' — ':'')+longueur+'m × '+largeur+'m';
-
-  // Afficher indicateur de dimensions dans la toolbar
-  let dimEl=document.getElementById('dimIndicator');
-  if(!dimEl){
-    dimEl=document.createElement('span');
-    dimEl.id='dimIndicator';
-    dimEl.style.cssText='font-size:10px;color:var(--gold);letter-spacing:1px;font-weight:500;';
-    document.querySelector('.toolbar').appendChild(dimEl);
-  }
-  const formeLabels={rect:'Rectangulaire',square:'Carrée',round:'Ronde',L:'En L',U:'En U',tent:'Tente/Chapiteau'};
-  dimEl.textContent=`${formeLabels[forme]||forme} — ${longueur}m × ${largeur}m`;
-}
-
+// ===== SAVE/LOAD =====
 function saveData(){
-  const d={
-    evName:document.getElementById('evName').value,
-    evType:document.getElementById('evType').value,
-    evDate:document.getElementById('evDate').value,
-    evLieu:document.getElementById('evLieu').value,
-    evOffre:document.getElementById('evOffre').value,
-    evTheme:document.getElementById('evTheme').value,
-    evMenu:document.getElementById('evMenu').value,
-    evNotes:document.getElementById('evNotes').value,
-    colors,tables,guests
-  };
-  localStorage.setItem('cp_plan3d',JSON.stringify(d));
-  showToast('💾 Sauvegardé !');
+  const d={tables,guests,decos,tapis,colors,chairSize,chairGap,salleShape,
+    salleL:document.getElementById('salleL').value,
+    salleW:document.getElementById('salleW').value,
+    tableCounter};
+  localStorage.setItem('cp_plan_v3',JSON.stringify(d));
+  showToast('💾 Plan sauvegardé !');
 }
 
 function loadData(){
-  // Lire les paramètres URL en priorité
-  const params=getURLParams();
-  if(params.nom) document.getElementById('evName').value=params.nom;
-  if(params.forme) appliquerFormeSalle(params.forme, params.longueur, params.largeur);
-
-  // Charger depuis localStorage
-  const raw=localStorage.getItem('cp_plan3d');if(!raw){updateEvName();return;}
-  const d=JSON.parse(raw);
-  if(!params.nom){
-    ['evName','evType','evDate','evLieu','evOffre','evTheme','evMenu','evNotes'].forEach(id=>{
-      if(d[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=d[id];
-    });
-  } else {
-    ['evType','evDate','evLieu','evOffre','evTheme','evMenu','evNotes'].forEach(id=>{
-      if(d[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=d[id];
-    });
-  }
-  if(d.colors){
-    colors={...d.colors};
-    document.getElementById('colorTable').value=colors.table;
-    document.getElementById('colorChair').value=colors.chair;
-    document.getElementById('colorFloor').value=colors.floor;
-    document.getElementById('colorAccent').value=colors.accent;
-  }
-  updateEvName();
-  guests=d.guests||[];
-  tables=d.tables||[];
-  tables.forEach(t=>renderTable(t));
-  renderGuestList();updateStats();applyColors();
-
-  // Appliquer la forme après le chargement
-  if(params.forme) appliquerFormeSalle(params.forme, params.longueur, params.largeur);
+  const raw=localStorage.getItem('cp_plan_v3');if(!raw)return;
+  try{
+    const d=JSON.parse(raw);
+    tables=d.tables||[];guests=d.guests||[];decos=d.decos||[];tapis=d.tapis||[];
+    colors=d.colors||colors;chairSize=d.chairSize||13;chairGap=d.chairGap||10;
+    if(d.salleL)document.getElementById('salleL').value=d.salleL;
+    if(d.salleW)document.getElementById('salleW').value=d.salleW;
+    if(d.salleShape)selectShape(d.salleShape);
+    if(d.tableCounter)tableCounter=d.tableCounter;
+    document.getElementById('colTable').value=colors.table;
+    document.getElementById('colChair').value=colors.chair;
+    document.getElementById('colFloor').value=colors.floor;
+    document.getElementById('chairSize').value=chairSize;
+    document.getElementById('chairGap').value=chairGap;
+    tables.forEach(t=>renderTable(t));
+    decos.forEach(d=>renderDeco(d));
+    tapis.forEach(t=>renderTapis(t));
+    updateSalleDimensions();applyColors();
+    renderGuestList();updateStats();
+  }catch(e){console.error(e);}
 }
 
+function clearAll(){
+  if(!confirm('Tout effacer ? Cette action est irréversible.'))return;
+  tables.forEach(t=>{const el=document.getElementById(t.id);if(el)el.remove();});
+  decos.forEach(d=>{const el=document.getElementById(d.id);if(el)el.remove();});
+  tapis.forEach(t=>{const el=document.getElementById(t.id);if(el)el.remove();});
+  tables=[];decos=[];tapis=[];
+  guests.forEach(g=>g.tableId=null);
+  tableCounter=1;document.getElementById('tCounter').value=1;
+  deselectAll();closeDetail();renderGuestList();updateStats();
+}
+
+// ===== URL PARAMS =====
+function readURLParams(){
+  const p=new URLSearchParams(window.location.search);
+  const ev=p.get('event');const forme=p.get('forme');
+  const l=p.get('longueur');const w=p.get('largeur');const nom=p.get('nom');
+  if(l)document.getElementById('salleL').value=l;
+  if(w)document.getElementById('salleW').value=w;
+  if(forme)selectShape(forme);
+  if(nom)document.getElementById('topbarEvent').textContent=nom;
+  updateSalleDimensions();
+}
+
+// ===== TOAST =====
 function showToast(msg){
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:18px;right:18px;background:#111;border:1px solid '+colors.table+';border-radius:5px;padding:9px 16px;font-size:11px;color:#ddd;z-index:9999;letter-spacing:1px;';
-  t.textContent=msg;document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2500);
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(()=>t.remove(),300);},2500);
 }
 
-document.getElementById('canvas').addEventListener('click',e=>{if(e.target===document.getElementById('canvas'))closeDetail();});
-document.querySelectorAll('.moverlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
-applyTheme('terra');
-loadData();
-setInterval(saveData,60000);
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded',()=>{
+  init();readURLParams();
+  document.getElementById('importModal').addEventListener('click',e=>{if(e.target===document.getElementById('importModal'))e.target.classList.remove('open');});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Delete'||e.key==='Backspace'){if(selectedEl&&document.activeElement===document.body)deleteSelected();}
+    if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();saveData();}
+  });
+  setInterval(saveData,60000);
+});
 </script>
 </body>
 </html>
