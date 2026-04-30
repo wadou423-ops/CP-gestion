@@ -225,13 +225,14 @@ tbody tr:last-child td{border-bottom:none;}
 .hmv-icon{font-size:32px;margin-bottom:10px;}
 .hmv-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);margin-bottom:12px;}
 
-/* ===== PRESTATAIRES ===== */
-.presta-sec{margin-bottom:18px;}
-.presta-sec-title{font-size:11px;color:var(--gold);letter-spacing:1px;font-weight:600;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--gold-bd);}
-.presta-row{display:grid;grid-template-columns:1fr 130px 1fr;gap:8px;margin-bottom:6px;align-items:center;}
-.presta-row input{padding:8px 11px;background:var(--off);border:1.5px solid var(--bg2);border-radius:var(--rs);color:var(--ink);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;}
-.presta-row input:focus{border-color:var(--gold);}
 .presta-add{font-size:11px;color:var(--gold);cursor:pointer;display:flex;align-items:center;gap:4px;padding:4px 0;}
+.presta-sec-title{font-size:11px;color:var(--gold);letter-spacing:1px;font-weight:600;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--gold-bd);}
+.presta-row{display:grid;grid-template-columns:1.5fr 120px 100px 100px 90px;gap:7px;margin-bottom:6px;align-items:center;}
+.presta-row input{padding:8px 10px;background:var(--off);border:1.5px solid var(--bg2);border-radius:var(--rs);color:var(--ink);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;}
+.presta-row input:focus{border-color:var(--gold);}
+.presta-row-hdr{display:grid;grid-template-columns:1.5fr 120px 100px 100px 90px;gap:7px;margin-bottom:4px;font-size:9px;color:var(--ink4);letter-spacing:1px;font-weight:500;}
+.sign-check{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);cursor:pointer;}
+.sign-check input{accent-color:var(--gold);width:16px;height:16px;cursor:pointer;}
 
 /* ===== EMPTY ===== */
 .empty{text-align:center;padding:52px 20px;}
@@ -720,6 +721,8 @@ function mapClient(c){
     fiches:sc.fiches||{},
     lune_miel:sc.lune_miel||{destination:'',hotel:'',dates:'',budget:'',notes:''},
     mise_au_vert:sc.mise_au_vert||{destination:'',activites:'',dates:'',budget:'',notes:''},
+    budget_materiel:sc.budget_materiel||{},
+    budget_final:sc.budget_final||{},
   };
 }
 
@@ -996,6 +999,8 @@ function stepClick(clientId,step){
 // ===== TABS DYNAMIQUES =====
 function buildEvTabs(c){
   const modules=c.modules||[];
+  const isPrivileged=['Administrateur','Gestionnaire'].includes(currentUser?.role);
+
   // Toujours visibles
   const alwaysTabs=[
     {id:'apercu',label:'Aperçu'},
@@ -1003,17 +1008,22 @@ function buildEvTabs(c){
     {id:'couleurs',label:'Couleurs'},
     {id:'fiches',label:'Fiches'},
     {id:'paiements_ev',label:'Paiements'},
+    ...(isPrivileged?[{id:'budget_final',label:'🔒 Budget Final'}]:[]),
   ];
   // Tabs conditionnels selon modules actifs
   const condTabs=[
     {id:'materiel',label:'Matériel',mod:'materiel'},
+    {id:'budget_materiel',label:'💰 Budget Matériel',mod:'materiel',privileged:true},
     {id:'prestataires_tab',label:'Prestataires',mod:'prestataires'},
     {id:'plan_salle_tab',label:'Plan de salle',mod:'plan_salle'},
     {id:'contrat',label:'Contrat',mod:'contrat'},
     {id:'lune_de_miel',label:'🌙 Lune de miel',mod:'lune_de_miel'},
     {id:'mise_au_vert',label:'🌿 Mise au vert',mod:'mise_au_vert'},
   ];
-  const visibleTabs=[...alwaysTabs,...condTabs.filter(t=>modules.includes(t.mod))];
+  const visibleTabs=[
+    ...alwaysTabs,
+    ...condTabs.filter(t=>modules.includes(t.mod)&&(!t.privileged||isPrivileged))
+  ];
 
   document.getElementById('evTabsBar').innerHTML=visibleTabs.map((t,i)=>`
     <div class="ev-tab ${i===0?'active':''}" onclick="switchEvTab('${t.id}')">${t.label}</div>`).join('');
@@ -1034,6 +1044,7 @@ function buildTabContent(tabId,c){
   if(tabId==='apercu')return renderApercu(c);
   if(tabId==='parcours')return renderParcours(c);
   if(tabId==='materiel')return renderMateriel(c);
+  if(tabId==='budget_materiel')return renderBudgetMateriel(c);
   if(tabId==='prestataires_tab')return renderPrestataires(c);
   if(tabId==='couleurs')return renderCouleurs(c);
   if(tabId==='plan_salle_tab')return renderPlanSalleTab(c);
@@ -1042,6 +1053,7 @@ function buildTabContent(tabId,c){
   if(tabId==='paiements_ev')return renderPaysEv(c);
   if(tabId==='lune_de_miel')return renderLuneMiel(c);
   if(tabId==='mise_au_vert')return renderMiseAuVert(c);
+  if(tabId==='budget_final')return renderBudgetFinal(c);
   return '';
 }
 
@@ -1224,17 +1236,23 @@ function renderPrestataires(c){
     <div class="card-hdr"><div class="card-title">Prestataires de l'événement</div>
       <button class="btn btn-gold btn-sm" onclick="savePresta('${c.id}')">💾 Sauvegarder</button>
     </div>
-    <p style="font-size:12px;color:var(--ink4);margin-bottom:16px;">Renseignez les coordonnées de chaque prestataire retenu.</p>
+    <p style="font-size:12px;color:var(--ink4);margin-bottom:16px;">Renseignez les coordonnées et le suivi financier de chaque prestataire.</p>
     ${cats.map(cat=>{
-      const items=pr[cat.k]||[{nom:'',tel:'',email:''}];
+      const items=pr[cat.k]||[{nom:'',tel:'',acompte:'',solde:'',signe:false}];
       const hasData=items.some(p=>p.nom);
       return `<div class="presta-sec">
-        <div class="presta-sec-title">${cat.l}${hasData?` <span style="color:var(--success);font-size:10px;">✓ Renseigné</span>`:'<span style="color:var(--ink4);font-size:10px;">— Non renseigné</span>'}</div>
+        <div class="presta-sec-title">${cat.l} ${hasData?'<span style="color:var(--success);font-size:10px;">✓</span>':''}</div>
+        <div class="presta-row-hdr"><span>NOM / SOCIÉTÉ</span><span>TÉLÉPHONE</span><span>ACOMPTE (FCFA)</span><span>SOLDE (FCFA)</span><span>SIGNÉ</span></div>
         ${items.map((p,pi)=>`
           <div class="presta-row">
             <input type="text" placeholder="Nom / Société" value="${p.nom||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'nom',this.value)">
             <input type="tel" placeholder="Téléphone" value="${p.tel||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'tel',this.value)">
-            <input type="email" placeholder="Email" value="${p.email||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'email',this.value)">
+            <input type="number" placeholder="0" value="${p.acompte||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'acompte',this.value)" style="color:var(--warning);">
+            <input type="number" placeholder="0" value="${p.solde||''}" oninput="setPresta('${c.id}','${cat.k}',${pi},'solde',this.value)" style="color:var(--success);">
+            <label class="sign-check">
+              <input type="checkbox" ${p.signe?'checked':''} onchange="setPresta('${c.id}','${cat.k}',${pi},'signe',this.checked)">
+              ${p.signe?'<span style="color:var(--success);">✓ Oui</span>':'<span style="color:var(--ink4);">Non</span>'}
+            </label>
           </div>`).join('')}
         <div class="presta-add" onclick="addPrestaLine('${c.id}','${cat.k}')">+ Ajouter un contact</div>
       </div>`;
@@ -1559,7 +1577,161 @@ function renderMiseAuVert(c){
 function setMv(cId,field,val){const c=D.clients.find(x=>x.id===cId);if(!c)return;if(!c.mise_au_vert)c.mise_au_vert={};c.mise_au_vert[field]=val;}
 async function saveMv(cId){const c=D.clients.find(x=>x.id===cId);if(!c)return;await updateClientSB(c);toast('Mise au vert sauvegardée','ok');}
 
-// ===== FICHE PDF PAYSAGE =====
+// ===== BUDGET MATÉRIEL =====
+function renderBudgetMateriel(c){
+  const mat=c.materiel||defaultMateriel();
+  const budgets=c.budget_materiel||{};
+  const totalBudget=mat.reduce((s,m)=>{
+    const pu=parseFloat(budgets[m.id]||0);
+    return s+pu*(m.qty||0);
+  },0);
+  return `<div class="card">
+    <div class="card-hdr">
+      <div class="card-title">💰 Budget Matériel</div>
+      <button class="btn btn-gold btn-sm" onclick="saveBudgetMat('${c.id}')">💾 Sauvegarder</button>
+    </div>
+    <p style="font-size:12px;color:var(--ink4);margin-bottom:16px;">Saisissez le prix unitaire de chaque élément pour calculer le budget total.</p>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead style="background:var(--off);">
+          <tr>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--ink4);letter-spacing:1.5px;font-weight:600;border-bottom:1px solid var(--bg2);">ÉLÉMENT</th>
+            <th style="padding:10px 14px;text-align:right;font-size:10px;color:var(--ink4);letter-spacing:1.5px;font-weight:600;border-bottom:1px solid var(--bg2);">QUANTITÉ</th>
+            <th style="padding:10px 14px;text-align:right;font-size:10px;color:var(--ink4);letter-spacing:1.5px;font-weight:600;border-bottom:1px solid var(--bg2);">PRIX UNITAIRE (FCFA)</th>
+            <th style="padding:10px 14px;text-align:right;font-size:10px;color:var(--ink4);letter-spacing:1.5px;font-weight:600;border-bottom:1px solid var(--bg2);">TOTAL (FCFA)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${mat.map(m=>{
+            const pu=parseFloat(budgets[m.id]||0);
+            const total=pu*(m.qty||0);
+            return `<tr style="border-bottom:1px solid var(--bg2);">
+              <td style="padding:11px 14px;color:var(--ink2);">${m.icon} ${m.name}</td>
+              <td style="padding:11px 14px;text-align:right;color:var(--ink3);">${m.qty||0}</td>
+              <td style="padding:11px 14px;text-align:right;">
+                <input type="number" value="${budgets[m.id]||''}" placeholder="0"
+                  style="width:120px;padding:6px 10px;background:var(--off);border:1.5px solid var(--bg2);border-radius:var(--rs);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;text-align:right;color:var(--ink);"
+                  oninput="setBudgetMat('${c.id}','${m.id}',this.value)"
+                  onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--bg2)'">
+              </td>
+              <td style="padding:11px 14px;text-align:right;font-weight:600;color:${total>0?'var(--gold)':'var(--ink4)'};">${total>0?fm(total):'-'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="background:var(--gold-dim);border-top:2px solid var(--gold-bd);">
+            <td colspan="3" style="padding:13px 14px;font-weight:600;font-size:13px;color:var(--ink);">TOTAL BUDGET MATÉRIEL</td>
+            <td style="padding:13px 14px;text-align:right;font-family:'Playfair Display',serif;font-size:20px;color:var(--gold);font-weight:700;">${fm(totalBudget)} FCFA</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>`;
+}
+
+function setBudgetMat(clientId,itemId,val){
+  const c=D.clients.find(x=>x.id===clientId);if(!c)return;
+  if(!c.budget_materiel)c.budget_materiel={};
+  c.budget_materiel[itemId]=parseFloat(val)||0;
+  // Recalculer le total affiché
+  const totalBudget=c.materiel.reduce((s,m)=>{
+    const pu=parseFloat(c.budget_materiel[m.id]||0);
+    return s+pu*(m.qty||0);
+  },0);
+}
+
+async function saveBudgetMat(clientId){
+  const c=D.clients.find(x=>x.id===clientId);if(!c)return;
+  await updateClientSB(c);
+  document.getElementById('etab-budget_materiel').innerHTML=renderBudgetMateriel(c);
+  toast('Budget matériel sauvegardé','ok');
+}
+
+// ===== BUDGET FINAL (Admin/Gestionnaire uniquement) =====
+function renderBudgetFinal(c){
+  const bf=c.budget_final||{recettes:{},depenses:{}};
+  const pr=c.prestataires||{};
+
+  // Calcul auto des recettes
+  const devisClient=D.devis.filter(d=>d.clientId===c.id);
+  const totalDevis=devisClient.reduce((s,d)=>s+parseFloat(d.montant||0),0);
+  const totalEncaisse=D.pays.filter(p=>p.clientId===c.id).reduce((s,p)=>s+parseFloat(p.montant||0),0);
+
+  // Calcul auto des dépenses prestataires
+  const cats=['photo','dj','traiteur','mignardises','deco','effets','lieu','mc','orchestre','chanteur','chorale','voiture'];
+  const totalPrestaAc=cats.reduce((s,k)=>{
+    const items=pr[k]||[];
+    return s+items.reduce((s2,p)=>s2+parseFloat(p.acompte||0),0);
+  },0);
+  const totalPrestaSolde=cats.reduce((s,k)=>{
+    const items=pr[k]||[];
+    return s+items.reduce((s2,p)=>s2+parseFloat(p.solde||0),0);
+  },0);
+  const totalMat=c.materiel?.reduce((s,m)=>{
+    const pu=parseFloat(c.budget_materiel?.[m.id]||0);
+    return s+pu*(m.qty||0);
+  },0)||0;
+
+  const totalDepenses=totalPrestaAc+totalPrestaSolde+totalMat+(parseFloat(bf.autres||0));
+  const benefice=totalDevis-totalDepenses;
+
+  return `<div style="display:flex;align-items:center;gap:10px;background:rgba(192,57,43,0.06);border:1px solid rgba(192,57,43,0.2);border-radius:var(--rs);padding:10px 16px;margin-bottom:18px;">
+    <span style="font-size:18px;">🔒</span>
+    <span style="font-size:12px;color:var(--danger);">Onglet confidentiel — visible uniquement par l'Administrateur et le Gestionnaire</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div class="card">
+      <div class="card-title">📥 Recettes</div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span style="color:var(--ink4);">Montant devis</span><span style="color:var(--gold);font-weight:600;">${fm(totalDevis)} FCFA</span></div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span style="color:var(--ink4);">Encaissé</span><span style="color:var(--success);font-weight:600;">${fm(totalEncaisse)} FCFA</span></div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:12px;"><span style="color:var(--ink4);">Restant à encaisser</span><span style="color:var(--warning);font-weight:600;">${fm(Math.max(0,totalDevis-totalEncaisse))} FCFA</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📤 Dépenses</div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span style="color:var(--ink4);">Acomptes prestataires</span><span style="color:var(--ink2);">${fm(totalPrestaAc)} FCFA</span></div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span style="color:var(--ink4);">Soldes prestataires</span><span style="color:var(--ink2);">${fm(totalPrestaSolde)} FCFA</span></div>
+      <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span style="color:var(--ink4);">Budget matériel</span><span style="color:var(--ink2);">${fm(totalMat)} FCFA</span></div>
+      <div style="padding:9px 0;font-size:12px;">
+        <div style="color:var(--ink4);margin-bottom:5px;">Autres dépenses</div>
+        <input type="number" value="${bf.autres||''}" placeholder="0 FCFA"
+          style="width:100%;padding:8px 12px;background:var(--off);border:1.5px solid var(--bg2);border-radius:var(--rs);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);"
+          oninput="setBudgetFinalField('${c.id}','autres',this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- MARGE NETTE -->
+  <div style="background:${benefice>=0?'rgba(45,122,79,0.08)':'rgba(192,57,43,0.08)'};border:2px solid ${benefice>=0?'rgba(45,122,79,0.3)':'rgba(192,57,43,0.3)'};border-radius:var(--r);padding:20px 24px;margin-top:18px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-size:11px;color:var(--ink4);letter-spacing:1px;margin-bottom:4px;">MARGE NETTE</div>
+      <div style="font-size:12px;color:var(--ink3);">Recettes (${fm(totalDevis)}) − Dépenses (${fm(totalDepenses)})</div>
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:32px;color:${benefice>=0?'var(--success)':'var(--danger)'};">
+      ${benefice>=0?'+':''}${fm(benefice)} FCFA
+    </div>
+  </div>
+
+  <!-- NOTES INTERNES -->
+  <div class="card" style="margin-top:18px;">
+    <div class="card-title">📝 Notes internes (confidentielles)</div>
+    <textarea style="width:100%;min-height:100px;padding:12px;background:var(--off);border:1.5px solid var(--bg2);border-radius:var(--rs);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;line-height:1.6;color:var(--ink);" placeholder="Notes internes, observations, informations confidentielles..." oninput="setBudgetFinalField('${c.id}','notes_internes',this.value)">${bf.notes_internes||''}</textarea>
+    <button class="btn btn-gold btn-sm" style="margin-top:10px;" onclick="saveBudgetFinal('${c.id}')">💾 Sauvegarder</button>
+  </div>`;
+}
+
+function setBudgetFinalField(clientId,field,val){
+  const c=D.clients.find(x=>x.id===clientId);if(!c)return;
+  if(!c.budget_final)c.budget_final={};
+  c.budget_final[field]=val;
+}
+
+async function saveBudgetFinal(clientId){
+  const c=D.clients.find(x=>x.id===clientId);if(!c)return;
+  await updateClientSB(c);
+  document.getElementById('etab-budget_final').innerHTML=renderBudgetFinal(c);
+  toast('Budget final sauvegardé','ok');
+}
+
 function printFicheMateriel(clientId){
   const c=D.clients.find(x=>x.id===clientId);if(!c)return;
   const mat=c.materiel||defaultMateriel();
