@@ -166,9 +166,25 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
 .guide-v{position:absolute;top:0;bottom:0;width:1px;background:rgba(52,152,219,0.5);pointer-events:none;z-index:20;display:none;}
 .guide-h.visible,.guide-v.visible{display:block;}
 .snap-label{position:absolute;background:rgba(52,152,219,0.85);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;pointer-events:none;z-index:21;display:none;letter-spacing:1px;}
-.snap-label.visible{display:block;}background:var(--dark2);border:1px solid var(--gold);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--text);z-index:9999;letter-spacing:0.5px;animation:toastIn 0.3s;}
+.snap-label.visible{display:block;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--dark2);border:1px solid var(--gold);border-radius:6px;padding:10px 18px;font-size:11px;color:var(--text);z-index:9999;letter-spacing:0.5px;animation:toastIn 0.3s;}
 @keyframes toastIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-</style>
+
+/* ===== PRINT ===== */
+.print-header{display:none;font-family:'DM Sans',sans-serif;padding:10px 0 14px;border-bottom:2px solid #B8872A;margin-bottom:14px;text-align:center;}
+.print-header-logo{font-family:'Playfair Display',serif;font-size:12px;color:#B8872A;letter-spacing:3px;}
+.print-header-title{font-family:'Playfair Display',serif;font-size:20px;color:#1C1A17;margin:5px 0 4px;letter-spacing:1px;}
+.print-header-meta{font-size:11px;color:#6B6560;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:4px;}
+@media print{
+  body{background:#fff !important;overflow:visible !important;height:auto !important;}
+  .topbar,.sidebar,.canvas-controls,.room-label,.guide-h,.guide-v,.snap-label{display:none !important;}
+  .workspace{display:block !important;margin:0 !important;height:auto !important;}
+  .canvas-area{overflow:visible !important;background:#fff !important;height:auto !important;flex:none !important;}
+  #viewport{overflow:visible !important;width:auto !important;height:auto !important;}
+  #canvas{transform:none !important;position:relative !important;box-shadow:none !important;border:1px solid #e8dcc8 !important;margin:0 auto !important;max-width:100% !important;}
+  .print-header{display:block !important;}
+  @page{size:A4 landscape;margin:8mm;}
+}
 </head>
 <body>
 
@@ -183,6 +199,7 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
     <button class="tbtn tbtn-ghost" onclick="genererTablesAuto()">⚡ Générer tables</button>
     <button class="tbtn tbtn-ghost" onclick="switchTab('calc');previewCalc()">🔢 Calculer</button>
     <button class="tbtn tbtn-ghost" onclick="printPlan()">🖨️ Imprimer</button>
+    <button class="tbtn tbtn-gold" onclick="saveScreenshot()" title="Enregistrer le plan pour la fiche PDF du CRM">📸 Enregistrer pour la fiche</button>
     <button class="tbtn tbtn-ghost" onclick="saveData()">💾 Sauvegarder</button>
     <button class="tbtn tbtn-ghost" onclick="clearAll()">🗑️ Effacer tout</button>
   </div>
@@ -350,6 +367,12 @@ input[type=color]{width:32px;height:26px;border:none;border-radius:4px;cursor:po
 
   <!-- CANVAS AREA -->
   <div class="canvas-area" id="canvasArea">
+    <!-- EN-TÊTE IMPRESSION UNIQUEMENT -->
+    <div class="print-header" id="printHeader">
+      <div class="print-header-logo">CRÉATIVE PLANNER · Nous créons, vous vivez!</div>
+      <div class="print-header-title" id="phTitle">Plan de Salle</div>
+      <div class="print-header-meta" id="phMeta"></div>
+    </div>
     <div class="canvas-controls">
       <div class="cc-btn" onclick="zoom(0.1)" title="Zoom +">+</div>
       <div class="cc-btn" onclick="zoom(-0.1)" title="Zoom -">−</div>
@@ -1148,8 +1171,88 @@ function updateStats(){
 }
 
 // ===== PRINT =====
+// ===== SAVE SCREENSHOT POUR FICHE CRM =====
+function saveScreenshot(){
+  const params=new URLSearchParams(window.location.search);
+  const evId=params.get('event');
+  if(!evId){showToast('⚠️ Ouvrez ce plan depuis un événement du CRM pour sauvegarder');return;}
+
+  const canvas=document.getElementById('canvas');
+  // Reset le zoom temporairement pour capture
+  const savedTransform=canvas.style.transform;
+  canvas.style.transform='none';
+  canvas.style.transformOrigin='0 0';
+
+  // Utiliser html2canvas pour capturer
+  const script=document.createElement('script');
+  script.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  script.onload=()=>{
+    html2canvas(canvas,{
+      backgroundColor:'#FFFEF9',
+      scale:0.6,
+      useCORS:true,
+      logging:false,
+    }).then(capturedCanvas=>{
+      const imgData=capturedCanvas.toDataURL('image/jpeg',0.85);
+      localStorage.setItem('cp_plan_img_'+evId,imgData);
+      canvas.style.transform=savedTransform;
+      showToast('✅ Plan sauvegardé ! Générez maintenant la fiche PDF depuis le CRM.');
+    }).catch(e=>{
+      canvas.style.transform=savedTransform;
+      showToast('❌ Erreur de capture. Essayez d\'imprimer le plan directement.');
+    });
+  };
+  script.onerror=()=>{
+    // Fallback sans html2canvas — canvas natif
+    canvas.style.transform=savedTransform;
+    try{
+      const tempCanvas=document.createElement('canvas');
+      const cw=parseInt(canvas.style.width)||1400;
+      const ch=parseInt(canvas.style.height)||860;
+      tempCanvas.width=cw;tempCanvas.height=ch;
+      const ctx=tempCanvas.getContext('2d');
+      ctx.fillStyle='#FFFEF9';ctx.fillRect(0,0,cw,ch);
+      const img=tempCanvas.toDataURL('image/jpeg',0.8);
+      localStorage.setItem('cp_plan_img_'+evId,img);
+      showToast('✅ Plan sauvegardé (version simplifiée)');
+    }catch(e){showToast('❌ Impossible de sauvegarder le plan');}
+  };
+  document.head.appendChild(script);
+}
+
+// ===== PRINT =====
 function printPlan(){
+  const nom=document.getElementById('topbarEvent').textContent||'';
+  const salleL=document.getElementById('salleL').value||'20';
+  const salleW=document.getElementById('salleW').value||'15';
+
+  // Récupérer les paramètres URL
+  const params=new URLSearchParams(window.location.search);
+  const evNom=params.get('nom')||nom;
+  const evDate=params.get('date')||'';
+  const evLieu=params.get('lieu')||'';
+  const evHeure=params.get('heure')||'';
+
+  // Mettre à jour l'en-tête print
+  document.getElementById('phTitle').textContent='Plan de salle — '+evNom;
+  const meta=[];
+  if(evDate)meta.push('📅 '+evDate);
+  if(evLieu)meta.push('📍 '+evLieu);
+  if(evHeure)meta.push('🕐 '+evHeure);
+  meta.push('📐 '+salleL+'m × '+salleW+'m');
+  meta.push('🪑 '+tables.length+' tables · '+(tables.find(t=>t.isMaries)?'Table des mariés incluse':''));
+  document.getElementById('phMeta').innerHTML=meta.map(m=>`<span>${m}</span>`).join('');
+
+  // Reset zoom pour l'impression
+  const canvas=document.getElementById('canvas');
+  const savedTransform=canvas.style.transform;
+  canvas.style.transform='none';
+  canvas.style.transformOrigin='0 0';
+
   window.print();
+
+  // Restaurer le zoom après
+  setTimeout(()=>{canvas.style.transform=savedTransform;},500);
 }
 
 // ===== SAVE/LOAD =====
