@@ -1336,24 +1336,91 @@ async function saveCouleurs(cId){
 
 // ===== PLAN DE SALLE TAB =====
 function renderPlanSalleTab(c){
-  return `<div class="card">
-    <div class="card-hdr"><div class="card-title">Plan de salle</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-      <div class="fg"><label>Longueur (m)</label><input class="fi" type="number" id="sL_${c.id}" value="${c.salleConfig?.longueur||20}" min="5" max="200"></div>
-      <div class="fg"><label>Largeur (m)</label><input class="fi" type="number" id="sW_${c.id}" value="${c.salleConfig?.largeur||15}" min="5" max="200"></div>
-    </div>
-    <div style="margin-bottom:14px;">
-      <div style="font-size:11px;color:var(--ink3);font-weight:500;margin-bottom:10px;">FORME DE LA SALLE</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-        ${[['rect','⬛','Rectangulaire'],['round','⭕','Ronde'],['L','📐','En L'],['U','🔷','En U'],['tent','⛺','Tente'],['square','🟫','Carrée']].map(([v,i,l])=>`
-          <div onclick="setSalleShape('${c.id}','${v}')" id="sshape_${c.id}_${v}" style="padding:10px;border:2px solid ${c.salleConfig?.forme===v?'var(--gold)':'var(--bg2)'};border-radius:var(--rs);text-align:center;cursor:pointer;background:${c.salleConfig?.forme===v?'var(--gold-dim)':'var(--white)'};">
-            <div style="font-size:20px;">${i}</div>
-            <div style="font-size:10px;color:var(--ink4);">${l}</div>
-          </div>`).join('')}
-      </div>
-    </div>
-    <button class="btn btn-gold" onclick="ouvrirPlanSalle('${c.id}')">🗺️ Ouvrir le Plan de Salle</button>
-  </div>`;
+  // Vérifier si un plan SVG existe déjà
+  var planSvg=localStorage.getItem('cp_plan_svg_'+c.id)||localStorage.getItem('cp_plan_svg_default')||null;
+  var planTs=localStorage.getItem('cp_plan_svg_'+c.id+'_ts');
+  var planDate=planTs?new Date(parseInt(planTs)).toLocaleDateString('fr-FR'):'';
+
+  // Vérifier si un plan nommé existe dans cp_plans_list
+  var plans=JSON.parse(localStorage.getItem('cp_plans_list')||'[]');
+  var evPlans=plans.filter(function(p){return p.evId===c.id;});
+
+  return '<div class="card">'
+    +'<div class="card-hdr"><div class="card-title">Plan de salle</div></div>'
+
+    // Plan existant
+    +(planSvg?
+      '<div style="margin-bottom:18px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      +'<div style="font-size:12px;font-weight:500;color:var(--ink);">Plan actuel'+(planDate?' <span style="font-size:10px;color:var(--ink4);font-weight:400;">— enregistré le '+planDate+'</span>':' ')+'</div>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button class="btn btn-gold btn-sm" onclick="ouvrirPlanSalle(\''+c.id+'\')">✏️ Modifier</button>'
+      +'<button class="btn btn-outline btn-sm" onclick="nouveauPlan(\''+c.id+'\')">+ Nouveau plan</button>'
+      +'</div></div>'
+      +'<div style="border:1px solid var(--bg2);border-radius:var(--rs);overflow:hidden;background:var(--off);">'+planSvg+'</div>'
+      +'</div>'
+    :
+      '<div style="background:var(--off);border:1px dashed var(--bg2);border-radius:var(--r);padding:24px;text-align:center;margin-bottom:18px;">'
+      +'<div style="font-size:36px;margin-bottom:10px;">🗺️</div>'
+      +'<div style="font-size:13px;color:var(--ink3);margin-bottom:6px;">Aucun plan de salle établi</div>'
+      +'<div style="font-size:12px;color:var(--ink4);margin-bottom:16px;">Créez le plan de salle pour cet événement</div>'
+      +'<button class="btn btn-gold" onclick="ouvrirPlanSalle(\''+c.id+'\')">🗺️ Créer le plan de salle</button>'
+      +'</div>'
+    )
+
+    // Plans sauvegardés pour cet événement
+    +(evPlans.length?
+      '<div style="margin-bottom:18px;">'
+      +'<div style="font-size:11px;color:var(--ink4);letter-spacing:0.5px;font-weight:500;margin-bottom:10px;">PLANS SAUVEGARDÉS ('+evPlans.length+')</div>'
+      +evPlans.map(function(p){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--off);border:1px solid var(--bg2);border-radius:var(--rs);margin-bottom:6px;">'
+          +'<div><div style="font-size:12px;font-weight:500;color:var(--ink);">'+p.name+'</div><div style="font-size:10px;color:var(--ink4);">'+p.date+'</div></div>'
+          +'<button class="btn btn-outline btn-sm" onclick="chargerPlanDansCRM(\''+p.id+'\',\''+c.id+'\')">Charger</button>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+    :'')
+
+    // Config salle
+    +'<div style="border-top:1px solid var(--bg2);padding-top:16px;">'
+    +'<div style="font-size:11px;color:var(--ink3);font-weight:500;margin-bottom:12px;">CONFIGURATION DE LA SALLE</div>'
+    +'<div class="form-row">'
+    +'<div class="fg"><label>Longueur (m)</label><input class="fi" type="number" id="sL_'+c.id+'" value="'+(c.salleConfig&&c.salleConfig.longueur||20)+'" min="5" max="200"></div>'
+    +'<div class="fg"><label>Largeur (m)</label><input class="fi" type="number" id="sW_'+c.id+'" value="'+(c.salleConfig&&c.salleConfig.largeur||15)+'" min="5" max="200"></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">'
+    +[['rect','⬛','Rect.'],['round','⭕','Ronde'],['L','📐','En L'],['U','🔷','En U'],['tent','⛺','Tente'],['square','🟫','Carré']].map(function(sh){
+      return '<div onclick="setSalleShape(\''+c.id+'\',\''+sh[0]+'\')" id="sshape_'+c.id+'_'+sh[0]+'" style="padding:9px;border:2px solid '+(c.salleConfig&&c.salleConfig.forme===sh[0]?'var(--gold)':'var(--bg2)')+';border-radius:var(--rs);text-align:center;cursor:pointer;background:'+(c.salleConfig&&c.salleConfig.forme===sh[0]?'var(--gold-dim)':'var(--white)')+';">'
+        +'<div style="font-size:18px;">'+sh[1]+'</div>'
+        +'<div style="font-size:10px;color:var(--ink4);">'+sh[2]+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'<button class="btn btn-gold" onclick="ouvrirPlanSalle(\''+c.id+'\')">🗺️ Ouvrir le Plan de Salle</button>'
+    +'</div>'
+    +'</div>';
+}
+
+function nouveauPlan(cId){
+  if(!confirm('Créer un nouveau plan ? Le plan actuel sera remplacé.'))return;
+  localStorage.removeItem('cp_plan_svg_'+cId);
+  localStorage.removeItem('cp_plan_svg_'+cId+'_ts');
+  ouvrirPlanSalle(cId);
+}
+
+function chargerPlanDansCRM(planId,cId){
+  // Charger le plan dans le plan de salle puis revenir
+  var plans=JSON.parse(localStorage.getItem('cp_plans_list')||'[]');
+  var plan=plans.find(function(p){return p.id===planId;});
+  if(!plan)return;
+  // Sauvegarder comme plan actif de cet événement
+  var d=plan.data;
+  // Générer le SVG depuis les données
+  var tmp={tables:d.tables||[],decos:d.decos||[],tapis:d.tapis||[],colors:d.colors||{t:'#C9963A',c:'#8B6914',f:'#FFFEF9'}};
+  // Mettre à jour et afficher
+  document.getElementById('etab-plan_salle_tab').innerHTML=renderPlanSalleTab(D.clients.find(function(c){return c.id===cId;}));
+  showToast('✅ Plan chargé — ouvrez le Plan de Salle pour le modifier','ok');
+  ouvrirPlanSalle(cId);
 }
 
 async function setSalleShape(cId,forme){
@@ -1371,7 +1438,7 @@ async function ouvrirPlanSalle(cId){
   if(!c.salleConfig)c.salleConfig={};
   c.salleConfig.longueur=parseInt(l);c.salleConfig.largeur=parseInt(w);
   await updateClientSB(c);
-  window.open(`plan-salle.html?event=${cId}&forme=${c.salleConfig.forme||'rect'}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c.nom)}`,'_blank');
+  window.open(`plan-salle.html?event=${cId}&forme=${c.salleConfig.forme||'rect'}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c.nom)}&type=${encodeURIComponent(c.type||'')}&date=${encodeURIComponent(c.date?fd(c.date):'')}&lieu=${encodeURIComponent(c.lieu||'')}&heure=${encodeURIComponent(c.heure||'')}`,'_blank');
 }
 
 // ===== CONTRAT =====
@@ -1739,9 +1806,19 @@ function printFicheMateriel(clientId){
   const couleurs=c.couleurs||[];
   const date=c.date?fd(c.date):'/';
   const cats={photo:'📸 Photo/Vidéo',dj:'🎵 DJ/Animation',traiteur:'🍽️ Traiteur',mignardises:'🍬 Mignardises',deco:'🌸 Décoration',mc:'🎤 MC',orchestre:'🎻 Orchestre',chanteur:'🎤 Chanteur',chorale:'🎵 Chorale',voiture:'🚗 Voiture'};
-  const planImg=localStorage.getItem('cp_plan_img_'+clientId)||null;
+  // Lire le SVG du plan depuis localStorage (sauvegardé depuis le plan de salle)
+  const planSvg=localStorage.getItem('cp_plan_svg_'+clientId)||localStorage.getItem('cp_plan_svg_default')||null;
+  const planTs=localStorage.getItem('cp_plan_svg_'+clientId+'_ts');
+  const planDate=planTs?new Date(parseInt(planTs)).toLocaleDateString('fr-FR'):'';
 
-  // Construire le HTML de la fiche
+  const planSection=planSvg
+    ?`<div style="width:100%;text-align:center;">${planSvg}</div>${planDate?`<div style="font-size:7px;color:#A09A93;text-align:center;margin-top:2px;">Plan enregistré le ${planDate}</div>`:''}`
+    :`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#A09A93;text-align:center;font-size:9px;padding:16px;">
+        <div style="font-size:28px;">🗺️</div>
+        <div>Plan non disponible. Ouvrez le Plan de Salle depuis cet événement<br>et cliquez sur <strong>📸 Enregistrer pour la fiche</strong></div>
+      </div>`;
+
+  // Construire les lignes matériel et prestataires
   let matRows='';
   mat.forEach(m=>{matRows+=`<tr><td>${m.icon} ${m.name}</td><td class="qty">${m.qty||0}</td></tr>`;});
 
@@ -1754,15 +1831,10 @@ function printFicheMateriel(clientId){
     prestaHtml+='</div>';
   });
 
-  const planSection=planImg
-    ?`<img src="${planImg}" style="max-width:100%;max-height:190px;object-fit:contain;"/>`
-    :`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#A09A93;text-align:center;font-size:9px;padding:16px;">
-        <div style="font-size:28px;">🗺️</div>
-        <div>Plan non disponible. Ouvrez le Plan de Salle depuis cet événement<br>et cliquez sur <strong>📸 Enregistrer pour la fiche</strong></div>
-      </div>`;
-
   const couleursHtml=couleurs.map(col=>`<div style="width:12px;height:12px;border-radius:50%;background:${col};border:1px solid rgba(0,0,0,0.1);display:inline-block;margin-right:4px;"></div>`).join('');
 
+  // Agrandir la boîte plan si SVG disponible
+  const minH=planSvg?'100px':'190px';
   const html=`<!DOCTYPE html><html><head><title>Fiche — ${c.nom}</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
@@ -1776,7 +1848,7 @@ function printFicheMateriel(clientId){
   .event-meta{font-size:8px;color:#A09A93;text-align:center;margin-top:2px;}
   .plan-section{margin-bottom:8px;border:1px solid #EEECE8;border-radius:6px;overflow:hidden;}
   .stitle{font-size:8px;color:#B8872A;letter-spacing:2px;font-weight:600;padding:5px 9px;background:#FAFAF8;text-transform:uppercase;border-bottom:1px solid #EEECE8;}
-  .plan-box{width:100%;height:190px;background:#FFFEF9;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .plan-box{width:100%;min-height:${minH};max-height:${planSvg?'280px':'190px'};background:#FFFEF9;display:flex;align-items:center;justify-content:center;overflow:hidden;}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .section{border:1px solid #EEECE8;border-radius:5px;overflow:hidden;}
   table{width:100%;border-collapse:collapse;font-size:8px;}
