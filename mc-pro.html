@@ -310,7 +310,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--t);display:flex;flex-direction
   <div class="shb">
     <div class="fg"><label>CATÉGORIE</label><select id="ac_cat"><option>Matériel</option><option>Préparation</option><option>Jour J</option><option>Autre</option></select></div>
     <div class="fg"><label>TÂCHE *</label><input type="text" id="ac_tx" placeholder="Ex: Tester le micro"></div>
-    <button class="btn bgold bbl" onclick="savCHI()" style="margin-bottom:8px;">Ajouter</button>
+    <button class="btn bgold bbl" onclick="saveCHI()" style="margin-bottom:8px;">Ajouter</button>
     <button class="btn bgh bbl" onclick="closeSh('shAC')">Annuler</button>
   </div>
 </div>
@@ -471,6 +471,50 @@ function togChk(evId,id){var item=(checks[evId]||[]).find(function(x){return x.i
 function delChkI(evId,id){if(!checks[evId])return;checks[evId]=checks[evId].filter(function(x){return x.id!==id;});saveAll();rChk(evId);}
 function rstChk(evId){if(!confirm('Réinitialiser ?'))return;checks[evId]=defChk();saveAll();rChk(evId);}
 function saveCHI(){var evId=curEvId;if(!evId)return;var text=document.getElementById('ac_tx').value.trim();if(!text){toast('Tâche obligatoire','err');return;}if(!checks[evId])checks[evId]=[];checks[evId].push({id:'C'+Date.now(),cat:document.getElementById('ac_cat').value,text:text,done:false});saveAll();closeSh('shAC');rChk(evId);document.getElementById('ac_tx').value='';}
+function editCHI(evId,itemId){
+  var item=(checks[evId]||[]).find(function(x){return x.id===itemId;});
+  if(!item)return;
+  document.getElementById('ec_id').value=itemId;
+  document.getElementById('ec_cat').value=item.cat;
+  document.getElementById('ec_tx').value=item.text;
+  openSh('shEC');
+}
+function saveECI(){
+  var evId=curEvId;
+  var itemId=document.getElementById('ec_id').value;
+  var item=(checks[evId]||[]).find(function(x){return x.id===itemId;});
+  if(!item)return;
+  item.cat=document.getElementById('ec_cat').value;
+  item.text=document.getElementById('ec_tx').value;
+  saveAll();closeSh('shEC');rChk(evId);toast('Tâche modifiée','ok');
+}
+var dragSrcC=null;
+function dStartC(e,id,evId){
+  dragSrcC=id;
+  var el=document.getElementById('ci_'+id);
+  if(el)el.style.opacity='0.3';
+}
+function dOverC(e,id){
+  e.preventDefault();
+  var el=document.getElementById('ci_'+id);
+  if(el&&id!==dragSrcC){el.style.borderColor='var(--gold)';el.style.background='var(--gd)';}
+}
+function dLeaveC(e,id){
+  var el=document.getElementById('ci_'+id);
+  if(el){el.style.borderColor='';el.style.background='';}
+}
+function dDropC(e,tid,evId){
+  e.preventDefault();
+  document.querySelectorAll('.ci').forEach(function(el){el.style.opacity='';el.style.borderColor='';el.style.background='';});
+  if(!dragSrcC||dragSrcC===tid||!checks[evId])return;
+  var list=checks[evId];
+  var si=list.findIndex(function(x){return x.id===dragSrcC;});
+  var ti=list.findIndex(function(x){return x.id===tid;});
+  if(si<0||ti<0)return;
+  var item=list.splice(si,1)[0];
+  list.splice(ti,0,item);
+  saveAll();rChk(evId);dragSrcC=null;
+}
 function defChk(){return [{id:'C1',cat:'Matériel',text:'Micro-cravate chargé',done:false},{id:'C2',cat:'Matériel',text:'Micro de secours',done:false},{id:'C3',cat:'Matériel',text:'Oreillette / Retour son',done:false},{id:'C4',cat:'Matériel',text:'Tenue MC prête',done:false},{id:'C5',cat:'Préparation',text:'Programme imprimé',done:false},{id:'C6',cat:'Préparation',text:'Contact DJ confirmé',done:false},{id:'C7',cat:'Préparation',text:'Contact traiteur confirmé',done:false},{id:'C8',cat:'Jour J',text:'Arrivée 2h avant',done:false},{id:'C9',cat:'Jour J',text:'Briefing équipe',done:false},{id:'C10',cat:'Jour J',text:'Test micro sur scène',done:false},{id:'C11',cat:'Jour J',text:'Mode silencieux activé',done:false}];}
 
 // CONTRAT
