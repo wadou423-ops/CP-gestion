@@ -137,6 +137,7 @@ input[type=color]{width:30px;height:24px;border:none;border-radius:3px;cursor:po
     <button class="tbtn tbtn-maries" onclick="addTableMaries()">💍 Mariés</button>
     <button class="tbtn tbtn-ghost" onclick="switchTab('calc');previewCalc()">🔢 Calculer</button>
     <button class="tbtn tbtn-gold" onclick="genAuto()">⚡ Générer tables</button>
+    <button class="tbtn tbtn-ghost" onclick="nouveauPlanVierge()">🆕 Nouveau plan</button>
     <button class="tbtn tbtn-ghost" onclick="saveData()">💾 Sauvegarder</button>
     <button class="tbtn tbtn-ghost" onclick="saveSVG()">📸 Enreg. pour fiche</button>
     <button class="tbtn tbtn-gold" onclick="doPrint()">🖨️ Imprimer</button>
@@ -288,7 +289,9 @@ input[type=color]{width:30px;height:24px;border:none;border-radius:3px;cursor:po
 
   <!-- PLANS SAUVEGARDÉS -->
   <div class="panel" id="panel-plans">
-    <div class="slabel">MES PLANS DE SALLE</div>
+    <div class="slabel">NOUVEAU PLAN</div>
+    <button onclick="nouveauPlanVierge()" style="width:100%;padding:8px;background:rgba(201,150,58,0.15);border:1px solid rgba(201,150,58,0.4);border-radius:5px;color:var(--gold);font-size:11px;cursor:pointer;margin-bottom:10px;font-family:'DM Sans',sans-serif;">🆕 Canvas vierge</button>
+    <div class="slabel">ENREGISTRER CE PLAN</div>
     <div style="display:flex;gap:4px;margin-bottom:8px;">
       <input type="text" id="planName" placeholder="Nom du plan..." style="flex:1;padding:6px 8px;background:var(--dark3);border:1px solid var(--dark4);border-radius:4px;color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif;outline:none;">
       <button onclick="savePlan()" style="padding:6px 9px;background:var(--gold);border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:11px;">Enreg.</button>
@@ -361,10 +364,6 @@ function init(){
   document.addEventListener('mousemove',onMM);
   document.addEventListener('mouseup',onMU);
   document.getElementById('canvas').addEventListener('click',function(e){if(e.target===document.getElementById('canvas'))deselAll();});
-  loadData();
-  updSalle();
-  previewCalc();
-  updGList();
   updStats();
 }
 
@@ -559,29 +558,81 @@ function renderTable(t){
 }
 
 function buildChairs(t){
-  var c=document.createElement('div');
-  c.style.cssText='position:absolute;inset:-'+chairSz+'px;pointer-events:none;z-index:1;';
-  var cap=t.cap||8;var sz=chairSz;
+  var cap=t.cap||8;
+  var sz;
   if(t.type==='round'){
-    var r=Math.min(t.w,t.h)/2;var R=r+sz/2+2;
+    var perim=Math.PI*Math.min(t.w,t.h);
+    sz=Math.max(7,Math.min(chairSz,Math.floor(perim/(cap*1.9))));
+  } else {
+    // Chaises réparties sur 4 côtés
+    // Estimer slots dispo
+    var perimeter=2*(t.w+t.h);
+    sz=Math.max(7,Math.min(chairSz,Math.floor(perimeter/(cap*2.0))));
+  }
+  var pad=sz+5;
+  var c=document.createElement('div');
+  c.style.cssText='position:absolute;top:-'+pad+'px;left:-'+pad+'px;right:-'+pad+'px;bottom:-'+pad+'px;pointer-events:none;z-index:1;';
+
+  if(t.type==='round'){
+    var r=Math.min(t.w,t.h)/2;
+    var R=r+sz*0.6+3;
     for(var i=0;i<cap;i++){
       var a=(i/cap)*Math.PI*2-Math.PI/2;
-      var cx=t.w/2+sz/2+R*Math.cos(a)-sz/2;
-      var cy=t.h/2+sz/2+R*Math.sin(a)-sz/2;
+      var cx=pad+t.w/2+R*Math.cos(a)-sz/2;
+      var cy=pad+t.h/2+R*Math.sin(a)-sz/2;
       var ch=document.createElement('div');
       ch.style.cssText='position:absolute;left:'+cx+'px;top:'+cy+'px;font-size:'+sz+'px;color:'+colors.c+';line-height:1;';
       ch.textContent='●';c.appendChild(ch);
     }
   } else {
-    var cols=Math.ceil(cap/2);var step=t.w/Math.max(cols,1);
-    for(var i=0;i<cols;i++){
-      var cx=step*i+step/2-sz/2;
-      var ct=document.createElement('div');
-      ct.style.cssText='position:absolute;left:'+cx+'px;top:'+(-sz-2)+'px;font-size:'+sz+'px;color:'+colors.c+';';
-      ct.textContent='●';c.appendChild(ct);
-      var cb=document.createElement('div');
-      cb.style.cssText='position:absolute;left:'+cx+'px;top:'+(t.h+2)+'px;font-size:'+sz+'px;color:'+colors.c+';';
-      cb.textContent='●';c.appendChild(cb);
+    // Distribuer les chaises sur 4 côtés proportionnellement
+    var ratio=(t.w+t.h>0)?(t.w/(t.w+t.h)):0.5;
+    var topBot=Math.round(cap*ratio/2)*2; // pair
+    var leftRight=cap-topBot;
+    var perTop=Math.floor(topBot/2);
+    var perBot=topBot-perTop;
+    var perLeft=Math.floor(leftRight/2);
+    var perRight=leftRight-perLeft;
+
+    // Haut
+    if(perTop>0){
+      var stepH=t.w/perTop;
+      for(var i=0;i<perTop;i++){
+        var cx=pad+stepH*i+stepH/2-sz/2;
+        var el2=document.createElement('div');
+        el2.style.cssText='position:absolute;left:'+cx+'px;top:'+(pad-sz-2)+'px;font-size:'+sz+'px;color:'+colors.c+';line-height:1;';
+        el2.textContent='●';c.appendChild(el2);
+      }
+    }
+    // Bas
+    if(perBot>0){
+      var stepB=t.w/perBot;
+      for(var i=0;i<perBot;i++){
+        var cx=pad+stepB*i+stepB/2-sz/2;
+        var el2=document.createElement('div');
+        el2.style.cssText='position:absolute;left:'+cx+'px;top:'+(pad+t.h+2)+'px;font-size:'+sz+'px;color:'+colors.c+';line-height:1;';
+        el2.textContent='●';c.appendChild(el2);
+      }
+    }
+    // Gauche
+    if(perLeft>0){
+      var stepL=t.h/perLeft;
+      for(var i=0;i<perLeft;i++){
+        var cy=pad+stepL*i+stepL/2-sz/2;
+        var el2=document.createElement('div');
+        el2.style.cssText='position:absolute;left:'+(pad-sz-2)+'px;top:'+cy+'px;font-size:'+(sz*0.85)+'px;color:'+colors.c+';line-height:1;';
+        el2.textContent='●';c.appendChild(el2);
+      }
+    }
+    // Droite
+    if(perRight>0){
+      var stepR=t.h/perRight;
+      for(var i=0;i<perRight;i++){
+        var cy=pad+stepR*i+stepR/2-sz/2;
+        var el2=document.createElement('div');
+        el2.style.cssText='position:absolute;left:'+(pad+t.w+2)+'px;top:'+cy+'px;font-size:'+(sz*0.85)+'px;color:'+colors.c+';line-height:1;';
+        el2.textContent='●';c.appendChild(el2);
+      }
     }
   }
   return c;
@@ -893,29 +944,35 @@ function doPrint(){
   if(lieu)meta.push('Lieu : '+lieu);
   if(heure)meta.push('Heure : '+heure);
   meta.push(l+'m x '+w+'m');
-  meta.push(tables.length+' tables');
+  meta.push(tables.length+' tables'+(tables.some(function(t){return t.maries;})?'+mariés':''));
+  if(document.getElementById('nbInv').value)meta.push(document.getElementById('nbInv').value+' invités');
   var svg=buildSVG();
+  // SVG avec viewBox qui s'adapte — on force une seule page A4 paysage
   var html='<!DOCTYPE html><html><head><title>'+titre+'</title>'
     +'<style>'
-    +'@page{size:A4 landscape;margin:8mm;}'
-    +'body{margin:0;padding:0;background:#fff;font-family:sans-serif;}'
-    +'.hd{text-align:center;border-bottom:2px solid #C9963A;padding-bottom:10px;margin-bottom:12px;}'
-    +'.h1{font-size:18px;font-weight:bold;color:#1a1a1a;margin-bottom:4px;}'
-    +'.h2{font-size:10px;color:#666;}'
-    +'svg{width:100%;height:auto;display:block;}'
+    +'@page{size:A4 landscape;margin:6mm;}'
+    +'*{margin:0;padding:0;box-sizing:border-box;}'
+    +'html,body{width:100%;height:100%;background:#fff;font-family:Arial,sans-serif;}'
+    +'body{display:flex;flex-direction:column;height:100%;padding:0;}'
+    +'.hd{text-align:center;border-bottom:2px solid #C9963A;padding-bottom:7px;margin-bottom:8px;flex-shrink:0;}'
+    +'.logo{font-size:10px;color:#C9963A;letter-spacing:2px;font-weight:bold;}'
+    +'.titre{font-size:16px;font-weight:bold;color:#1a1a1a;margin:4px 0 3px;}'
+    +'.meta{font-size:9px;color:#666;}'
+    +'.svg-wrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;}'
+    +'svg{width:100%;height:100%;max-width:100%;max-height:100%;}'
     +'</style></head><body>'
     +'<div class="hd">'
-    +'<div style="font-size:11px;color:#C9963A;letter-spacing:2px;margin-bottom:4px;">CREATIVE PLANNER - Nous creons, vous vivez!</div>'
-    +'<div class="h1">'+titre+'</div>'
-    +'<div class="h2">'+meta.join('  |  ')+'</div>'
+    +'<div class="logo">CREATIVE PLANNER - Nous creons, vous vivez!</div>'
+    +'<div class="titre">'+titre+'</div>'
+    +'<div class="meta">'+meta.join('  |  ')+'</div>'
     +'</div>'
-    +svg
-    +'<script>setTimeout(function(){window.print();},300);<\/script>'
+    +'<div class="svg-wrap">'+svg+'</div>'
+    +'<script>setTimeout(function(){window.print();},400);<\/script>'
     +'</body></html>';
   var blob=new Blob([html],{type:'text/html'});
   var url=URL.createObjectURL(blob);
   window.open(url,'_blank');
-  setTimeout(function(){URL.revokeObjectURL(url);},15000);
+  setTimeout(function(){URL.revokeObjectURL(url);},20000);
 }
 
 // ===== SAVE SVG pour CRM =====
@@ -1116,20 +1173,46 @@ function savePlan(){
   var planData={
     id:id,name:name,evId:evId,evNom:evNom,
     date:new Date().toLocaleDateString('fr-FR'),
-    data:{tables:tables,guests:guests,decos:decos,tapis:tapis,
+    data:{tables:JSON.parse(JSON.stringify(tables)),
+      guests:JSON.parse(JSON.stringify(guests)),
+      decos:JSON.parse(JSON.stringify(decos)),
+      tapis:JSON.parse(JSON.stringify(tapis)),
       colors:colors,chairSz:chairSz,salleShape:salleShape,
       l:document.getElementById('salleL').value,
       w:document.getElementById('salleW').value}
   };
   plans.unshift(planData);
-  if(plans.length>20)plans=plans.slice(0,20);
+  if(plans.length>30)plans=plans.slice(0,30);
   localStorage.setItem('cp_plans_list',JSON.stringify(plans));
-  // Aussi sauvegarder le SVG pour le CRM
+  // Sauvegarder SVG pour le CRM
   var svg=buildSVG();
   localStorage.setItem('cp_plan_svg_'+(evId||'default'),svg);
   localStorage.setItem('cp_plan_svg_'+(evId||'default')+'_ts',Date.now());
   document.getElementById('planName').value='';
-  renderPlansList();showToast('✅ Plan "'+name+'" sauvegardé !');
+  renderPlansList();
+  showToast('Plan "'+name+'" sauvegardé !');
+}
+
+function nouveauPlanVierge(){
+  if(tables.length>0&&!confirm('Effacer le plan actuel pour en créer un nouveau ?'))return;
+  // Vider complètement le canvas
+  tables.forEach(function(t){var el=document.getElementById(t.id);if(el)el.remove();});
+  decos.forEach(function(d){var el=document.getElementById(d.id);if(el)el.remove();});
+  tapis.forEach(function(t){var el=document.getElementById(t.id);if(el)el.remove();});
+  tables=[];decos=[];tapis=[];guests=[];tc=1;
+  colors={t:'#C9963A',c:'#8B6914',f:'#FFFEF9'};
+  document.getElementById('salleL').value=20;
+  document.getElementById('salleW').value=15;
+  document.getElementById('colT').value='#C9963A';
+  document.getElementById('colC').value='#8B6914';
+  document.getElementById('colF').value='#FFFEF9';
+  document.getElementById('tCounter').value=1;
+  document.getElementById('nbInv').value=100;
+  document.getElementById('ppt').value=8;
+  document.getElementById('canvas').style.background=colors.f;
+  selShape('rect');
+  deselAll();updGList();updStats();previewCalc();
+  showToast('Canvas vierge — prêt !');
 }
 
 function renderPlansList(){
@@ -1241,11 +1324,40 @@ function clearAll(){
 // ===== URL PARAMS =====
 function readParams(){
   var p=new URLSearchParams(window.location.search);
-  var nom=p.get('nom');var l=p.get('longueur');var w=p.get('largeur');var forme=p.get('forme');
+  var nom=p.get('nom');
+  var l=p.get('longueur');
+  var w=p.get('largeur');
+  var forme=p.get('forme');
+  var evId=p.get('event');
+  var isNew=p.get('new');
+
   if(nom)document.getElementById('evLabel').textContent=nom;
   if(l)document.getElementById('salleL').value=l;
   if(w)document.getElementById('salleW').value=w;
   if(forme)selShape(forme);
+
+  // Si "new=1" dans l'URL → NE PAS charger les données → canvas vierge
+  if(!isNew){
+    loadData();
+    // Si on a un evId, essayer de charger le plan spécifique
+    if(evId){
+      var plans=JSON.parse(localStorage.getItem('cp_plans_list')||'[]');
+      var evPlan=plans.find(function(pl){return pl.evId===evId;});
+      if(evPlan&&tables.length===0){
+        // Charger silencieusement si le canvas est vide
+        var d=evPlan.data;
+        tables=d.tables||[];guests=d.guests||[];decos=d.decos||[];tapis=d.tapis||[];
+        colors=d.colors||colors;
+        tables.forEach(function(t){renderTable(t);});
+        decos.forEach(function(d){renderDeco(d);});
+        tapis.forEach(function(t){renderTapis(t);});
+        applyColors();updGList();updStats();
+      }
+    }
+  } else {
+    // Canvas vierge — on ne charge rien
+    showToast('Nouveau plan de salle — canvas vierge');
+  }
   updSalle();
 }
 
@@ -1258,7 +1370,10 @@ function showToast(msg){
 
 // ===== SCROLL WHEEL ZOOM =====
 document.addEventListener('DOMContentLoaded',function(){
-  init();readParams();
+  init();
+  readParams();// gère loadData + canvas vierge selon URL
+  previewCalc();
+  updGList();
   document.getElementById('ca').addEventListener('wheel',function(e){
     e.preventDefault();
     if(e.ctrlKey)zoom(e.deltaY>0?-0.05:0.05);
