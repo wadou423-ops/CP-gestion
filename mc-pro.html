@@ -310,8 +310,19 @@ body{font-family:'DM Sans',sans-serif;color:var(--t);display:flex;flex-direction
   <div class="shb">
     <div class="fg"><label>CATÉGORIE</label><select id="ac_cat"><option>Matériel</option><option>Préparation</option><option>Jour J</option><option>Autre</option></select></div>
     <div class="fg"><label>TÂCHE *</label><input type="text" id="ac_tx" placeholder="Ex: Tester le micro"></div>
-    <button class="btn bgold bbl" onclick="saveCHI()" style="margin-bottom:8px;">Ajouter</button>
+    <button class="btn bgold bbl" onclick="savCHI()" style="margin-bottom:8px;">Ajouter</button>
     <button class="btn bgh bbl" onclick="closeSh('shAC')">Annuler</button>
+  </div>
+</div>
+<div class="ov" id="ovshEC" onclick="closeSh('shEC')"></div>
+<div class="sheet" id="shEC">
+  <div class="sh"></div><div class="sht">Modifier la tâche</div>
+  <div class="shb">
+    <input type="hidden" id="ec_id">
+    <div class="fg"><label>CATÉGORIE</label><select id="ec_cat"><option>Matériel</option><option>Préparation</option><option>Jour J</option><option>Autre</option></select></div>
+    <div class="fg"><label>TÂCHE</label><input type="text" id="ec_tx"></div>
+    <button class="btn bgold bbl" onclick="saveECI()" style="margin-bottom:8px;">Enregistrer</button>
+    <button class="btn bgh bbl" onclick="closeSh('shEC')">Annuler</button>
   </div>
 </div>
 
@@ -356,13 +367,13 @@ function fmn(n){return parseFloat(n||0).toLocaleString('fr-FR');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // NAV
-function goTab(t){showPg(t);MAIN.forEach(function(id){var tab=document.getElementById('tab-'+id);if(tab)tab.classList.toggle('active',id===t);});document.getElementById('fab').style.display=['agenda','events','notes'].includes(t)?'flex':'none';document.getElementById('backBtn').style.display='none';pStack=[t];updTB(t,null,null);}
+function goTab(t){showPg(t);MAIN.forEach(function(id){var tab=document.getElementById('tab-'+id);if(tab)tab.classList.toggle('active',id===t);});document.getElementById('fab').style.display='flex';document.getElementById('backBtn').style.display='none';pStack=[t];updTB(t,null,null);}
 function showPg(id){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});var p=document.getElementById('page-'+id);if(p)p.classList.add('active');}
-function navTo(id,title,sub){showPg(id);pStack.push(id);document.getElementById('backBtn').style.display='flex';MAIN.forEach(function(t){var tab=document.getElementById('tab-'+t);if(tab)tab.classList.remove('active');});document.getElementById('fab').style.display='none';updTB(id,title,sub);}
-function goBack(){if(pStack.length<=1){goTab('events');return;}pStack.pop();var prev=pStack[pStack.length-1];showPg(prev);if(MAIN.includes(prev)){var tab=document.getElementById('tab-'+prev);if(tab)tab.classList.add('active');document.getElementById('backBtn').style.display='none';document.getElementById('fab').style.display=['agenda','events','notes'].includes(prev)?'flex':'none';updTB(prev,null,null);}else{document.getElementById('backBtn').style.display='flex';updTB(prev,null,null);}}
+function navTo(id,title,sub){showPg(id);pStack.push(id);document.getElementById('backBtn').style.display='flex';MAIN.forEach(function(t){var tab=document.getElementById('tab-'+t);if(tab)tab.classList.remove('active');});document.getElementById('fab').style.display='flex';updTB(id,title,sub);}
+function goBack(){if(pStack.length<=1){goTab('events');return;}pStack.pop();var prev=pStack[pStack.length-1];showPg(prev);if(MAIN.includes(prev)){var tab=document.getElementById('tab-'+prev);if(tab)tab.classList.add('active');document.getElementById('backBtn').style.display='none';document.getElementById('fab').style.display='flex';updTB(prev,null,null);}else{document.getElementById('backBtn').style.display='flex';document.getElementById('fab').style.display='flex';updTB(prev,null,null);}}
 function updTB(pg,t,s){var TIT={agenda:'MC PRO',events:'ÉVÉNEMENTS',prog:'PROGRAMME',check:'CHECKLIST',alarmes:'ALARMES',notes:'NOTES',detail:'ÉVÉNEMENT',contrat:'CONTRAT',install:'INSTALLATION'};document.getElementById('topLogo').textContent=t||TIT[pg]||'MC PRO';document.getElementById('topSub').textContent=s||'CRÉATIVE PLANNER';}
 function goInst(){navTo('install','INSTALLATION','GUIDE');}
-function fabAct(){var c=pStack[pStack.length-1];if(c==='notes')openSh('shNote');else openSh('shNewEv');}
+function fabAct(){openSh('shNewEv');}
 
 // SHEETS
 function openSh(id){var ov=document.getElementById('ovsh'+id.slice(2));if(ov)ov.classList.add('open');document.getElementById(id).classList.add('open');}
@@ -419,7 +430,43 @@ function defProg(e){return [{id:'P1',time:'17:00',dur:30,title:'Installation & C
 
 // CHECKLIST
 function ouvrirCheck(id){curEvId=id;var e=events.find(function(x){return x.id===id;});if(!checks[id])checks[id]=defChk();rChk(id);navTo('check',e?e.nom:'Checklist','CHECKLIST');}
-function rChk(id){var items=checks[id]||[];var done=items.filter(function(x){return x.done;}).length;var pct=items.length?Math.round(done/items.length*100):0;var cats={};items.forEach(function(item){if(!cats[item.cat])cats[item.cat]=[];cats[item.cat].push(item);});var h='<div class="card" style="padding:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;"><div style="font-size:13px;font-weight:600;">Progression</div><div style="font-family:Playfair Display,serif;font-size:22px;color:var(--gold);">'+pct+'%</div></div><div class="pbar-w"><div class="pbar" style="width:'+pct+'%;"></div></div><div style="font-size:11px;color:var(--t3);margin-top:4px;">'+done+' / '+items.length+' tâches</div></div><div style="display:flex;gap:7px;margin-bottom:6px;"><button class="btn bgold bsm" onclick="openSh(\'shAC\')">+ Tâche</button><button class="btn bgh bsm" onclick="rstChk(\''+id+'\')">↺ Réinit.</button></div>';Object.keys(cats).forEach(function(cat){h+='<div class="slabel">'+cat.toUpperCase()+'</div>';cats[cat].forEach(function(item){h+='<div class="ci '+(item.done?'done':'')+'"><div class="cbox" onclick="togChk(\''+id+'\',\''+item.id+'\')">'+( item.done?'✓':'')+'</div><div class="citx" onclick="togChk(\''+id+'\',\''+item.id+'\')">'+esc(item.text)+'</div><div class="cidel" onclick="delChkI(\''+id+'\',\''+item.id+'\')">✕</div></div>';});});if(!items.length)h+='<div class="card" style="text-align:center;padding:24px;"><div style="font-size:28px;opacity:0.2;margin-bottom:8px;">✅</div><div style="font-size:13px;color:var(--t3);">Checklist vide</div></div>';document.getElementById('chkCnt').innerHTML=h;}
+function rChk(id){
+  var items=checks[id]||[];
+  var done=items.filter(function(x){return x.done;}).length;
+  var pct=items.length?Math.round(done/items.length*100):0;
+  var cats={};
+  items.forEach(function(item){if(!cats[item.cat])cats[item.cat]=[];cats[item.cat].push(item);});
+  var h='<div class="card" style="padding:14px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">'
+    +'<div style="font-size:13px;font-weight:600;">Progression</div>'
+    +'<div style="font-family:Playfair Display,serif;font-size:22px;color:var(--gold);">'+pct+'%</div></div>'
+    +'<div class="pbar-w"><div class="pbar" style="width:'+pct+'%;"></div></div>'
+    +'<div style="font-size:11px;color:var(--t3);margin-top:4px;">'+done+' / '+items.length+' tâches</div></div>'
+    +'<div style="display:flex;gap:7px;margin-bottom:6px;">'
+    +'<button class="btn bgold bsm" onclick="openSh(\'shAC\')">+ Tâche</button>'
+    +'<button class="btn bgh bsm" onclick="rstChk(\''+id+'\')">↺ Réinit.</button>'
+    +'</div>';
+  Object.keys(cats).forEach(function(cat){
+    h+='<div class="slabel">'+cat.toUpperCase()+'</div>';
+    cats[cat].forEach(function(item){
+      h+='<div class="ci '+(item.done?'done':'')+'" id="ci_'+item.id+'" draggable="true"'
+        +' ondragstart="dStartC(event,\''+item.id+'\',\''+id+'\')"'
+        +' ondragover="dOverC(event,\''+item.id+'\')"'
+        +' ondrop="dDropC(event,\''+item.id+'\',\''+id+'\')"'
+        +' ondragleave="dLeaveC(event,\''+item.id+'\')">'
+        +'<div style="color:var(--t4);font-size:16px;cursor:grab;padding:0 4px;touch-action:none;">⋮⋮</div>'
+        +'<div class="cbox" onclick="togChk(\''+id+'\',\''+item.id+'\')">'+( item.done?'✓':'')+'</div>'
+        +'<div class="citx" onclick="togChk(\''+id+'\',\''+item.id+'\')">'+esc(item.text)+'</div>'
+        +'<div style="display:flex;gap:3px;flex-shrink:0;">'
+        +'<div style="color:var(--t3);font-size:13px;padding:4px;cursor:pointer;" onclick="editCHI(\''+id+'\',\''+item.id+'\')">✏️</div>'
+        +'<div class="cidel" onclick="delChkI(\''+id+'\',\''+item.id+'\')">✕</div>'
+        +'</div>'
+        +'</div>';
+    });
+  });
+  if(!items.length)h+='<div class="card" style="text-align:center;padding:24px;"><div style="font-size:28px;opacity:0.2;margin-bottom:8px;">✅</div><div style="font-size:13px;color:var(--t3);">Checklist vide</div></div>';
+  document.getElementById('chkCnt').innerHTML=h;
+}
 function togChk(evId,id){var item=(checks[evId]||[]).find(function(x){return x.id===id;});if(!item)return;item.done=!item.done;saveAll();rChk(evId);}
 function delChkI(evId,id){if(!checks[evId])return;checks[evId]=checks[evId].filter(function(x){return x.id!==id;});saveAll();rChk(evId);}
 function rstChk(evId){if(!confirm('Réinitialiser ?'))return;checks[evId]=defChk();saveAll();rChk(evId);}
