@@ -459,6 +459,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);display:flex;flex-direct
       <div class="fg"><label>LIEU</label><input type="text" id="ev_lieu" placeholder="Sofitel..."></div>
     </div>
     <div class="fg"><label>HONORAIRES (FCFA)</label><input type="number" id="ev_montant" placeholder="0"></div>
+    <div class="fg"><label>TÉLÉPHONE CLIENT (WhatsApp)</label><input type="tel" id="ev_tel" placeholder="+225 07..."></div>
     <div class="fg"><label>NOTES</label><textarea id="ev_notes" placeholder="Thème, contacts, instructions..."></textarea></div>
     <button class="btn btn-gold btn-block" onclick="saveEv()" style="margin-bottom:8px;">Enregistrer</button>
     <button class="btn btn-ghost btn-block" onclick="closeSheet('sheetNouvelEv')">Annuler</button>
@@ -493,9 +494,17 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);display:flex;flex-direct
   <div class="sheet-body" id="detailBody"></div>
 </div>
 
+<!-- SHEET CONTRAT -->
+<div class="sheet-overlay" id="ovContrat" onclick="closeSheet('sheetContrat')"></div>
+<div class="sheet" id="sheetContrat" style="max-height:96vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="contratTitle">Contrat</div>
+  <div class="sheet-body" id="contratBody"></div>
+</div>
+
 <script>
 // ===== STATE =====
-var events=[], notes=[], checks={}, progs={}, alarms=[];
+var events=[], notes=[], checks={}, progs={}, alarms=[], contrats={};
 var calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 var calSelDay=null, curFilter='tous', activeTimers={};
 var curProgEvId=null, curCheckEvId=null;
@@ -518,6 +527,7 @@ function loadAll(){
   checks=JSON.parse(localStorage.getItem('mc_checks')||'{}');
   progs=JSON.parse(localStorage.getItem('mc_progs')||'{}');
   alarms=JSON.parse(localStorage.getItem('mc_alarms')||'[]');
+  contrats=JSON.parse(localStorage.getItem('mc_contrats')||'{}');
 }
 
 function saveAll(){
@@ -526,6 +536,7 @@ function saveAll(){
   localStorage.setItem('mc_checks',JSON.stringify(checks));
   localStorage.setItem('mc_progs',JSON.stringify(progs));
   localStorage.setItem('mc_alarms',JSON.stringify(alarms));
+  localStorage.setItem('mc_contrats',JSON.stringify(contrats));
 }
 
 function renderAll(){
@@ -725,20 +736,49 @@ function voirEv(id){
   var e=events.find(function(x){return x.id===id;});if(!e)return;
   var sc={confirme:'b-green',attente:'b-orange',annule:'b-red',realise:'b-blue'};
   var sl={confirme:'Confirmé',attente:'En attente',annule:'Annulé',realise:'Réalisé'};
+  var ct=contrats[id];
+  var hasTel=!!(e.tel);
   document.getElementById('detailTitle').textContent=e.nom;
   document.getElementById('detailBody').innerHTML=''
-    +'<div class="alarm-banner" style="background:rgba('+( e.statut==='confirme'?'46,204,113':'201,150,58')+',0.1);border-color:'+(e.statut==='confirme'?'rgba(46,204,113,0.3)':'var(--gold-bd)')+'">'
-    +'<div class="alarm-icon">'+( e.type==='Mariage'?'💍':e.type==='Anniversaire'?'🎂':e.type==='Corporate'?'🏢':'🎉')+'</div>'
-    +'<div class="alarm-text"><div class="alarm-title">'+e.type+'<span class="badge '+(sc[e.statut]||'b-muted')+'" style="margin-left:8px;font-size:10px;">'+( sl[e.statut]||e.statut)+'</span></div>'
+    +'<div class="alarm-banner" style="background:rgba('+(e.statut==='confirme'?'46,204,113':'201,150,58')+',0.1);border-color:'+(e.statut==='confirme'?'rgba(46,204,113,0.3)':'var(--gold-bd)')+'">'
+    +'<div class="alarm-icon">'+(e.type==='Mariage'?'💍':e.type==='Anniversaire'?'🎂':e.type==='Corporate'?'🏢':'🎉')+'</div>'
+    +'<div class="alarm-text"><div class="alarm-title">'+e.type+'<span class="badge '+(sc[e.statut]||'b-muted')+'" style="margin-left:8px;font-size:10px;">'+(sl[e.statut]||e.statut)+'</span></div>'
     +'<div class="alarm-sub">'+formatDate(e.date)+(e.hStart?' à '+e.hStart:'')+(e.lieu?' — '+e.lieu:'')+'</div></div>'
     +'</div>'
     +(e.montant?'<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:var(--text3);">Honoraires</span><span style="font-family:Playfair Display,serif;font-size:20px;color:var(--gold);">'+fm(e.montant)+' FCFA</span></div></div>':'')
+    +(e.tel?'<div class="card" style="padding:12px 14px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:2px;">TÉLÉPHONE CLIENT</div><div style="font-size:14px;color:var(--text);">'+e.tel+'</div></div><a href="tel:'+e.tel+'" class="btn btn-ghost btn-sm" style="text-decoration:none;">📞 Appeler</a></div></div>':'')
     +(e.notes?'<div class="card"><div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:8px;">NOTES</div><div style="font-size:13px;color:var(--text2);line-height:1.6;">'+e.notes+'</div></div>':'')
+
+    // SECTION CONTRAT
+    +'<div class="slabel">CONTRAT</div>'
+    +(ct
+      ?'<div class="card" style="background:rgba(201,150,58,0.06);border-color:var(--gold-bd);padding:14px;margin-bottom:8px;">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+        +'<div><div style="font-size:13px;font-weight:600;color:var(--gold);">Contrat généré</div>'
+        +'<div style="font-size:11px;color:var(--text3);">'+ct.type+' — '+(ct.updatedAt?new Date(ct.updatedAt).toLocaleDateString('fr-FR'):'')+'</div></div>'
+        +'<span class="badge '+(ct.statut==='Signé'?'b-green':'b-gold')+'">'+ct.statut+'</span>'
+        +'</div>'
+        +'<div style="display:flex;gap:7px;flex-wrap:wrap;">'
+        +'<button class="btn btn-outline btn-sm" onclick="ouvrirContrat(\''+id+'\')">✏️ Modifier</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="imprimerContratMC(\''+id+'\')">🖨️ PDF</button>'
+        +(e.tel?'<button class="btn btn-gold btn-sm" onclick="envoyerWhatsApp(\''+id+'\')">💬 WhatsApp</button>':'')
+        +'</div>'
+        +'</div>'
+      :'<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:8px;">'
+        +'<button class="btn btn-gold btn-block" onclick="ouvrirContrat(\''+id+'\')">📄 Générer un contrat</button>'
+        +'<label class="btn btn-ghost btn-block" style="position:relative;overflow:hidden;">'
+        +'📎 Importer document'
+        +'<input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="importerDocument(\''+id+'\',this)">'
+        +'</label>'
+        +'</div>')
+
+    // ACTIONS
     +'<div class="slabel">ACTIONS</div>'
     +'<div style="display:flex;flex-direction:column;gap:8px;">'
-    +'<button class="btn btn-outline btn-block" onclick="allerProg(\''+id+'\')">🎙️ Ouvrir le programme</button>'
-    +'<button class="btn btn-ghost btn-block" onclick="ouvrirStatut(\''+id+'\')">⟢ Changer le statut</button>'
-    +'<button class="btn btn-ghost btn-block" onclick="programmerRappel(\''+id+'\')">🔔 Programmer rappel</button>'
+    +'<button class="btn btn-outline btn-block" onclick="allerProg(\''+id+'\')">🎙️ Programme</button>'
+    +'<button class="btn btn-ghost btn-block" onclick="ouvrirStatut(\''+id+'\')">⟢ Statut</button>'
+    +'<button class="btn btn-ghost btn-block" onclick="programmerRappel(\''+id+'\')">🔔 Rappel veille</button>'
+    +(e.tel?'<button class="btn btn-ghost btn-block" onclick="envoyerMsgWA(\''+e.tel+'\',\'Bonjour, voici votre rappel pour l\\\'événement '+e.nom+' prévu le '+formatDate(e.date)+(e.lieu?' à '+e.lieu:'')+'. Cordialement, Créative Planner\')">💬 Message WhatsApp</button>':'')
     +'<button class="btn btn-danger btn-block" onclick="delEv(\''+id+'\')">🗑 Supprimer</button>'
     +'</div>';
   openSheet('sheetDetail');
@@ -780,6 +820,7 @@ function saveEv(){
     date:date,hStart:document.getElementById('ev_hStart').value,
     hEnd:document.getElementById('ev_hEnd').value,lieu:document.getElementById('ev_lieu').value,
     montant:document.getElementById('ev_montant').value,
+    tel:document.getElementById('ev_tel').value,
     notes:document.getElementById('ev_notes').value,
     createdAt:Date.now()
   };
@@ -790,7 +831,7 @@ function saveEv(){
   saveAll();renderAll();
   // Auto-programmer le rappel
   programmerRappel(e.id,true);
-  ['ev_nom','ev_date','ev_lieu','ev_montant','ev_notes'].forEach(function(id){document.getElementById(id).value='';});
+  ['ev_nom','ev_date','ev_lieu','ev_montant','ev_tel','ev_notes'].forEach(function(id){document.getElementById(id).value='';});
   closeSheet('sheetNouvelEv');
   toast('Événement créé ! Rappel programmé pour la veille.','ok');
 }
@@ -905,7 +946,224 @@ function doneProg(evId,itemId){
 
 function resetProg(){if(!confirm('Réinitialiser le programme ?'))return;var id=curProgEvId;if(id)progs[id]=defaultProg(events.find(function(e){return e.id===id;})||{});saveAll();renderProg();}
 
-// ===== TIMERS =====
+// ===== CONTRATS =====
+var TYPES_CT={
+  'Mariage':['Contrat Organisation Mariage','Contrat Maître de Cérémonie','Contrat Prestation'],
+  'Anniversaire':['Contrat Organisation Anniversaire','Contrat Animation'],
+  'Corporate':['Contrat Prestation Événementielle','Contrat Animation'],
+  'Baptême':['Contrat Organisation Baptême','Contrat Prestation'],
+  'Soirée':['Contrat Prestation Soirée'],
+  'Événement':['Contrat Prestation de Services']
+};
+
+function ouvrirContrat(evId){
+  var e=events.find(function(x){return x.id===evId;});if(!e)return;
+  var ct=contrats[evId];
+  var types=TYPES_CT[e.type]||TYPES_CT['Événement'];
+  closeSheet('sheetDetail');
+  document.getElementById('contratTitle').textContent='Contrat — '+e.nom;
+
+  // Types de contrats disponibles
+  var typesHtml='<div class="slabel">TYPE DE CONTRAT</div>'
+    +'<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">'
+    +types.map(function(tp){
+      var sel=ct&&ct.type===tp;
+      return '<div onclick="selTypeContrat(\''+evId+'\',\''+tp+'\')" style="padding:12px 14px;border:2px solid '+(sel?'var(--gold)':'var(--bg5)')+';border-radius:var(--rs);cursor:pointer;background:'+(sel?'var(--gold-dim)':'var(--bg3)')+';font-size:13px;font-weight:500;color:'+(sel?'var(--gold)':'var(--text)')+';display:flex;align-items:center;justify-content:space-between;">'
+        +tp+(sel?'<span>✓</span>':'<span style="color:var(--text3);font-size:11px;">Sélectionner</span>')+'</div>';
+    }).join('')
+    +'</div>';
+
+  // Corps du contrat si généré
+  var corpsHtml='';
+  if(ct&&ct.corps){
+    corpsHtml='<div class="slabel">CONTENU DU CONTRAT</div>'
+      +'<div style="margin-bottom:10px;">'
+      +'<textarea id="contratCorps" style="width:100%;min-height:280px;padding:13px;background:var(--bg3);border:1.5px solid var(--bg5);border-radius:var(--rs);color:var(--text2);font-size:12px;font-family:DM Sans,sans-serif;outline:none;resize:vertical;line-height:1.7;" oninput="saveContratCorps(\''+evId+'\')">'
+      +escHtml(ct.corps)+'</textarea>'
+      +'</div>'
+      +'<div class="slabel">STATUT</div>'
+      +'<div style="display:flex;gap:7px;margin-bottom:14px;">'
+      +['En attente','Envoyé','Signé'].map(function(s){
+        return '<div onclick="setStatutContrat(\''+evId+'\',\''+s+'\')" style="flex:1;padding:9px;border:2px solid '+(ct.statut===s?'var(--gold)':'var(--bg5)')+';border-radius:var(--rs);text-align:center;cursor:pointer;background:'+(ct.statut===s?'var(--gold-dim)':'var(--bg3)')+';font-size:11px;font-weight:600;color:'+(ct.statut===s?'var(--gold)':'var(--text3)')+'">'
+          +s+'</div>';
+      }).join('')
+      +'</div>'
+      +'<div class="slabel">ACTIONS</div>'
+      +'<div style="display:flex;flex-direction:column;gap:8px;">'
+      +'<button class="btn btn-gold btn-block" onclick="imprimerContratMC(\''+evId+'\')">🖨️ Imprimer / Télécharger PDF</button>'
+      +(e.tel?'<button class="btn btn-outline btn-block" onclick="envoyerWhatsApp(\''+evId+'\')">💬 Envoyer via WhatsApp</button>':'<div class="card" style="font-size:12px;color:var(--text3);">⚠️ Ajoutez le tél. du client pour envoyer via WhatsApp</div>')
+      +'<button class="btn btn-danger btn-sm" onclick="supprimerContrat(\''+evId+'\')">🗑 Supprimer ce contrat</button>'
+      +'</div>';
+  } else {
+    corpsHtml='<button class="btn btn-ghost btn-block" style="margin-bottom:8px;" onclick="genContratTexte(\''+evId+'\')">⚡ Générer le contrat</button>';
+  }
+
+  // Import document
+  var importHtml='<div class="slabel">OU IMPORTER UN DOCUMENT</div>'
+    +'<label class="btn btn-ghost btn-block" style="position:relative;overflow:hidden;">'
+    +'📎 Importer PDF / Image / Word'
+    +'<input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="importerDocument(\''+evId+'\',this)">'
+    +'</label>';
+
+  document.getElementById('contratBody').innerHTML=typesHtml+corpsHtml+importHtml;
+  openSheet('sheetContrat');
+}
+
+function selTypeContrat(evId,type){
+  if(!contrats[evId])contrats[evId]={type:type,corps:'',statut:'En attente',updatedAt:Date.now()};
+  else contrats[evId].type=type;
+  saveAll();
+  ouvrirContrat(evId);
+}
+
+function genContratTexte(evId){
+  var e=events.find(function(x){return x.id===evId;});if(!e)return;
+  var ct=contrats[evId];
+  if(!ct){contrats[evId]={type:'Contrat Prestation',corps:'',statut:'En attente',updatedAt:Date.now()};ct=contrats[evId];}
+  var type=ct.type||'Contrat Prestation de Services';
+  var today=new Date().toLocaleDateString('fr-FR');
+  ct.corps='CRÉATIVE PLANNER — Nous créons, vous vivez!\n'
+    +'=====================================\n'
+    +type.toUpperCase()+'\n'
+    +'N° CTR-'+(Date.now()+'').slice(-6)+' — '+today+'\n'
+    +'=====================================\n\n'
+    +'PRESTATAIRE\n'
+    +'Créative Planner\n'
+    +'Email : creativeplanner03@gmail.com\n'
+    +'Tél   : +225 07 78 16 01 69\n\n'
+    +'CLIENT\n'
+    +'Nom   : '+e.nom+'\n'
+    +'Tél   : '+(e.tel||'—')+'\n\n'
+    +'ÉVÉNEMENT\n'
+    +'Type  : '+e.type+'\n'
+    +'Date  : '+formatDate(e.date)+'\n'
+    +'Heure : '+(e.hStart||'—')+(e.hEnd?' – '+e.hEnd:'')+'\n'
+    +'Lieu  : '+(e.lieu||'—')+'\n\n'
+    +'PRESTATION & HONORAIRES\n'
+    +(e.montant?'Montant total : '+fm(e.montant)+' FCFA\n':'Montant total : À définir\n')
+    +'Acompte (50%) : '+(e.montant?fm(parseFloat(e.montant)/2)+' FCFA':'—')+'\n'
+    +'Solde        : Le jour de l\'événement\n'
+    +'Modes        : Espèces / Mobile Money / Virement\n\n'
+    +'PRESTATIONS INCLUSES\n'
+    +'- Animation et maîtrise de cérémonie\n'
+    +'- Coordination des activités\n'
+    +'- Gestion du programme\n'
+    +'[Modifier selon accord]\n\n'
+    +'CONDITIONS\n'
+    +'• Annulation client : l\'acompte reste acquis.\n'
+    +'• Annulation CP : remboursement intégral.\n'
+    +'• Litiges : Tribunal d\'Abidjan, Côte d\'Ivoire.\n\n'
+    +'=====================================\n'
+    +'Fait à Abidjan, le '+today+'\n\n'
+    +'Créative Planner               Client\n'
+    +'__________________         __________________\n'
+    +'Signature & Cachet         Lu et approuvé';
+  ct.updatedAt=Date.now();
+  saveAll();
+  ouvrirContrat(evId);
+  toast('Contrat généré — modifiez librement !','ok');
+}
+
+function saveContratCorps(evId){
+  var ta=document.getElementById('contratCorps');
+  if(!ta||!contrats[evId])return;
+  contrats[evId].corps=ta.value;
+  contrats[evId].updatedAt=Date.now();
+  saveAll();
+}
+
+function setStatutContrat(evId,statut){
+  if(!contrats[evId])return;
+  contrats[evId].statut=statut;
+  saveAll();
+  ouvrirContrat(evId);
+  toast('Statut : '+statut,'ok');
+}
+
+function supprimerContrat(evId){
+  if(!confirm('Supprimer ce contrat ?'))return;
+  delete contrats[evId];
+  saveAll();
+  closeSheet('sheetContrat');
+  voirEv(evId);
+  toast('Contrat supprimé','ok');
+}
+
+// ===== IMPRESSION CONTRAT =====
+function imprimerContratMC(evId){
+  var e=events.find(function(x){return x.id===evId;});if(!e)return;
+  var ct=contrats[evId];if(!ct||!ct.corps){toast('Aucun contrat à imprimer','err');return;}
+  var corps=ct.corps;
+  // Sauvegarder les modifications en cours
+  var ta=document.getElementById('contratCorps');
+  if(ta)corps=ta.value;
+  var html='<!DOCTYPE html><html><head><title>Contrat — '+e.nom+'</title>'
+    +'<style>@page{size:A4;margin:20mm;}body{font-family:Arial,sans-serif;font-size:12px;color:#1C1A17;line-height:1.7;white-space:pre-wrap;max-width:700px;margin:0 auto;padding:20px;}</style>'
+    +'</head><body>'+escHtml(corps).replace(/\n/g,'<br>')+'<script>window.print();<\/script></body></html>';
+  var blob=new Blob([html],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+  setTimeout(function(){URL.revokeObjectURL(blob);},15000);
+}
+
+// ===== WHATSAPP =====
+function envoyerWhatsApp(evId){
+  var e=events.find(function(x){return x.id===evId;});if(!e)return;
+  var ct=contrats[evId];
+  if(!e.tel){toast('Numéro WhatsApp du client manquant','err');return;}
+  var ta=document.getElementById('contratCorps');
+  var corps=ta?ta.value:(ct?ct.corps:'');
+  if(!corps){toast('Générez d\'abord le contrat','err');return;}
+  // Construire le message WhatsApp
+  var msg='*CRÉATIVE PLANNER*\n_Nous créons, vous vivez!_\n\n'
+    +'Bonjour,\n\nVeuillez trouver ci-dessous votre contrat :\n\n'
+    +'```'+corps+'```\n\n'
+    +'Pour valider, répondez simplement *ACCEPTÉ* à ce message.\n\n'
+    +'Créative Planner\n+225 07 78 16 01 69';
+  // Nettoyer le numéro
+  var tel=e.tel.replace(/[\s\-\(\)\.]/g,'');
+  if(tel.startsWith('0'))tel='+225'+tel.slice(1);
+  if(!tel.startsWith('+'))tel='+225'+tel;
+  var url='https://wa.me/'+tel.replace('+','')+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  // Mettre à jour le statut
+  if(ct){ct.statut='Envoyé';ct.updatedAt=Date.now();saveAll();ouvrirContrat(evId);}
+  toast('Ouverture WhatsApp...','ok');
+}
+
+function envoyerMsgWA(tel,msg){
+  var t=tel.replace(/[\s\-\(\)\.]/g,'');
+  if(t.startsWith('0'))t='+225'+t.slice(1);
+  if(!t.startsWith('+'))t='+225'+t;
+  window.open('https://wa.me/'+t.replace('+','')+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ===== IMPORT DOCUMENT =====
+function importerDocument(evId,input){
+  var file=input.files[0];if(!file)return;
+  var e=events.find(function(x){return x.id===evId;});if(!e)return;
+  // Si PDF ou image — afficher dans une nouvelle fenêtre
+  var url=URL.createObjectURL(file);
+  if(file.type.startsWith('image/')||file.type==='application/pdf'){
+    // Stocker comme document importé
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      if(!contrats[evId])contrats[evId]={type:'Document importé',corps:'[Document importé : '+file.name+']',statut:'En attente',updatedAt:Date.now()};
+      contrats[evId].docImporte={name:file.name,type:file.type,data:ev.target.result};
+      saveAll();
+      ouvrirContrat(evId);
+      toast('Document "'+file.name+'" importé !','ok');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // Word ou autre — noter l'import
+    if(!contrats[evId])contrats[evId]={type:'Document importé',corps:'[Document importé : '+file.name+']\nÀ éditer...',statut:'En attente',updatedAt:Date.now()};
+    else{contrats[evId].corps='[Document importé : '+file.name+']\n\n'+(contrats[evId].corps||'');}
+    saveAll();ouvrirContrat(evId);
+    toast('Document "'+file.name+'" noté','ok');
+  }
+}
+
+
 function toggleTimer(itemId,durMin){
   if(activeTimers[itemId]){
     clearInterval(activeTimers[itemId].interval);
