@@ -967,34 +967,81 @@ function ouvrirEv(id){
 }
 
 function renderSteps(c){
+  const today=new Date().toISOString().split('T')[0];
+  const isJourJ=c.date&&today>=c.date;
+  const prog=c.progression||{};
   const steps=[
-    {l:'Demande',done:true},
-    {l:'Devis',done:D.devis.some(d=>d.clientId===c.id)},
-    {l:'Contrat',done:D.contrats.some(ct=>ct.clientId===c.id)},
-    {l:'Acompte',done:D.pays.some(p=>p.clientId===c.id&&p.type==='Acompte')},
-    {l:'Prépa',done:['En préparation','Événement passé','Clôturé'].includes(c.statut)},
-    {l:'Jour J',done:['Événement passé','Clôturé'].includes(c.statut)},
-    {l:'Bilan',done:D.postEvents.some(pe=>pe.clientId===c.id)},
+    {id:'demande', l:'Demande', icon:'📩',
+      done:true, auto:true},
+    {id:'devis',   l:'Devis',   icon:'📋',
+      done:D.devis.some(d=>d.clientId===c.id)||!!prog.devis,
+      autoOk:D.devis.some(d=>d.clientId===c.id)},
+    {id:'contrat', l:'Contrat', icon:'📄',
+      done:D.contrats.some(ct=>ct.clientId===c.id&&ct.statut==='Signé')||!!prog.contrat,
+      autoOk:D.contrats.some(ct=>ct.clientId===c.id&&ct.statut==='Signé')},
+    {id:'acompte', l:'Acompte', icon:'💰',
+      done:D.pays.some(p=>p.clientId===c.id&&p.type==='Acompte')||!!prog.acompte,
+      autoOk:D.pays.some(p=>p.clientId===c.id&&p.type==='Acompte')},
+    {id:'prepa',   l:'Prépa',   icon:'🎨',
+      done:['En préparation','Événement passé','Clôturé'].includes(c.statut)||!!prog.prepa,
+      autoOk:['En préparation','Événement passé','Clôturé'].includes(c.statut)},
+    {id:'jour_j',  l:'Jour J',  icon:'🎉',
+      done:['Événement passé','Clôturé'].includes(c.statut)||!!prog.jour_j,
+      autoOk:['Événement passé','Clôturé'].includes(c.statut),
+      locked:!isJourJ,
+      tip:isJourJ?null:(c.date?'Disponible le '+fd(c.date):'Date non définie')},
+    {id:'bilan',   l:'Bilan',   icon:'⭐',
+      done:D.postEvents.some(pe=>pe.clientId===c.id)||!!prog.bilan,
+      autoOk:D.postEvents.some(pe=>pe.clientId===c.id)},
   ];
-  document.getElementById('stepsWrap').innerHTML=steps.map((s,i)=>`
-    <div class="step ${s.done?'done':i===steps.findIndex(x=>!x.done)?'current':''}" onclick="stepClick('${c.id}','${s.l}')">
-      <div class="step-circle">${s.done?'✓':i+1}</div>
-      <div class="step-lbl">${s.l}</div>
-    </div>`).join('');
+  document.getElementById('stepsWrap').innerHTML=steps.map((s,i)=>{
+    const isDone=s.done;
+    const isCur=!isDone&&i===steps.findIndex(x=>!x.done);
+    const lk=s.locked&&!isDone;
+    return '<div class="step '+(isDone?'done':isCur?'current':'')+'" '
+      +'onclick="stepClick(\''+c.id+'\',\''+s.id+'\')" '
+      +'title="'+(lk?(s.tip||'Bloqué'):(isDone?'Cocher/décocher':s.l))+'" '
+      +'style="cursor:'+(lk?'not-allowed':'pointer')+';opacity:'+(lk?'0.45':'1')+';">'
+      +'<div class="step-circle" style="font-size:14px;">'+(isDone?'✓':(lk?'🔒':s.icon))+'</div>'
+      +'<div class="step-lbl">'+s.l+'</div>'
+      +'</div>';
+  }).join('');
 }
 
-function stepClick(clientId,step){
-  // Rediriger selon l'étape
-  const actions={
-    'Devis':()=>openMo('moNewDevis'),
-    'Contrat':()=>switchEvTab('contrat'),
-    'Acompte':()=>openMo('moNewPay'),
-    'Prépa':()=>switchEvTab('jour_j'),
-    'Jour J':()=>switchEvTab('jour_j'),
-    'Bilan':()=>openMo('moPostEvent'),
+async function stepClick(clientId,stepId){
+  const c=D.clients.find(x=>x.id===clientId);if(!c)return;
+  const today=new Date().toISOString().split('T')[0];
+  if(stepId==='jour_j'&&c.date&&today<c.date){
+    toast(c.date?'Jour J disponible le '+fd(c.date):'Date non définie','warn');return;
+  }
+  if(stepId==='demande')return;// toujours coché
+  if(!c.progression)c.progression={};
+  const autoOk={
+    devis:D.devis.some(d=>d.clientId===clientId),
+    contrat:D.contrats.some(ct=>ct.clientId===clientId&&ct.statut==='Signé'),
+    acompte:D.pays.some(p=>p.clientId===clientId&&p.type==='Acompte'),
+    prepa:['En préparation','Événement passé','Clôturé'].includes(c.statut),
+    jour_j:['Événement passé','Clôturé'].includes(c.statut),
+    bilan:D.postEvents.some(pe=>pe.clientId===clientId),
   };
-  if(actions[step])actions[step]();
+  // Basculer manuellement si pas automatiquement coché
+  if(!autoOk[stepId]){
+    c.progression[stepId]=!c.progression[stepId];
+    await updateClientSB(c);
+  }
+  renderSteps(c);
+  // Rediriger vers la bonne page
+  const nav={
+    devis:()=>openMo('moNewDevis'),
+    contrat:()=>switchEvTab('contrat'),
+    acompte:()=>openMo('moNewPay'),
+    prepa:()=>switchEvTab('materiel'),
+    jour_j:()=>switchEvTab('fiches'),
+    bilan:()=>openMo('moPostEvent'),
+  };
+  if(nav[stepId])nav[stepId]();
 }
+
 
 // ===== TABS DYNAMIQUES =====
 function buildEvTabs(c){
@@ -1438,64 +1485,186 @@ async function ouvrirPlanSalle(cId){
   if(!c.salleConfig)c.salleConfig={};
   c.salleConfig.longueur=parseInt(l);c.salleConfig.largeur=parseInt(w);
   await updateClientSB(c);
-  window.open(`plan-salle.html?event=${cId}&forme=${c.salleConfig.forme||'rect'}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c.nom)}&type=${encodeURIComponent(c.type||'')}&date=${encodeURIComponent(c.date?fd(c.date):'')}&lieu=${encodeURIComponent(c.lieu||'')}&heure=${encodeURIComponent(c.heure||'')}`,'_blank');
+  const url=`plan-salle.html?event=${cId}&forme=${c.salleConfig.forme||'rect'}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c.nom)}&type=${encodeURIComponent(c.type||'')}&date=${encodeURIComponent(c.date?fd(c.date):'')}&lieu=${encodeURIComponent(c.lieu||'')}&heure=${encodeURIComponent(c.heure||'')}`;
+  window.open(url,'_blank');
+}
+
+async function nouveauPlan(cId){
+  if(!confirm('Créer un nouveau plan de salle vierge ?'))return;
+  // Supprimer le SVG existant
+  localStorage.removeItem('cp_plan_svg_'+cId);
+  localStorage.removeItem('cp_plan_svg_'+cId+'_ts');
+  const c=D.clients.find(x=>x.id===cId);if(!c)return;
+  const l=c.salleConfig?.longueur||20;
+  const w=c.salleConfig?.largeur||15;
+  // Ouvrir avec new=1 → canvas vierge
+  const url=`plan-salle.html?event=${cId}&forme=${c.salleConfig?.forme||'rect'}&longueur=${l}&largeur=${w}&nom=${encodeURIComponent(c.nom)}&type=${encodeURIComponent(c.type||'')}&date=${encodeURIComponent(c.date?fd(c.date):'')}&lieu=${encodeURIComponent(c.lieu||'')}&new=1`;
+  window.open(url,'_blank');
+  // Rafraîchir l'onglet plan
+  setTimeout(()=>{
+    const c2=D.clients.find(x=>x.id===cId);
+    if(c2&&document.getElementById('etab-plan_salle_tab'))
+      document.getElementById('etab-plan_salle_tab').innerHTML=renderPlanSalleTab(c2);
+  },500);
 }
 
 // ===== CONTRAT =====
 function renderContratTab(c){
-  return `<div style="display:flex;gap:8px;margin-bottom:16px;">
-    <button class="btn btn-gold" onclick="genContrat('${c.id}')">📄 Générer</button>
-    <button class="btn btn-ghost" onclick="printContrat()">🖨️ Imprimer</button>
-  </div>
-  <div id="contratDoc_${c.id}">
-    <div style="text-align:center;padding:40px;color:var(--ink4);">
-      <div style="font-size:36px;margin-bottom:10px;">📄</div>
-      <div>Cliquez sur "Générer" pour créer le contrat</div>
-    </div>
-  </div>`;
+  var TYPES_CT={
+    'Mariage':['Contrat Organisation Mariage','Contrat Maitre de Ceremonie','Contrat Traiteur','Contrat Photo-Video','Contrat DJ-Animation','Contrat Decoration','Contrat Location Salle'],
+    'Anniversaire':['Contrat Organisation Anniversaire','Contrat Animation','Contrat Traiteur'],
+    'Corporate':['Contrat Prestation Evenementielle','Contrat Traiteur Corporate','Contrat Animation'],
+    'Bapteme':['Contrat Organisation Bapteme','Contrat Traiteur','Contrat MC'],
+    'Autre':['Contrat Prestation de Services']
+  };
+  var types=TYPES_CT[c.type]||TYPES_CT['Autre'];
+  var cts=D.contrats.filter(function(x){return x.clientId===c.id;});
+  var html='<div>';
+  // Grille des types
+  html+='<div class="card" style="margin-bottom:14px;">';
+  html+='<div class="card-hdr"><div class="card-title">Types de contrats — '+c.type+'</div>';
+  if(cts.length)html+='<button class="btn btn-ghost btn-sm" onclick="printAllCts(\''+c.id+'\')">🖨️ Tout imprimer</button>';
+  html+='</div>';
+  html+='<p style="font-size:12px;color:var(--ink4);margin-bottom:12px;">Cliquez sur un type pour le generer ou le modifier.</p>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;">';
+  types.forEach(function(tp){
+    var ex=cts.find(function(x){return x.type===tp;});
+    html+='<div onclick="genContrat(\''+c.id+'\',\''+tp+'\')" '
+      +'style="padding:11px;border:2px solid '+(ex?'var(--gold)':'var(--bg2)')+';border-radius:var(--rs);cursor:pointer;background:'+(ex?'var(--gold-dim)':'var(--white)')+';transition:all 0.2s;" '
+      +'onmouseover="this.style.borderColor=\'var(--gold-bd)\'" onmouseout="this.style.borderColor=\''+(ex?'var(--gold)':'var(--bg2)')+'\';">'
+      +'<div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px;">'+tp+'</div>'
+      +(ex
+        ?'<div style="font-size:10px;color:var(--gold);">✓ '+ex.statut+'</div>'
+        :'<div style="font-size:10px;color:var(--ink4);">+ Generer</div>')
+      +'</div>';
+  });
+  html+='</div></div>';
+  // Liste des contrats generes
+  if(cts.length){
+    html+='<div class="card">';
+    html+='<div class="card-title" style="margin-bottom:14px;">Contrats generes ('+cts.length+')</div>';
+    cts.forEach(function(ct){
+      html+='<div style="border:1px solid var(--bg2);border-radius:var(--rs);padding:13px;margin-bottom:10px;">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--ink);">'+(ct.type||'Contrat')+'</div>';
+      html+='<div style="display:flex;gap:6px;align-items:center;">';
+      // Select statut
+      html+='<select onchange="setCStatut(\''+ct.id+'\',this.value,\''+c.id+'\')" '
+        +'style="padding:4px 8px;background:var(--off);border:1px solid var(--bg2);border-radius:4px;font-size:11px;cursor:pointer;">';
+      ['Genere','Envoye','Signe','Annule'].forEach(function(s){
+        html+='<option'+(ct.statut===s?' selected':'')+'>'+s+'</option>';
+      });
+      html+='</select>';
+      html+='<button class="btn btn-ghost btn-sm" onclick="printOneCt(\''+ct.id+'\')">🖨️</button>';
+      html+='<button class="btn btn-danger btn-sm" onclick="delCt(\''+ct.id+'\',\''+c.id+'\')">✕</button>';
+      html+='</div></div>';
+      // Corps du contrat
+      html+='<div id="ctdoc_'+ct.id+'">';
+      if(ct.corps)html+=ct.corps;
+      else html+='<div style="font-size:12px;color:var(--ink4);text-align:center;padding:14px;">Cliquez sur le type ci-dessus pour generer le contenu</div>';
+      html+='</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+  return html;
 }
 
-async function genContrat(cId){
-  const c=D.clients.find(x=>x.id===cId);if(!c)return;
-  const lastDv=D.devis.filter(d=>d.clientId===cId).slice(-1)[0];
-  const today=new Date().toLocaleDateString('fr-FR');
-  const montant=lastDv?fm(lastDv.montant)+' FCFA':'À définir';
-  const acompte=lastDv?fm(lastDv.acompte)+' FCFA':'À définir';
-  const ct={id:'CTR_'+Date.now(),clientId:cId,date:today,montant:lastDv?.montant||0,statut:'Généré'};
-  if(!D.contrats.find(x=>x.clientId===cId)){D.contrats.push(ct);await sb('contrats','POST',{id:ct.id,client_id:ct.clientId,date:ct.date,montant:ct.montant,statut:ct.statut});renderContrats();}
-  document.getElementById('contratDoc_'+cId).innerHTML=`
-    <div class="contrat-doc" id="contratPrint">
-      <div style="text-align:center;border-bottom:2px solid var(--gold);padding-bottom:16px;margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);letter-spacing:3px;">CRÉATIVE PLANNER</div>
-        <div style="font-size:11px;color:var(--ink4);font-style:italic;">Nous créons, vous vivez!</div>
-        <div style="font-size:16px;letter-spacing:3px;margin-top:12px;">CONTRAT DE PRESTATION</div>
-        <div style="font-size:12px;color:var(--gold);">N° CTR-${Date.now().toString().slice(-6)}</div>
-      </div>
-      ${[
-        ['LES PARTIES',`<strong>Prestataire :</strong> CRÉATIVE PLANNER — creativeplanner03@gmail.com — +225 07 78 16 01 69<br><br><strong>Client :</strong> ${c.nom} — ${c.tel||'—'} — ${c.email||'—'}`],
-        ['OBJET',`Type : ${c.type}<br>Date : ${c.date?fd(c.date):'À définir'}<br>Lieu : ${c.lieu||'À définir'}<br>Invités : ${c.package||'À définir'}<br>Offre : ${c.offre}`],
-        ['PRESTATIONS',lastDv?.prestations||c.offre+' — Organisation complète'],
-        ['CONDITIONS FINANCIÈRES',`Montant total : ${montant}<br>Acompte (30%) : ${acompte}<br>Solde : 7 jours avant l'événement<br>Modes : Espèces, Mobile Money, Virement`],
-        ['ANNULATION','Annulation client : l\'acompte reste acquis. Annulation CP : remboursement intégral.'],
-        ['IMAGES','Le client autorise CP à utiliser les photos/vidéos pour sa communication. ☐ Refus'],
-        ['LITIGES','Solution amiable privilégiée. À défaut : Tribunal d\'Abidjan, Côte d\'Ivoire.']
-      ].map(([t,v])=>`<div class="contrat-art"><div class="contrat-art-title">Article — ${t}</div><div class="contrat-art-content">${v}</div></div>`).join('')}
-      <div style="font-size:12px;color:var(--ink4);text-align:right;margin-bottom:16px;">Fait à Abidjan, le ${today}</div>
-      <div class="sign-grid">
-        <div class="sign-box"><div style="font-size:13px;font-weight:600;">CRÉATIVE PLANNER</div><div class="sign-line"></div><div class="sign-lbl">Signature & Cachet</div></div>
-        <div class="sign-box"><div style="font-size:13px;font-weight:600;">Le Client — ${c.nom}</div><div class="sign-line"></div><div class="sign-lbl">Lu et approuvé</div></div>
-      </div>
-      <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid var(--bg2);font-size:10px;color:var(--ink4);">creativeplanner03@gmail.com — +225 07 78 16 01 69 — Abidjan</div>
-    </div>`;
-  toast('Contrat généré','ok');
+async function genContrat(cId,type){
+  var c=D.clients.find(function(x){return x.id===cId;});if(!c)return;
+  var dv=D.devis.filter(function(d){return d.clientId===cId;}).slice(-1)[0];
+  var today=new Date().toLocaleDateString('fr-FR');
+  var mtot=dv?fm(dv.montant)+' FCFA':'A definir';
+  var mac=dv?fm(dv.acompte)+' FCFA':'A definir';
+  var ct=D.contrats.find(function(x){return x.clientId===cId&&x.type===type;});
+  if(!ct){
+    ct={id:'CTR'+Date.now(),clientId:cId,type:type,date:today,montant:dv?dv.montant:0,statut:'Genere',corps:''};
+    D.contrats.push(ct);
+    await sb('contrats','POST',{id:ct.id,client_id:ct.clientId,date:ct.date,montant:ct.montant,statut:ct.statut});
+    // Cocher la progression contrat
+    if(!c.progression)c.progression={};
+    c.progression.contrat=true;
+    await updateClientSB(c);
+    renderSteps(c);
+  }
+  ct.corps=buildCtHTML(c,ct,type,mtot,mac,today,dv);
+  document.getElementById('etab-contrat').innerHTML=renderContratTab(c);
+  var el=document.getElementById('ctdoc_'+ct.id);
+  if(el)el.innerHTML=ct.corps;
+  renderContrats();
+  toast('Contrat "'+type+'" genere','ok');
 }
 
-function printContrat(){
-  const el=document.getElementById('contratPrint');
-  if(!el){toast('Générez d\'abord le contrat','err');return;}
-  const w=window.open('','_blank');
-  w.document.write(`<html><head><title>Contrat</title><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/><style>body{font-family:'DM Sans',sans-serif;color:#1C1A17;padding:32px;max-width:720px;margin:0 auto;}</style></head><body>${el.outerHTML}<script>window.print();<\/script></body></html>`);
+function buildCtHTML(c,ct,type,mtot,mac,today,dv){
+  var presta=dv&&dv.prestations?dv.prestations:'Offre '+c.offre;
+  return '<div id="ct_'+ct.id+'" style="background:var(--off);border-radius:var(--rs);padding:20px;font-size:12px;line-height:1.7;color:var(--ink2);">'
+    +'<div style="text-align:center;border-bottom:2px solid var(--gold);padding-bottom:12px;margin-bottom:14px;">'
+    +'<div style="font-size:18px;font-weight:700;color:var(--gold);letter-spacing:2px;">CREATIVE PLANNER</div>'
+    +'<div style="font-size:9px;color:var(--ink4);font-style:italic;">Nous creons, vous vivez!</div>'
+    +'<div style="font-size:13px;letter-spacing:1px;margin-top:7px;font-weight:600;">'+type.toUpperCase()+'</div>'
+    +'<div style="font-size:10px;color:var(--gold);">No '+ct.id.slice(-6)+' — '+today+'</div>'
+    +'</div>'
+    +'<div style="background:var(--white);border-radius:6px;padding:11px;margin-bottom:12px;">'
+    +'<strong>Prestataire :</strong> CREATIVE PLANNER — creativeplanner03@gmail.com — +225 07 78 16 01 69<br>'
+    +'<strong>Client :</strong> '+c.nom+' — '+(c.tel||'—')+'<br>'
+    +'<strong>Evenement :</strong> '+c.type+' — '+(c.date?fd(c.date):'A definir')+' — '+(c.lieu||'—')+'<br>'
+    +'<strong>Invites :</strong> '+(c.package||'—')+' — <strong>Offre :</strong> '+c.offre
+    +'</div>'
+    +'<div style="margin-bottom:10px;"><strong style="color:var(--gold);">PRESTATIONS :</strong> '+presta+'</div>'
+    +'<div style="margin-bottom:10px;"><strong style="color:var(--gold);">CONDITIONS FINANCIERES :</strong><br>'
+    +'Montant total : <strong>'+mtot+'</strong><br>'
+    +'Acompte a la signature : <strong>'+mac+'</strong><br>'
+    +'Solde : 7 jours avant l\'evenement<br>'
+    +'Modes de paiement : Especes — Mobile Money — Virement</div>'
+    +'<div style="margin-bottom:10px;"><strong style="color:var(--gold);">ANNULATION :</strong> L\'acompte reste acquis en cas d\'annulation par le client. En cas d\'annulation par CREATIVE PLANNER, remboursement integral.</div>'
+    +'<div style="margin-bottom:14px;"><strong style="color:var(--gold);">LITIGES :</strong> Solution amiable privilegiee. A defaut : Tribunal competent d\'Abidjan, Cote d\'Ivoire.</div>'
+    +'<div style="font-size:11px;color:var(--ink4);text-align:right;margin-bottom:14px;">Fait a Abidjan, le '+today+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">'
+    +'<div style="text-align:center;"><strong>CREATIVE PLANNER</strong><div style="border-bottom:1px solid var(--gold);margin:18px 0 5px;"></div><div style="font-size:10px;color:var(--ink4);">Signature et Cachet</div></div>'
+    +'<div style="text-align:center;"><strong>'+c.nom+'</strong><div style="border-bottom:1px solid var(--gold);margin:18px 0 5px;"></div><div style="font-size:10px;color:var(--ink4);">Lu et approuve</div></div>'
+    +'</div>'
+    +'<div style="text-align:center;margin-top:12px;font-size:9px;color:var(--ink4);border-top:1px solid var(--bg2);padding-top:8px;">creativeplanner03@gmail.com — +225 07 78 16 01 69 — Abidjan</div>'
+    +'</div>';
 }
+
+async function setCStatut(ctId,statut,cId){
+  var ct=D.contrats.find(function(x){return x.id===ctId;});if(!ct)return;
+  ct.statut=statut;
+  await sb('contrats','PATCH',{statut:statut},'?id=eq.'+ctId);
+  if(statut==='Signe'){
+    var c=D.clients.find(function(x){return x.id===cId;});
+    if(c){if(!c.progression)c.progression={};c.progression.contrat=true;await updateClientSB(c);renderSteps(c);}
+  }
+  renderContrats();toast('Statut : '+statut,'ok');
+}
+
+async function delCt(ctId,cId){
+  if(!confirm('Supprimer ce contrat ?'))return;
+  await sb('contrats','DELETE',null,'?id=eq.'+ctId);
+  D.contrats=D.contrats.filter(function(x){return x.id!==ctId;});
+  var c=D.clients.find(function(x){return x.id===cId;});
+  if(c)document.getElementById('etab-contrat').innerHTML=renderContratTab(c);
+  renderContrats();toast('Contrat supprime','ok');
+}
+
+function printOneCt(ctId){
+  var ct=D.contrats.find(function(x){return x.id===ctId;});
+  if(!ct||!ct.corps){toast('Generez le contrat d\'abord','err');return;}
+  var css=':root{--gold:#B8872A;--off:#FAFAF8;--bg2:#EEECE8;--white:#fff;--rs:8px;--ink:#1C1A17;--ink2:#3D3A35;--ink4:#A09A93;--gold-dim:rgba(184,135,42,0.08);}';
+  var blob=new Blob(['<!DOCTYPE html><html><head><title>Contrat</title><style>body{font-family:sans-serif;padding:28px;max-width:700px;margin:0 auto;}'+css+'</style></head><body>'+ct.corps+'<script>window.print();<\/script></body></html>'],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
+function printAllCts(cId){
+  var cts=D.contrats.filter(function(x){return x.clientId===cId&&x.corps;});
+  if(!cts.length){toast('Aucun contrat genere','err');return;}
+  var css=':root{--gold:#B8872A;--off:#FAFAF8;--bg2:#EEECE8;--white:#fff;--rs:8px;--ink:#1C1A17;--ink2:#3D3A35;--ink4:#A09A93;--gold-dim:rgba(184,135,42,0.08);}';
+  var body=cts.map(function(ct,i){return ct.corps+(i<cts.length-1?'<div style="page-break-after:always;height:20px;"></div>':'');}).join('');
+  var blob=new Blob(['<!DOCTYPE html><html><head><title>Contrats</title><style>body{font-family:sans-serif;padding:24px;max-width:700px;margin:0 auto;}'+css+'</style></head><body>'+body+'<script>window.print();<\/script></body></html>'],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
 
 // ===== FICHES ÉDITABLES =====
 function renderFiches(c){
@@ -1805,99 +1974,85 @@ function printFicheMateriel(clientId){
   const pr=c.prestataires||{};
   const couleurs=c.couleurs||[];
   const date=c.date?fd(c.date):'/';
-  const cats={photo:'📸 Photo/Vidéo',dj:'🎵 DJ/Animation',traiteur:'🍽️ Traiteur',mignardises:'🍬 Mignardises',deco:'🌸 Décoration',mc:'🎤 MC',orchestre:'🎻 Orchestre',chanteur:'🎤 Chanteur',chorale:'🎵 Chorale',voiture:'🚗 Voiture'};
-  // Lire le SVG du plan depuis localStorage (sauvegardé depuis le plan de salle)
-  const planSvg=localStorage.getItem('cp_plan_svg_'+clientId)||localStorage.getItem('cp_plan_svg_default')||null;
+  const cats={photo:'Photo/Video',dj:'DJ/Animation',traiteur:'Traiteur',mignardises:'Mignardises',deco:'Decoration',mc:'MC',orchestre:'Orchestre',chanteur:'Chanteur',chorale:'Chorale',voiture:'Voiture'};
+  const planSvg=localStorage.getItem('cp_plan_svg_'+clientId)||null;
   const planTs=localStorage.getItem('cp_plan_svg_'+clientId+'_ts');
   const planDate=planTs?new Date(parseInt(planTs)).toLocaleDateString('fr-FR'):'';
 
-  const planSection=planSvg
-    ?`<div style="width:100%;text-align:center;">${planSvg}</div>${planDate?`<div style="font-size:7px;color:#A09A93;text-align:center;margin-top:2px;">Plan enregistré le ${planDate}</div>`:''}`
-    :`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#A09A93;text-align:center;font-size:9px;padding:16px;">
-        <div style="font-size:28px;">🗺️</div>
-        <div>Plan non disponible. Ouvrez le Plan de Salle depuis cet événement<br>et cliquez sur <strong>📸 Enregistrer pour la fiche</strong></div>
-      </div>`;
-
-  // Construire les lignes matériel et prestataires
   let matRows='';
-  mat.forEach(m=>{matRows+=`<tr><td>${m.icon} ${m.name}</td><td class="qty">${m.qty||0}</td></tr>`;});
+  mat.forEach(function(m){matRows+='<tr><td>'+m.name+'</td><td class="qty">'+( m.qty||0)+'</td></tr>';});
 
   let prestaHtml='';
-  Object.entries(cats).forEach(([k,l])=>{
-    const ps=(pr[k]||[]).filter(p=>p&&p.nom);
-    prestaHtml+=`<div class="presta-cat"><div class="pcat-t">${l}</div>`;
-    if(!ps.length)prestaHtml+='<div class="pcat-row" style="color:#A09A93;">—</div>';
-    else ps.forEach(p=>{prestaHtml+=`<div class="pcat-row">${p.nom}${p.tel?' · '+p.tel:''}${p.signe?' ✓':''}</div>`;});
+  Object.entries(cats).forEach(function([k,l]){
+    const ps=(pr[k]||[]).filter(function(p){return p&&p.nom;});
+    prestaHtml+='<div class="pcat"><div class="pcat-t">'+l+'</div>';
+    if(!ps.length)prestaHtml+='<div class="pcat-r">—</div>';
+    else ps.forEach(function(p){prestaHtml+='<div class="pcat-r">'+p.nom+(p.tel?' · '+p.tel:'')+'</div>';});
     prestaHtml+='</div>';
   });
 
-  const couleursHtml=couleurs.map(col=>`<div style="width:12px;height:12px;border-radius:50%;background:${col};border:1px solid rgba(0,0,0,0.1);display:inline-block;margin-right:4px;"></div>`).join('');
+  const planBlock=planSvg
+    ?('<div style="width:100%;overflow:hidden;max-height:160px;text-align:center;">'+(planSvg.replace('viewBox="0 0','viewBox="0 0').replace(/width="\d+"/, 'width="100%"').replace(/height="\d+"/, 'height="auto"'))+'</div>'+(planDate?'<div style="font-size:7px;color:#A09A93;text-align:center;">Plan du '+planDate+'</div>':''))
+    :'<div style="text-align:center;padding:20px;color:#A09A93;font-size:9px;">Plan non disponible — Enregistrer depuis le Plan de Salle</div>';
 
-  // Agrandir la boîte plan si SVG disponible
-  const minH=planSvg?'100px':'190px';
-  const html=`<!DOCTYPE html><html><head><title>Fiche — ${c.nom}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-  @page{size:A4 landscape;margin:8mm;}
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'DM Sans',sans-serif;color:#1C1A17;font-size:9px;background:#fff;}
-  .wrap{padding:4mm;}
-  .header{display:flex;align-items:center;justify-content:space-between;padding-bottom:7px;border-bottom:2px solid #B8872A;margin-bottom:8px;}
-  .logo{font-family:'Playfair Display',serif;font-size:15px;color:#B8872A;letter-spacing:3px;}
-  .event-name{font-family:'Playfair Display',serif;font-size:13px;color:#1C1A17;text-align:center;}
-  .event-meta{font-size:8px;color:#A09A93;text-align:center;margin-top:2px;}
-  .plan-section{margin-bottom:8px;border:1px solid #EEECE8;border-radius:6px;overflow:hidden;}
-  .stitle{font-size:8px;color:#B8872A;letter-spacing:2px;font-weight:600;padding:5px 9px;background:#FAFAF8;text-transform:uppercase;border-bottom:1px solid #EEECE8;}
-  .plan-box{width:100%;min-height:${minH};max-height:${planSvg?'280px':'190px'};background:#FFFEF9;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .section{border:1px solid #EEECE8;border-radius:5px;overflow:hidden;}
-  table{width:100%;border-collapse:collapse;font-size:8px;}
-  th{background:#1C1A17;color:#fff;padding:4px 6px;text-align:left;font-size:7.5px;}
-  td{padding:4px 6px;border-bottom:1px solid #EEECE8;}
-  tr:nth-child(even) td{background:#FAFAF8;}
-  .qty{font-weight:700;color:#B8872A;text-align:right;}
-  .presta-cat{padding:3px 6px;border-bottom:1px solid #EEECE8;}
-  .pcat-t{font-size:7.5px;color:#B8872A;font-weight:600;margin-bottom:1px;}
-  .pcat-row{font-size:8px;color:#3D3A35;}
-  .equipe-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:5px;}
-  .eq-item{background:#FAFAF8;border:1px solid #EEECE8;border-radius:3px;padding:4px;text-align:center;}
-  .eq-num{font-size:13px;font-weight:700;color:#B8872A;}
-  .eq-lbl{font-size:7px;color:#A09A93;}
-  .footer{text-align:center;font-size:7.5px;color:#A09A93;padding-top:5px;border-top:1px solid #EEECE8;margin-top:7px;}
-  </style></head><body><div class="wrap">
+  const html='<!DOCTYPE html><html><head><title>Fiche '+c.nom+'</title>'
+    +'<style>'
+    +'@page{size:A4 landscape;margin:6mm;}'
+    +'*{margin:0;padding:0;box-sizing:border-box;}'
+    +'html,body{width:100%;height:100%;font-family:Arial,sans-serif;color:#1C1A17;font-size:8.5px;background:#fff;}'
+    +'.page{display:flex;flex-direction:column;height:100vh;padding:0;}'
+    +'.hdr{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #B8872A;padding-bottom:5px;margin-bottom:6px;flex-shrink:0;}'
+    +'.logo{font-size:13px;font-weight:bold;color:#B8872A;letter-spacing:2px;}'
+    +'.evn{font-size:11px;font-weight:bold;text-align:center;}'
+    +'.evm{font-size:8px;color:#A09A93;text-align:center;}'
+    +'.body{flex:1;display:grid;grid-template-rows:auto 1fr;gap:6px;overflow:hidden;}'
+    +'.plan-sec{border:1px solid #EEECE8;border-radius:4px;overflow:hidden;}'
+    +'.plan-hdr{font-size:8px;color:#B8872A;letter-spacing:1px;font-weight:bold;padding:3px 7px;background:#FAFAF8;border-bottom:1px solid #EEECE8;}'
+    +'.plan-body{padding:4px;background:#FFFEF9;display:flex;justify-content:center;align-items:center;overflow:hidden;}'
+    +'.plan-body svg{width:100%;max-height:155px;height:auto;display:block;}'
+    +'.cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow:hidden;}'
+    +'.sec{border:1px solid #EEECE8;border-radius:4px;overflow:hidden;}'
+    +'.sec-hdr{font-size:8px;color:#B8872A;letter-spacing:1px;font-weight:bold;padding:3px 7px;background:#FAFAF8;border-bottom:1px solid #EEECE8;}'
+    +'table{width:100%;border-collapse:collapse;font-size:7.5px;}'
+    +'th{background:#1C1A17;color:#fff;padding:3px 6px;text-align:left;font-size:7px;}'
+    +'td{padding:3px 6px;border-bottom:1px solid #F0EDE8;}'
+    +'tr:nth-child(even) td{background:#FAFAF8;}'
+    +'.qty{font-weight:700;color:#B8872A;text-align:right;}'
+    +'.pcat{padding:2px 6px;border-bottom:1px solid #F0EDE8;}'
+    +'.pcat-t{font-size:7px;color:#B8872A;font-weight:bold;}'
+    +'.pcat-r{font-size:7.5px;color:#3D3A35;}'
+    +'.eq{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:4px;}'
+    +'.eq-i{text-align:center;background:#FAFAF8;border:1px solid #EEECE8;border-radius:2px;padding:3px;}'
+    +'.eq-n{font-size:12px;font-weight:bold;color:#B8872A;}'
+    +'.eq-l{font-size:6.5px;color:#A09A93;}'
+    +'.ftr{text-align:center;font-size:7px;color:#A09A93;padding-top:4px;border-top:1px solid #EEECE8;flex-shrink:0;}'
+    +'</style></head><body><div class="page">'
+    +'<div class="hdr">'
+    +'<div><div class="logo">CREATIVE PLANNER</div><div style="font-size:7px;color:#A09A93;font-style:italic;">Nous creons, vous vivez!</div></div>'
+    +'<div><div class="evn">'+c.nom+'</div><div class="evm">'+c.type+' · '+date+' · '+(c.lieu||'')+' · '+(c.package||'')+' · '+c.offre+'</div></div>'
+    +'<div style="display:flex;gap:3px;">'+(couleurs.map(function(col){return '<div style="width:10px;height:10px;border-radius:50%;background:'+col+';border:1px solid rgba(0,0,0,0.1);"></div>';}).join(''))+'</div>'
+    +'</div>'
+    +'<div class="body">'
+    +'<div class="plan-sec"><div class="plan-hdr">Plan de la salle</div><div class="plan-body">'+planBlock+'</div></div>'
+    +'<div class="cols">'
+    +'<div class="sec"><div class="sec-hdr">Inventaire materiel</div>'
+    +'<table><thead><tr><th>Element</th><th style="text-align:right;">Qte</th></tr></thead><tbody>'+matRows+'</tbody></table></div>'
+    +'<div class="sec"><div class="sec-hdr">Prestataires & Equipe</div>'
+    +prestaHtml
+    +'<div class="eq">'
+    +'<div class="eq-i"><div class="eq-n">'+(c.nb_hotesses||0)+'</div><div class="eq-l">Hotesses</div></div>'
+    +'<div class="eq-i"><div class="eq-n">'+(c.nb_traiteur||0)+'</div><div class="eq-l">Traiteur</div></div>'
+    +'<div class="eq-i"><div class="eq-n">'+(c.nb_securite||0)+'</div><div class="eq-l">Securite</div></div>'
+    +'</div></div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="ftr">CREATIVE PLANNER · creativeplanner03@gmail.com · +225 07 78 16 01 69 · Abidjan · '+new Date().toLocaleDateString('fr-FR')+'</div>'
+    +'</div><script>setTimeout(function(){window.print();},300);<\/script></body></html>';
 
-  <div class="header">
-    <div><div class="logo">CRÉATIVE PLANNER</div><div style="font-size:7px;color:#A09A93;font-style:italic;">Nous créons, vous vivez!</div></div>
-    <div><div class="event-name">${c.nom}</div><div class="event-meta">${c.type} · ${date} · ${c.lieu||''} · ${c.package||''} · ${c.offre}</div></div>
-    <div>${couleursHtml}</div>
-  </div>
-
-  <div class="plan-section">
-    <div class="stitle">🗺️ Plan de la salle — ${c.salleConfig?.longueur||20}m × ${c.salleConfig?.largeur||15}m</div>
-    <div class="plan-box">${planSection}</div>
-  </div>
-
-  <div class="cols">
-    <div class="section">
-      <div class="stitle">🪑 Inventaire matériel</div>
-      <table><thead><tr><th>Élément</th><th style="text-align:right;">Quantité</th></tr></thead><tbody>${matRows}</tbody></table>
-    </div>
-    <div class="section">
-      <div class="stitle">👥 Prestataires & Équipe</div>
-      ${prestaHtml}
-      <div class="equipe-box">
-        <div class="eq-item"><div class="eq-num">${c.nb_hotesses||0}</div><div class="eq-lbl">👗 Hôtesses</div></div>
-        <div class="eq-item"><div class="eq-num">${c.nb_traiteur||0}</div><div class="eq-lbl">🍽️ Traiteur</div></div>
-        <div class="eq-item"><div class="eq-num">${c.nb_securite||0}</div><div class="eq-lbl">🛡️ Sécurité</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">Créative Planner · creativeplanner03@gmail.com · +225 07 78 16 01 69 · Abidjan · ${new Date().toLocaleDateString('fr-FR')}</div>
-  </div><script>window.print();<\/script></body></html>`;
-
-  const w=window.open('','_blank');
-  w.document.write(html);
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  setTimeout(function(){URL.revokeObjectURL(url);},20000);
   toast('Fiche PDF générée','ok');
 }
 
@@ -1945,16 +2100,37 @@ async function saveDevis(){
   document.querySelectorAll('input[name="prest"]').forEach(cb=>cb.checked=false);
   closeMo('moNewDevis');
   await sb('devis','POST',{id:d.id,numero:d.numero,client_id:d.clientId,date:d.date,validite:d.validite,montant:d.montant,acompte:d.acompte,prestations:d.prestations,details:d.notes,statut:d.statut});
-  refresh();toast('Devis créé : '+d.numero,'ok');
+  refresh();
+  // Auto-refresh progression sans rechargement
+  if(curEvId){const c=D.clients.find(x=>x.id===curEvId);if(c)renderSteps(c);}
+  toast('Devis créé : '+d.numero,'ok');
 }
 
 function renderDevis(){
   const tbody=document.getElementById('devisTable');if(!tbody)return;
   tbody.innerHTML=D.devis.length?D.devis.map(d=>{
     const c=D.clients.find(x=>x.id===d.clientId);
-    return `<tr><td><strong>${d.numero}</strong></td><td>${c?c.nom:'-'}</td><td style="color:var(--gold);font-weight:600;">${fm(d.montant)} FCFA</td><td>${d.date?fd(d.date):'-'}</td><td><span class="badge b-${d.statut==='Accepté'?'ok':d.statut==='Refusé'?'err':'warn'}">${d.statut}</span></td>
-    <td><button class="btn btn-ghost btn-sm" onclick="printDevis('${d.id}')">🖨️</button></td></tr>`;
+    const sc={Accepte:'ok',Refus:'err'};
+    return '<tr>'
+      +'<td><strong>'+d.numero+'</strong></td>'
+      +'<td>'+(c?c.nom:'-')+'</td>'
+      +'<td style="color:var(--gold);font-weight:600;">'+fm(d.montant)+' FCFA</td>'
+      +'<td>'+(d.date?fd(d.date):'-')+'</td>'
+      +'<td><select onchange="setStatutDevis(\''+d.id+'\',this.value)" style="padding:4px 8px;background:var(--off);border:1px solid var(--bg2);border-radius:4px;font-size:11px;color:var(--ink);font-family:\'DM Sans\',sans-serif;cursor:pointer;">'
+      +['En attente','Envoyé','Accepté','Refusé'].map(s=>'<option value="'+s+'"'+(d.statut===s?' selected':'')+'>'+s+'</option>').join('')
+      +'</select></td>'
+      +'<td><button class="btn btn-ghost btn-sm" onclick="printDevis(\''+d.id+'\')">🖨️</button></td>'
+      +'</tr>';
   }).join(''):'<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--ink4);">Aucun devis</td></tr>';
+}
+
+async function setStatutDevis(dvId,statut){
+  const d=D.devis.find(x=>x.id===dvId);if(!d)return;
+  d.statut=statut;
+  await sb('devis','PATCH',{statut},'?id=eq.'+dvId);
+  // Auto-refresh progression si événement ouvert
+  if(curEvId){const c=D.clients.find(x=>x.id===curEvId);if(c)renderSteps(c);}
+  toast('Statut devis : '+statut,'ok');
 }
 
 function printDevis(id){
@@ -1983,7 +2159,10 @@ async function savePay(){
   ['p_montant','p_date','p_ref'].forEach(id=>document.getElementById(id).value='');
   closeMo('moNewPay');
   await sb('paiements','POST',{id:p.id,client_id:p.clientId,type:p.type,montant:p.montant,date:p.date,mode:p.mode,ref:p.ref});
-  refresh();toast('Paiement enregistré','ok');
+  refresh();
+  // Auto-refresh progression sans rechargement
+  if(curEvId){const c=D.clients.find(x=>x.id===curEvId);if(c)renderSteps(c);}
+  toast('Paiement enregistré','ok');
 }
 
 function renderPays(){
