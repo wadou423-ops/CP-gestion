@@ -1,0 +1,37 @@
+{
+  "name": "MC Pro — Créative Planner",
+  "short_name": "MC Pro",
+  "description": "Application du Maître de Cérémonie — Créative Planner",
+  "start_url": "./mc-pro.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0D0D0D",
+  "theme_color": "#C9963A",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nouvel événement",
+      "short_name": "Nouveau",
+      "description": "Créer un nouvel événement",
+      "url": "./mc-pro.html#nouveau",
+      "icons": [{"src": "./icon-192.png", "sizes": "192x192"}]
+    }
+  ]
+}
