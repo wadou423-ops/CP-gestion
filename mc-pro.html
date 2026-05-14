@@ -190,6 +190,34 @@ body{font-family:'DM Sans',sans-serif;color:var(--t);display:flex;flex-direction
 </div>
 <!-- DÉTAIL -->
 <div class="page pi" id="page-detail"><div id="detCnt"></div></div>
+
+<!-- NOUVEL ÉVÉNEMENT — onglet dédié -->
+<div class="page" id="page-nouveau">
+  <div style="background:linear-gradient(135deg,rgba(201,150,58,0.12),transparent);border-bottom:1px solid var(--bg4);padding:20px 16px 16px;">
+    <div style="font-family:Playfair Display,serif;font-size:22px;color:var(--gold);margin-bottom:4px;">Nouvel événement</div>
+    <div style="font-size:12px;color:var(--t3);">Renseignez les informations de l'événement</div>
+  </div>
+  <div class="pi" style="padding-top:16px;">
+    <div class="fg"><label>NOM DU CLIENT *</label><input type="text" id="n_nom" placeholder="Ex: Mariage Koné — Traoré"></div>
+    <div class="frow">
+      <div class="fg"><label>TYPE</label><select id="n_type"><option>Mariage</option><option>Anniversaire</option><option>Corporate</option><option>Baptême</option><option>Soirée</option></select></div>
+      <div class="fg"><label>STATUT</label><select id="n_stat"><option value="confirme">Confirmé</option><option value="attente">En attente</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>DATE *</label><input type="date" id="n_date"></div>
+      <div class="fg"><label>HEURE DÉBUT</label><input type="time" id="n_hs" value="18:00"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>HEURE FIN</label><input type="time" id="n_he" value="23:00"></div>
+      <div class="fg"><label>LIEU</label><input type="text" id="n_lieu" placeholder="Sofitel..."></div>
+    </div>
+    <div class="fg"><label>TÉL CLIENT (WhatsApp)</label><input type="tel" id="n_tel" placeholder="+225 07..."></div>
+    <div class="fg"><label>HONORAIRES (FCFA)</label><input type="number" id="n_mt" placeholder="0"></div>
+    <div class="fg"><label>NOTES</label><textarea id="n_notes" style="height:80px;" placeholder="Thème, instructions..."></textarea></div>
+    <button class="btn bgold" onclick="saveEv()" style="width:100%;margin-bottom:8px;">&#10003; Créer l'événement</button>
+    <button class="btn bgh" onclick="resetForm()" style="width:100%;margin-bottom:8px;">&#8635; Effacer</button>
+  </div>
+</div>
 <!-- PROGRAMME -->
 <div class="page pi" id="page-prog"><div id="progCnt"></div></div>
 <!-- CHECKLIST -->
@@ -251,6 +279,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--t);display:flex;flex-direction
 <div class="tabs">
   <div class="tab active" id="tab-agenda" onclick="goTab('agenda')"><div class="ti">📅</div><div class="tl">AGENDA</div></div>
   <div class="tab" id="tab-events" onclick="goTab('events')"><div class="ti">🎉</div><div class="tl">EVENTS</div><div class="tbadge" id="evBadge" style="display:none;"></div></div>
+  <div class="tab" id="tab-nouveau" style="background:linear-gradient(180deg,rgba(201,150,58,0.12),transparent);" onclick="goTab('nouveau')"><div class="ti" style="color:var(--gold);font-size:20px;">&#65291;</div><div class="tl" style="color:var(--gold);">NOUVEAU</div></div>
   <div class="tab" id="tab-prog" onclick="goTab('prog')"><div class="ti">🎙️</div><div class="tl">PROGRAMME</div></div>
   <div class="tab" id="tab-check" onclick="goTab('check')"><div class="ti">✅</div><div class="tl">CHECKLIST</div></div>
   <div class="tab" id="tab-notes" onclick="goTab('notes')"><div class="ti">📝</div><div class="tl">NOTES</div></div>
@@ -331,7 +360,7 @@ var events=[],notes=[],checks={},progs={},alarms=[],contrats={};
 var calY=new Date().getFullYear(),calM2=new Date().getMonth();
 var calSel=null,curFilt='tous',timers={};
 var curEvId=null,pStack=['agenda'],dragSrc=null,notifOK=false;
-var MAIN=['agenda','events','prog','check','notes','alarmes'];
+var MAIN=['agenda','events','nouveau','prog','check','notes','alarmes'];
 var SL={confirme:'Confirmé',attente:'En attente',annule:'Annulé',realise:'Réalisé'};
 var SC={confirme:'bgrn',attente:'bora',annule:'bred',realise:'bblu'};
 var MONS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -371,7 +400,7 @@ function goTab(t){showPg(t);MAIN.forEach(function(id){var tab=document.getElemen
 function showPg(id){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});var p=document.getElementById('page-'+id);if(p)p.classList.add('active');}
 function navTo(id,title,sub){showPg(id);pStack.push(id);document.getElementById('backBtn').style.display='flex';MAIN.forEach(function(t){var tab=document.getElementById('tab-'+t);if(tab)tab.classList.remove('active');});document.getElementById('fab').style.display='flex';updTB(id,title,sub);}
 function goBack(){if(pStack.length<=1){goTab('events');return;}pStack.pop();var prev=pStack[pStack.length-1];showPg(prev);if(MAIN.includes(prev)){var tab=document.getElementById('tab-'+prev);if(tab)tab.classList.add('active');document.getElementById('backBtn').style.display='none';document.getElementById('fab').style.display='flex';updTB(prev,null,null);}else{document.getElementById('backBtn').style.display='flex';document.getElementById('fab').style.display='flex';updTB(prev,null,null);}}
-function updTB(pg,t,s){var TIT={agenda:'MC PRO',events:'ÉVÉNEMENTS',prog:'PROGRAMME',check:'CHECKLIST',alarmes:'ALARMES',notes:'NOTES',detail:'ÉVÉNEMENT',contrat:'CONTRAT',install:'INSTALLATION'};document.getElementById('topLogo').textContent=t||TIT[pg]||'MC PRO';document.getElementById('topSub').textContent=s||'CRÉATIVE PLANNER';}
+function updTB(pg,t,s){var TIT={agenda:'MC PRO',nouveau:'NOUVEL ÉVÉNEMENT',events:'ÉVÉNEMENTS',prog:'PROGRAMME',check:'CHECKLIST',alarmes:'ALARMES',notes:'NOTES',detail:'ÉVÉNEMENT',contrat:'CONTRAT',install:'INSTALLATION'};document.getElementById('topLogo').textContent=t||TIT[pg]||'MC PRO';document.getElementById('topSub').textContent=s||'CRÉATIVE PLANNER';}
 function goInst(){navTo('install','INSTALLATION','GUIDE');}
 function fabAct(){openSh('shNewEv');}
 
@@ -406,6 +435,27 @@ function showStatut(id){var e=events.find(function(x){return x.id===id;});if(!e)
 function chgStat(id,st){var e=events.find(function(x){return x.id===id;});if(!e)return;e.statut=st;saveAll();renderAll();document.querySelectorAll('#shST,#ovST').forEach(function(el){el.remove();});toast(SL[st]||st,'ok');ouvrirEv(id);}
 
 function saveEv(){var nom=document.getElementById('n_nom').value.trim(),date=document.getElementById('n_date').value;if(!nom||!date){toast('Nom et date obligatoires','err');return;}var e={id:'EV'+Date.now(),nom:nom,type:document.getElementById('n_type').value,statut:document.getElementById('n_stat').value,date:date,hStart:document.getElementById('n_hs').value,hEnd:document.getElementById('n_he').value,lieu:document.getElementById('n_lieu').value,tel:document.getElementById('n_tel').value,montant:document.getElementById('n_mt').value,notes:document.getElementById('n_notes').value};events.push(e);progs[e.id]=defProg(e);checks[e.id]=defChk();saveAll();renderAll();progRap(e.id,true);['n_nom','n_date','n_lieu','n_tel','n_mt','n_notes'].forEach(function(id){document.getElementById(id).value='';});closeSh('shNewEv');toast('Événement créé ! Rappel programmé.','ok');}
+
+function resetForm(){
+  ['n_nom','n_date','n_lieu','n_tel','n_mt','n_notes'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+}
+var dragSrcP=null;
+function dStartP(e,id,evId){dragSrcP=id;var el=document.getElementById('pi_'+id);if(el)el.classList.add('dragging');}
+function dOverP(e,id){e.preventDefault();var el=document.getElementById('pi_'+id);if(el&&id!==dragSrcP)el.classList.add('dov');}
+function dLeaveP(id){var el=document.getElementById('pi_'+id);if(el)el.classList.remove('dov');}
+function dDropP(e,tid,evId){
+  e.preventDefault();
+  document.querySelectorAll('.prog-item').forEach(function(el){el.classList.remove('dov','dragging');});
+  if(!dragSrcP||dragSrcP===tid||!progs[evId])return;
+  var si=progs[evId].findIndex(function(x){return x.id===dragSrcP;});
+  var ti=progs[evId].findIndex(function(x){return x.id===tid;});
+  if(si<0||ti<0)return;
+  var item=progs[evId].splice(si,1)[0];progs[evId].splice(ti,0,item);
+  saveAll();rProg(evId);dragSrcP=null;
+}
+
 function delEv(id){if(!confirm('Supprimer ?'))return;events=events.filter(function(e){return e.id!==id;});delete checks[id];delete progs[id];delete contrats[id];alarms=alarms.filter(function(a){return a.evId!==id;});saveAll();renderAll();goBack();toast('Supprimé','ok');}
 
 // PROGRAMME
