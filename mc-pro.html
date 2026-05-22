@@ -57,20 +57,69 @@ textarea {
   <h2>Contrat MC</h2>
 
   <textarea id="contratEditor" style="height:400px;">
-CONTRAT DE PRESTATION - MAITRE DE CEREMONIE
+CONTRAT DE PRESTATION
+MAITRE DE CEREMONIE
 
-Client : {{client_nom}}
-Date de l'événement : {{event_date}}
+Le présent contrat a pour objet de définir les termes et conditions dans lesquels le Prestataire s’engage à fournir au / à la Client(e) une prestation de services en qualité de Maître de cérémonie.
 
-Le prestataire s'engage à assurer la prestation avec professionnalisme.
+La prestation se déroulera le {{event_date}}, selon les modalités convenues entre les parties.
+
+-----------------------------
+CLIENT(E) : {{client_nom}}
+
+Prestataire : Jean Jaurès NOGBOU
+
+-----------------------------
+
+Article 1 : Objet du contrat
+
+1. Obligations du Prestataire
+Le Prestataire s’engage à :
+- Préparer et animer l’événement selon le programme validé
+- Assurer la coordination des interventions
+- Être présent à l’heure convenue
+
+2. Obligations du Client
+Le Client s’engage à :
+- Fournir les informations nécessaires
+- Mettre à disposition les moyens techniques
+- Respecter les échéances de paiement
+
+-----------------------------
+
+Article 3 : Rémunération
 
 Montant total : {{montant}} FCFA
+
+Acompte (50%) : {{acompte}} FCFA
+Solde : {{solde}} FCFA
+
+-----------------------------
+
+Article 4 : Conditions d’annulation
+
+- Si le prestataire annule → remboursement intégral
+- Si le client annule → acompte conservé
+
+-----------------------------
+
+Article 5 : Entrée en vigueur
+
+Le contrat prend effet à sa signature
+
+-----------------------------
+
+Article 6 : Litiges
+
+Les parties privilégient un règlement à l’amiable
+
+-----------------------------
 
 Fait le : {{date_signature}}
 
 Signature Client :
 Signature Prestataire :
-  </textarea>
+</textarea>
 
   <button onclick="remplirContrat()">Auto-remplir</button>
   <button onclick="exportPDF()">Exporter PDF</button>
@@ -115,10 +164,74 @@ function remplirContrat() {
 }
 
 function exportPDF() {
-  const element = document.createElement("div");
-  element.innerText = document.getElementById("contratEditor").value;
+  const data = JSON.parse(localStorage.getItem("clientData")) || {};
 
-  html2pdf().from(element).save("contrat_mc.pdf");
+  const montant = Number(data.montant || 0);
+  const acompte = montant * 0.5;
+  const solde = montant * 0.5;
+
+  const content = `
+  <div style="font-family: Arial; padding:40px; line-height:1.6;">
+
+    <h2 style="text-align:center;">CONTRAT DE PRESTATION</h2>
+    <h3 style="text-align:center;">MAITRE DE CEREMONIE</h3>
+
+    <p>Le présent contrat a pour objet de définir les termes et conditions dans lesquels le Prestataire s’engage à fournir au Client une prestation de Maître de cérémonie.</p>
+
+    <p><strong>Client :</strong> ${data.nom || ''}</p>
+    <p><strong>Date de l'événement :</strong> ${data.date || ''}</p>
+
+    <h4>Article 1 : Objet du contrat</h4>
+    <p><strong>Obligations du Prestataire :</strong><br>
+    - Préparer et animer l’événement<br>
+    - Assurer la coordination<br>
+    - Être présent à l’heure</p>
+
+    <p><strong>Obligations du Client :</strong><br>
+    - Fournir les informations<br>
+    - Mettre les moyens techniques<br>
+    - Respecter les paiements</p>
+
+    <h4>Article 3 : Rémunération</h4>
+    <p>Montant total : ${montant} FCFA</p>
+    <p>Acompte (50%) : ${acompte} FCFA</p>
+    <p>Solde : ${solde} FCFA</p>
+
+    <h4>Article 4 : Conditions d’annulation</h4>
+    <p>Si le prestataire annule → remboursement intégral<br>
+    Si le client annule → acompte conservé</p>
+
+    <h4>Article 5 : Entrée en vigueur</h4>
+    <p>Le contrat prend effet à sa signature</p>
+
+    <h4>Article 6 : Litiges</h4>
+    <p>Règlement à l’amiable privilégié</p>
+
+    <br><br>
+
+    <p>Fait le : ${new Date().toLocaleDateString()}</p>
+
+    <br><br>
+
+    <table style="width:100%; margin-top:40px;">
+      <tr>
+        <td>Signature Client :</td>
+        <td>Signature Prestataire :</td>
+      </tr>
+    </table>
+
+  </div>
+  `;
+
+  html2pdf()
+    .from(content)
+    .set({
+      margin: 10,
+      filename: 'contrat_mc.pdf',
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    })
+    .save();
 }
 
 // Auto save form
